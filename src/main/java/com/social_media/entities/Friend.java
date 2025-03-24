@@ -2,8 +2,6 @@ package com.social_media.entities;
 
 import jakarta.persistence.*;
 
-import java.util.List;
-
 @Entity
 @Table(name = "friends")
 public class Friend {
@@ -11,9 +9,15 @@ public class Friend {
     @Column(name = "id")
     private String id;
 
-    @ManyToMany(mappedBy = "friends")
-    private List<User> users;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "friend_id")
+    private User recipient;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private FriendshipStatus status;
 }

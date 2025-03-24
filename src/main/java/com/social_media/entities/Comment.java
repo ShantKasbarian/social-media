@@ -20,6 +20,9 @@ public class Comment {
     @Column(name = "content")
     private String content;
 
+    @Column(name = "commented_time")
+    private String commentedTime;
+
     @ManyToOne
     private Post post;
 
