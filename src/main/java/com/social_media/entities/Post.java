@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -23,7 +24,10 @@ public class Post {
     private String title;
 
     @Column(name = "likes")
-    private long likes;
+    private Long likes;
+
+    @Column(name = "posted_time")
+    private LocalDateTime postedTime;
 
     @OneToMany(mappedBy = "post")
     private List<Comment> comments;
