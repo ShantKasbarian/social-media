@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -21,7 +23,7 @@ public class Comment {
     private String content;
 
     @Column(name = "commented_time")
-    private String commentedTime;
+    private LocalDateTime commentedTime;
 
     @ManyToOne
     private Post post;
