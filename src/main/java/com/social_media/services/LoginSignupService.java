@@ -5,6 +5,7 @@ import com.social_media.entities.User;
 import com.social_media.exceptions.InvalidCredentialsException;
 import com.social_media.exceptions.InvalidProvidedInfoException;
 import com.social_media.repositories.UserRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,11 +26,13 @@ public class LoginSignupService implements UserDetailsService {
 
     public LoginSignupService(
             UserRepository userRepository,
-            JwtService jwtService
+            JwtService jwtService,
+            @Lazy
+            BCryptPasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
-        this.passwordEncoder = new BCryptPasswordEncoder(12);
+        this.passwordEncoder = passwordEncoder;
     }
 
     public String login(String email, String password) {
@@ -41,7 +44,7 @@ public class LoginSignupService implements UserDetailsService {
             throw new InvalidCredentialsException("wrong email or password");
         }
 
-        return jwtService.generateToken(user.getName());
+        return jwtService.generateToken(user.getUsername());
     }
 
     public String signup(User user) {
@@ -82,7 +85,7 @@ public class LoginSignupService implements UserDetailsService {
         return "signup successful";
     }
 
-    private boolean isPasswordValid(String password) {
+    public static boolean isPasswordValid(String password) {
         if (password.length() < 6) {
             throw new InvalidCredentialsException("password must be at least 6 characters long");
         }
