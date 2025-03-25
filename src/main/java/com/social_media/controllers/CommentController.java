@@ -1,0 +1,55 @@
+package com.social_media.controllers;
+
+import com.social_media.converters.CommentConverter;
+import com.social_media.entities.User;
+import com.social_media.models.CommentDto;
+import com.social_media.services.CommentService;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/comment")
+@AllArgsConstructor
+public class CommentController {
+    private final CommentService commentService;
+
+    private final CommentConverter commentConverter;
+
+    @PostMapping
+    public ResponseEntity<CommentDto> comment(@RequestBody CommentDto commentDto, Authentication authentication) {
+        return new ResponseEntity<>(
+                commentConverter.convertToModel(
+                        commentService.comment(
+                                commentDto.content(),
+                                commentDto.postId(),
+                                (User) authentication.getPrincipal()
+                        )
+                ), HttpStatus.CREATED
+        );
+    }
+
+    @DeleteMapping("/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteComment(@PathVariable String commentId, Authentication authentication) {
+        commentService.deleteComment(commentId, (User) authentication.getPrincipal());
+    }
+
+    @PutMapping
+    public ResponseEntity<CommentDto> updateComment(
+            @RequestBody CommentDto commentDto,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(
+                commentConverter.convertToModel(
+                        commentService.editComment(
+                                commentDto.id(),
+                                commentDto.content(),
+                                (User) authentication.getPrincipal()
+                        )
+                )
+        );
+    }
+}

@@ -1,7 +1,9 @@
 package com.social_media.controllers;
 
+import com.social_media.converters.CommentConverter;
 import com.social_media.converters.PostConverter;
 import com.social_media.entities.User;
+import com.social_media.models.CommentDto;
 import com.social_media.models.PageDto;
 import com.social_media.models.PostDto;
 import com.social_media.services.PostService;
@@ -19,9 +21,16 @@ public class PostController {
 
     private final PostConverter postConverter;
 
-    public PostController(PostService postService, PostConverter postConverter) {
+    private final CommentConverter commentConverter;
+
+    public PostController(
+            PostService postService,
+            PostConverter postConverter,
+            CommentConverter commentConverter
+    ) {
         this.postService = postService;
         this.postConverter = postConverter;
+        this.commentConverter = commentConverter;
     }
 
     @GetMapping
@@ -89,6 +98,27 @@ public class PostController {
         return ResponseEntity.ok(
                 postConverter.convertToModel(
                     postService.getPostById(postId)
+                )
+        );
+    }
+
+    @PutMapping("/{postId}/like")
+    public ResponseEntity<PostDto> likePost(@PathVariable String postId, Authentication authentication) {
+        return ResponseEntity.ok(
+                postConverter.convertToModel(postService.likePost(postId))
+        );
+    }
+
+    @GetMapping("/{postId}/comments")
+    public ResponseEntity<PageDto<CommentDto>> getComments(
+            @PathVariable String postId,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(
+                postService.getComments(
+                        postId,
+                        PageRequest.of(page, size, Sort.by(Sort.Order.desc("commentedTime")))
                 )
         );
     }

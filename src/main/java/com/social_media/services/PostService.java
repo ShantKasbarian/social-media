@@ -1,15 +1,20 @@
 package com.social_media.services;
 
+import com.social_media.converters.CommentConverter;
 import com.social_media.converters.PostConverter;
+import com.social_media.entities.Comment;
 import com.social_media.entities.Post;
 import com.social_media.entities.User;
 import com.social_media.exceptions.InvalidProvidedInfoException;
 import com.social_media.exceptions.RequestNotAllowedException;
 import com.social_media.exceptions.ResourceNotFoundException;
+import com.social_media.models.CommentDto;
 import com.social_media.models.PageDto;
 import com.social_media.models.PostDto;
+import com.social_media.repositories.CommentRepository;
 import com.social_media.repositories.PostRepository;
 import com.social_media.repositories.UserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
 
@@ -25,15 +31,9 @@ public class PostService {
 
     private final PostConverter postConverter;
 
-    public PostService(
-            PostRepository postRepository,
-            UserRepository userRepository,
-            PostConverter postConverter
-    ) {
-        this.postRepository = postRepository;
-        this.userRepository = userRepository;
-        this.postConverter = postConverter;
-    }
+    private final CommentRepository commentRepository;
+
+    private final CommentConverter commentConverter;
 
     public Post createPost(Post post, User user) {
         if (post.getTitle() == null || post.getTitle().isEmpty()) {
@@ -121,5 +121,33 @@ public class PostService {
     public Post getPostById(String id) {
         return postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("post not found"));
+    }
+
+    public Post likePost(String id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("post not found"));
+
+        post.setLikes(post.getLikes() + 1);
+        return postRepository.save(post);
+    }
+
+    public PageDto<CommentDto> getComments(String postId, Pageable pageable) {
+        Page<Comment> comments = commentRepository.findByPost_id(postId, pageable);
+
+        PageDto<CommentDto> page = new PageDto<>();
+        page.setContent(
+                comments.getContent()
+                        .stream()
+                        .map(commentConverter:: convertToModel)
+                        .toList()
+        );
+
+        page.setPageNo(pageable.getPageNumber());
+        page.setPageSize(comments.getSize());
+        page.setTotalElements(comments.getContent().size());
+        page.setTotalPages(comments.getTotalPages());
+        page.setEmpty(comments.isEmpty());
+
+        return page;
     }
 }
