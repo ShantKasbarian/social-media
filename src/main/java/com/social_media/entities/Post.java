@@ -23,7 +23,7 @@ public class Post {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "likes")
+    @Column(name = "likes", columnDefinition = "bigint DEFAULT 0")
     private Long likes;
 
     @Column(name = "posted_time")

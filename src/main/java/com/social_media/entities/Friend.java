@@ -23,7 +23,7 @@ public class Friend {
 
     @ManyToOne
     @JoinColumn(name = "friend_id")
-    private User recipient;
+    private User friend;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
