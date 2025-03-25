@@ -1,6 +1,7 @@
 package com.social_media.converters;
 
 import com.social_media.entities.Comment;
+import com.social_media.entities.User;
 import com.social_media.models.CommentDto;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +20,14 @@ public class CommentConverter implements Converter<Comment, CommentDto> {
     @Override
     public CommentDto convertToModel(Comment entity) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        User user = entity.getUser();
+
         return new CommentDto(
                 entity.getId(),
                 entity.getPost().getId(),
                 entity.getContent(),
+                user.getId(),
+                user.getUsername(),
                 entity.getCommentedTime().format(dateTimeFormatter)
         );
     }
