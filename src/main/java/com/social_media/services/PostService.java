@@ -2,20 +2,15 @@ package com.social_media.services;
 
 import com.social_media.converters.CommentConverter;
 import com.social_media.converters.PostConverter;
-import com.social_media.entities.Comment;
-import com.social_media.entities.Friend;
-import com.social_media.entities.Post;
-import com.social_media.entities.User;
+import com.social_media.entities.*;
 import com.social_media.exceptions.InvalidProvidedInfoException;
 import com.social_media.exceptions.RequestNotAllowedException;
+import com.social_media.exceptions.ResourceAlreadyExistsException;
 import com.social_media.exceptions.ResourceNotFoundException;
 import com.social_media.models.CommentDto;
 import com.social_media.models.PageDto;
 import com.social_media.models.PostDto;
-import com.social_media.repositories.CommentRepository;
-import com.social_media.repositories.FriendRepository;
-import com.social_media.repositories.PostRepository;
-import com.social_media.repositories.UserRepository;
+import com.social_media.repositories.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +34,8 @@ public class PostService {
 
     private final CommentConverter commentConverter;
 
+    private final LikeRepository likeRepository;
+
     public Post createPost(Post post, User user) {
         if (post.getTitle() == null || post.getTitle().isEmpty()) {
             throw new InvalidProvidedInfoException("post must have a title");
@@ -47,7 +44,6 @@ public class PostService {
         post.setId(UUID.randomUUID().toString());
         post.setPostedTime(LocalDateTime.now());
         post.setUser(user);
-        post.setLikes(0L);
 
         return postRepository.save(post);
     }
@@ -127,12 +123,38 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("post not found"));
     }
 
-    public Post likePost(String id) {
+    public Post likePost(String id, User user) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("post not found"));
 
-        post.setLikes(post.getLikes() + 1);
-        return postRepository.save(post);
+        if (likeRepository.existsByPostAndUser(post, user)) {
+            throw new ResourceAlreadyExistsException("cannot like post more than once");
+        }
+
+        likeRepository.save(new Like(UUID.randomUUID().toString(), user, post));
+        post.setLikes(likeRepository.findByPost(post));
+        return post;
+    }
+
+    public PageDto<PostDto> getUserLikedPosts(User user, Pageable pageable) {
+        Page<Post> posts = postRepository.findByLikesUser(user, pageable);
+
+        PageDto<PostDto> page = new PageDto<>();
+
+        page.setContent(
+                posts.getContent()
+                        .stream()
+                        .map(postConverter:: convertToModel)
+                        .toList()
+        );
+
+        page.setPageNo(pageable.getPageNumber());
+        page.setPageSize(posts.getSize());
+        page.setTotalElements(posts.getContent().size());
+        page.setTotalPages(posts.getTotalPages());
+        page.setEmpty(posts.isEmpty());
+
+        return page;
     }
 
     public PageDto<CommentDto> getComments(String postId, Pageable pageable) {

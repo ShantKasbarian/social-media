@@ -1,5 +1,6 @@
 package com.social_media.repositories;
 
+import com.social_media.entities.Like;
 import com.social_media.entities.Post;
 import com.social_media.entities.User;
 import org.hibernate.annotations.processing.HQL;
@@ -9,6 +10,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, String> {
@@ -21,4 +24,11 @@ public interface PostRepository extends JpaRepository<Post, String> {
             "where u = :user"
     )
     Page<Post> findByUser_Friends(@Param("user") User user, Pageable pageable);
+
+    @Query(
+            "from Post p " +
+                    "left join Like l on l.post.id = p.id " +
+                    "where l.user = :user"
+    )
+    Page<Post> findByLikesUser(@Param("user") User user, Pageable pageable);
 }
