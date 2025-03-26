@@ -18,8 +18,8 @@ public class FriendConverter implements Converter<Friend, FriendDto> {
 
     @Override
     public FriendDto convertToModel(Friend entity) {
-        User user = entity.getUser();
-        User recipient = entity.getFriend();
+        User user = entity.getUserFriend().getUser();
+        User recipient = entity.getUserFriend().getFriend();
         return new FriendDto(
                 entity.getId(),
                 user.getId(),

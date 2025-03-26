@@ -1,12 +1,12 @@
 package com.social_media.controllers;
 
-import com.social_media.converters.CommentConverter;
 import com.social_media.converters.PostConverter;
 import com.social_media.entities.User;
 import com.social_media.models.CommentDto;
 import com.social_media.models.PageDto;
 import com.social_media.models.PostDto;
 import com.social_media.services.PostService;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -14,24 +14,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/post")
 public class PostController {
     private final PostService postService;
 
     private final PostConverter postConverter;
-
-    private final CommentConverter commentConverter;
-
-    public PostController(
-            PostService postService,
-            PostConverter postConverter,
-            CommentConverter commentConverter
-    ) {
-        this.postService = postService;
-        this.postConverter = postConverter;
-        this.commentConverter = commentConverter;
-    }
 
     @GetMapping
     public ResponseEntity<PageDto<PostDto>> getPosts(

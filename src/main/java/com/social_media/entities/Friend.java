@@ -17,13 +17,8 @@ public class Friend {
     @Column(name = "id")
     private String id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "friend_id")
-    private User friend;
+    @Embedded
+    private UserFriend userFriend;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
