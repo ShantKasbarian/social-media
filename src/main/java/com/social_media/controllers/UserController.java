@@ -4,21 +4,18 @@ import com.social_media.converters.UserConverter;
 import com.social_media.entities.User;
 import com.social_media.models.UserDto;
 import com.social_media.services.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/user")
 public class UserController {
     private final UserService userService;
 
     private final UserConverter userConverter;
-
-    public UserController(UserService userService, UserConverter userConverter) {
-        this.userService = userService;
-        this.userConverter = userConverter;
-    }
 
     @GetMapping("/profile")
     public ResponseEntity<UserDto> getProfile(Authentication authentication) {

@@ -3,6 +3,7 @@ package com.social_media.services;
 import com.social_media.converters.CommentConverter;
 import com.social_media.converters.PostConverter;
 import com.social_media.entities.Comment;
+import com.social_media.entities.Friend;
 import com.social_media.entities.Post;
 import com.social_media.entities.User;
 import com.social_media.exceptions.InvalidProvidedInfoException;
@@ -12,6 +13,7 @@ import com.social_media.models.CommentDto;
 import com.social_media.models.PageDto;
 import com.social_media.models.PostDto;
 import com.social_media.repositories.CommentRepository;
+import com.social_media.repositories.FriendRepository;
 import com.social_media.repositories.PostRepository;
 import com.social_media.repositories.UserRepository;
 import lombok.AllArgsConstructor;
@@ -28,6 +30,8 @@ public class PostService {
     private final PostRepository postRepository;
 
     private final UserRepository userRepository;
+
+    private final FriendRepository friendRepository;
 
     private final PostConverter postConverter;
 
