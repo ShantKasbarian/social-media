@@ -28,7 +28,7 @@ public class PostConverter implements Converter<Post, PostDto> {
                 user.getId(),
                 user.getUsername(),
                 entity.getTitle(),
-                entity.getLikes(),
+                (long) entity.getLikes().size(),
                 entity.getPostedTime().format(dateTimeFormatter)
         );
     }

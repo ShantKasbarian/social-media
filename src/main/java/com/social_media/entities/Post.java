@@ -23,8 +23,8 @@ public class Post {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "likes", columnDefinition = "bigint DEFAULT 0")
-    private Long likes;
+    @OneToMany(mappedBy = "post")
+    private List<Like> likes;
 
     @Column(name = "posted_time")
     private LocalDateTime postedTime;

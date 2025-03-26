@@ -94,7 +94,21 @@ public class PostController {
     @PutMapping("/{postId}/like")
     public ResponseEntity<PostDto> likePost(@PathVariable String postId, Authentication authentication) {
         return ResponseEntity.ok(
-                postConverter.convertToModel(postService.likePost(postId))
+                postConverter.convertToModel(postService.likePost(postId, (User) authentication.getPrincipal()))
+        );
+    }
+
+    @GetMapping("/liked")
+    public ResponseEntity<PageDto<PostDto>> getUserLikedPosts(
+            Authentication authentication,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(
+                postService.getUserLikedPosts(
+                        (User) authentication.getPrincipal(),
+                        PageRequest.of(page, size, Sort.by(Sort.Order.desc("postedTime")))
+                )
         );
     }
 
