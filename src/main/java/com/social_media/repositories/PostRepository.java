@@ -14,15 +14,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PostRepository extends JpaRepository<Post, String> {
     Page<Post> findByUser(@Param("user") User user, Pageable pageable);
-
-//    @HQL(
-//        "select p.*, u.username from posts p " +
-//                "left join users u on u.id = p.user_id " +
-//                "left join friends f on f.user_id = u.id or f.friend_id = u.id " +
-//                "where (f.user_id = :userId or f.friend_id = :userId) and p.user_id != userId and f.status = 'ACCEPTED' " +
-//                "order by p.posted_time DESC"
-//    )
-
+    
     @Query(
             value = "select p.* from posts p " +
                 "left join users u on u.id = p.user_id " +

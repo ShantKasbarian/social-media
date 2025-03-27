@@ -76,46 +76,22 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public PageDto<PostDto> getFriendsPosts(User user, Pageable pageable) {
-        Page<Post> posts = postRepository.findByUser_Friends(user.getId(), pageable);
-
-        PageDto<PostDto> page = new PageDto<>();
-        page.setContent(
-                posts.getContent()
-                        .stream()
-                        .map(postConverter:: convertToModel)
-                        .toList()
+    public PageDto<Post, PostDto> getFriendsPosts(User user, Pageable pageable) {
+        return new PageDto<>(
+                postRepository.findByUser_Friends(user.getId(), pageable),
+                postConverter
         );
-        page.setPageNo(pageable.getPageNumber());
-        page.setPageSize(posts.getSize());
-        page.setTotalElements(posts.getContent().size());
-        page.setTotalPages(posts.getTotalPages());
-        page.setEmpty(posts.isEmpty());
-
-        return page;
     }
 
-    public PageDto<PostDto> getUserPosts(String userId, Pageable pageable) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
-
-        Page<Post> posts = postRepository.findByUser(user, pageable);
-
-        PageDto<PostDto> page = new PageDto<>();
-        page.setContent(
-                posts.getContent()
-                        .stream()
-                        .map(postConverter:: convertToModel)
-                        .toList()
+    public PageDto<Post, PostDto> getUserPosts(String userId, Pageable pageable) {
+        return new PageDto<>(
+                postRepository.findByUser(
+                        userRepository.findById(userId)
+                            .orElseThrow(() -> new ResourceNotFoundException("user not found")),
+                        pageable
+                ),
+                postConverter
         );
-
-        page.setPageNo(pageable.getPageNumber());
-        page.setPageSize(posts.getSize());
-        page.setTotalElements(posts.getContent().size());
-        page.setTotalPages(posts.getTotalPages());
-        page.setEmpty(posts.isEmpty());
-
-        return page;
     }
 
     public Post getPostById(String id) {
@@ -136,44 +112,17 @@ public class PostService {
         return post;
     }
 
-    public PageDto<PostDto> getUserLikedPosts(User user, Pageable pageable) {
-        Page<Post> posts = postRepository.findByLikesUser(user, pageable);
-
-        PageDto<PostDto> page = new PageDto<>();
-
-        page.setContent(
-                posts.getContent()
-                        .stream()
-                        .map(postConverter:: convertToModel)
-                        .toList()
+    public PageDto<Post, PostDto> getUserLikedPosts(User user, Pageable pageable) {
+        return new PageDto<>(
+                postRepository.findByLikesUser(user, pageable),
+                postConverter
         );
-
-        page.setPageNo(pageable.getPageNumber());
-        page.setPageSize(posts.getSize());
-        page.setTotalElements(posts.getContent().size());
-        page.setTotalPages(posts.getTotalPages());
-        page.setEmpty(posts.isEmpty());
-
-        return page;
     }
 
-    public PageDto<CommentDto> getComments(String postId, Pageable pageable) {
-        Page<Comment> comments = commentRepository.findByPost_id(postId, pageable);
-
-        PageDto<CommentDto> page = new PageDto<>();
-        page.setContent(
-                comments.getContent()
-                        .stream()
-                        .map(commentConverter:: convertToModel)
-                        .toList()
+    public PageDto<Comment, CommentDto> getComments(String postId, Pageable pageable) {
+        return new PageDto<>(
+                commentRepository.findByPost_id(postId, pageable),
+                commentConverter
         );
-
-        page.setPageNo(pageable.getPageNumber());
-        page.setPageSize(comments.getSize());
-        page.setTotalElements(comments.getContent().size());
-        page.setTotalPages(comments.getTotalPages());
-        page.setEmpty(comments.isEmpty());
-
-        return page;
     }
 }

@@ -1,6 +1,7 @@
 package com.social_media.controllers;
 
 import com.social_media.converters.FriendConverter;
+import com.social_media.entities.Friend;
 import com.social_media.entities.User;
 import com.social_media.models.FriendDto;
 import com.social_media.models.PageDto;
@@ -49,7 +50,7 @@ public class FriendController {
     }
 
     @GetMapping
-    public PageDto<FriendDto> getFriends(
+    public PageDto<Friend, FriendDto> getFriends(
             Authentication authentication,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
@@ -61,7 +62,7 @@ public class FriendController {
     }
 
     @GetMapping("/blocked")
-    public PageDto<FriendDto> getBlockedUsers(
+    public PageDto<Friend, FriendDto> getBlockedUsers(
             Authentication authentication,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
@@ -73,7 +74,7 @@ public class FriendController {
     }
 
     @GetMapping("/pending")
-    public PageDto<FriendDto> getPendingUsers(
+    public PageDto<Friend, FriendDto> getPendingUsers(
             Authentication authentication,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
