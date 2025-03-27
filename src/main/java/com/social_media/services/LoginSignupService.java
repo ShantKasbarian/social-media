@@ -6,6 +6,7 @@ import com.social_media.exceptions.InvalidCredentialsException;
 import com.social_media.exceptions.InvalidProvidedInfoException;
 import com.social_media.exceptions.ResourceAlreadyExistsException;
 import com.social_media.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -48,6 +49,7 @@ public class LoginSignupService implements UserDetailsService {
         return jwtService.generateToken(user.getUsername());
     }
 
+    @Transactional
     public String signup(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new ResourceAlreadyExistsException("email already in use");
