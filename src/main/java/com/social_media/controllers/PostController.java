@@ -31,7 +31,7 @@ public class PostController {
         return ResponseEntity.ok(
                 postService.getFriendsPosts(
                         (User) authentication.getPrincipal(),
-                        PageRequest.of(page, size, Sort.by(Sort.Order.desc("postedTime")))
+                        PageRequest.of(page, size)
                 )
         );
     }
