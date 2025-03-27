@@ -5,9 +5,7 @@ import com.social_media.entities.User;
 import com.social_media.models.PostDto;
 import org.springframework.stereotype.Component;
 
-import javax.swing.text.DateFormatter;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 
 @Component
 public class PostConverter implements Converter<Post, PostDto> {
@@ -23,12 +21,19 @@ public class PostConverter implements Converter<Post, PostDto> {
     public PostDto convertToModel(Post entity) {
         User user = entity.getUser();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+        int likes = 0;
+
+        if (entity.getLikes() != null) {
+            likes = entity.getLikes().size();
+        }
+
         return new PostDto(
                 entity.getId(),
                 user.getId(),
                 user.getUsername(),
                 entity.getTitle(),
-                (long) entity.getLikes().size(),
+                (long) likes,
                 entity.getPostedTime().format(dateTimeFormatter)
         );
     }

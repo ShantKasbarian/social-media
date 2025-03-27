@@ -77,7 +77,7 @@ public class PostService {
     }
 
     public PageDto<PostDto> getFriendsPosts(User user, Pageable pageable) {
-        Page<Post> posts = postRepository.findByUser_Friends(user, pageable);
+        Page<Post> posts = postRepository.findByUser_Friends(user.getId(), pageable);
 
         PageDto<PostDto> page = new PageDto<>();
         page.setContent(

@@ -11,24 +11,31 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface PostRepository extends JpaRepository<Post, String> {
     Page<Post> findByUser(@Param("user") User user, Pageable pageable);
 
-    @HQL(
-            "from Post p " +
-            "left join Friend f on f.friend = p.user " +
-            "left join User u on u.id = f.user.id " +
-            "where u = :user"
+//    @HQL(
+//        "select p.*, u.username from posts p " +
+//                "left join users u on u.id = p.user_id " +
+//                "left join friends f on f.user_id = u.id or f.friend_id = u.id " +
+//                "where (f.user_id = :userId or f.friend_id = :userId) and p.user_id != userId and f.status = 'ACCEPTED' " +
+//                "order by p.posted_time DESC"
+//    )
+
+    @Query(
+            value = "select p.* from posts p " +
+                "left join users u on u.id = p.user_id " +
+                "left join friends f on f.user_id = u.id or f.friend_id = u.id " +
+                "where (f.user_id = :userId or f.friend_id = :userId) and p.user_id != :userId and f.status = 'ACCEPTED' " +
+                "order by p.posted_time DESC", nativeQuery = true
     )
-    Page<Post> findByUser_Friends(@Param("user") User user, Pageable pageable);
+    Page<Post> findByUser_Friends(@Param("userId") String userId, Pageable pageable);
 
     @Query(
             "from Post p " +
-                    "left join Like l on l.post.id = p.id " +
-                    "where l.user = :user"
+                "left join Like l on l.post.id = p.id " +
+                "where l.user = :user"
     )
     Page<Post> findByLikesUser(@Param("user") User user, Pageable pageable);
 }
