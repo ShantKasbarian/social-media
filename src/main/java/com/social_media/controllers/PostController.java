@@ -1,6 +1,8 @@
 package com.social_media.controllers;
 
 import com.social_media.converters.PostConverter;
+import com.social_media.entities.Comment;
+import com.social_media.entities.Post;
 import com.social_media.entities.User;
 import com.social_media.models.CommentDto;
 import com.social_media.models.PageDto;
@@ -23,7 +25,7 @@ public class PostController {
     private final PostConverter postConverter;
 
     @GetMapping
-    public ResponseEntity<PageDto<PostDto>> getPosts(
+    public ResponseEntity<PageDto<Post, PostDto>> getPosts(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
             Authentication authentication
@@ -38,7 +40,7 @@ public class PostController {
 
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<PageDto<PostDto>> getUserPosts(
+    public ResponseEntity<PageDto<Post, PostDto>> getUserPosts(
             @PathVariable String userId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
@@ -99,7 +101,7 @@ public class PostController {
     }
 
     @GetMapping("/liked")
-    public ResponseEntity<PageDto<PostDto>> getUserLikedPosts(
+    public ResponseEntity<PageDto<Post, PostDto>> getUserLikedPosts(
             Authentication authentication,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
@@ -113,7 +115,7 @@ public class PostController {
     }
 
     @GetMapping("/{postId}/comments")
-    public ResponseEntity<PageDto<CommentDto>> getComments(
+    public ResponseEntity<PageDto<Comment, CommentDto>> getComments(
             @PathVariable String postId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size

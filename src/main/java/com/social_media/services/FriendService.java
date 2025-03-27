@@ -13,7 +13,6 @@ import com.social_media.models.PageDto;
 import com.social_media.repositories.FriendRepository;
 import com.social_media.repositories.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -68,58 +67,24 @@ public class FriendService {
         throw new RequestNotAllowedException("cannot block friend of another user");
     }
 
-    public PageDto<FriendDto> getFriends(User user, Pageable pageable) {
-        Page<Friend> friends = friendRepository.findByUserFriend_FriendAndStatus(user, FriendshipStatus.ACCEPTED, pageable);
-
-        PageDto<FriendDto> page = new PageDto<>();
-
-        page.setContent(
-                friends.getContent()
-                    .stream()
-                    .map(friendConverter:: convertToModel)
-                    .toList());
-        page.setPageNo(pageable.getPageNumber());
-        page.setPageSize(friends.getSize());
-        page.setTotalElements(friends.getContent().size());
-        page.setTotalPages(friends.getTotalPages());
-        page.setEmpty(friends.isEmpty());
-        return page;
+    public PageDto<Friend, FriendDto> getFriends(User user, Pageable pageable) {
+        return new PageDto<>(
+                friendRepository.findByUserFriend_FriendAndStatus(
+                        user,
+                        FriendshipStatus.ACCEPTED,
+                        pageable
+                ), friendConverter
+        );
     }
 
-    public PageDto<FriendDto> getBlockedUsers(User user, Pageable pageable) {
-        Page<Friend> friends = friendRepository.findByUserFriend_FriendAndStatus(user, FriendshipStatus.BLOCKED, pageable);
-
-        PageDto<FriendDto> page = new PageDto<>();
-
-        page.setContent(
-                friends.getContent()
-                        .stream()
-                        .map(friendConverter:: convertToModel)
-                        .toList());
-        page.setPageNo(pageable.getPageNumber());
-        page.setPageSize(friends.getSize());
-        page.setTotalElements(friends.getContent().size());
-        page.setTotalPages(friends.getTotalPages());
-        page.setEmpty(friends.isEmpty());
-        return page;
+    public PageDto<Friend, FriendDto> getBlockedUsers(User user, Pageable pageable) {
+        return new PageDto<>(friendRepository.findByUserFriend_FriendAndStatus(user, FriendshipStatus.BLOCKED, pageable), friendConverter);
     }
 
-    public PageDto<FriendDto> getPendingUsers(User user, Pageable pageable) {
-        Page<Friend> friends = friendRepository.findByUserFriend_FriendAndStatus(user, FriendshipStatus.PENDING, pageable);
-
-        PageDto<FriendDto> page = new PageDto<>();
-
-        page.setContent(
-                friends.getContent()
-                        .stream()
-                        .map(friendConverter:: convertToModel)
-                        .toList());
-        page.setPageNo(pageable.getPageNumber());
-        page.setPageSize(friends.getSize());
-        page.setTotalElements(friends.getContent().size());
-        page.setTotalPages(friends.getTotalPages());
-        page.setEmpty(friends.isEmpty());
-
-        return page;
+    public PageDto<Friend, FriendDto> getPendingUsers(User user, Pageable pageable) {
+        return new PageDto<>(
+                friendRepository.findByUserFriend_FriendAndStatus(user, FriendshipStatus.PENDING, pageable),
+                friendConverter
+        );
     }
 }

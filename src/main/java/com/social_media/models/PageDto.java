@@ -1,35 +1,31 @@
 package com.social_media.models;
 
-import lombok.AllArgsConstructor;
+import com.social_media.converters.Converter;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 @Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class PageDto<T> {
-    private List<T> content;
+public class PageDto<E, M> {
+    private final List<M> content;
 
-    private int pageNo;
+    private final int pageNo;
 
-    private int pageSize;
+    private final int pageSize;
 
-    private long totalElements;
+    private final long totalElements;
 
-    private int totalPages;
+    private final int totalPages;
 
-    private boolean empty;
+    private final boolean empty;
 
-    public PageDto(Page<T> page) {
-        this.content = page.getContent();
-        this.pageNo = page.getTotalPages();
+    public PageDto(Page<E> page, Converter<E, M> converter) {
+        this.content = page.getContent().stream().map(converter:: convertToModel).toList();
+        this.pageNo = page.getNumber();
         this.pageSize = page.getSize();
         this.totalElements = page.getTotalElements();
+        this.totalPages = page.getTotalPages();
         this.empty = page.isEmpty();
     }
 }
