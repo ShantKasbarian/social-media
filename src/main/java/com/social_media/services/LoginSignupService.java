@@ -4,6 +4,7 @@ import com.social_media.config.JwtService;
 import com.social_media.entities.User;
 import com.social_media.exceptions.InvalidCredentialsException;
 import com.social_media.exceptions.InvalidProvidedInfoException;
+import com.social_media.exceptions.ResourceAlreadyExistsException;
 import com.social_media.repositories.UserRepository;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -49,7 +50,7 @@ public class LoginSignupService implements UserDetailsService {
 
     public String signup(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new InvalidCredentialsException("email already in use");
+            throw new ResourceAlreadyExistsException("email already in use");
         }
 
         if (!isPasswordValid(user.getPassword())) {
@@ -71,7 +72,7 @@ public class LoginSignupService implements UserDetailsService {
         }
 
         if (userRepository.existsByUsername(username)) {
-            throw new InvalidProvidedInfoException("username already exist try a different one");
+            throw new ResourceAlreadyExistsException("username already exist try a different one");
         }
 
         if (username.trim().contains(" ")) {
@@ -93,7 +94,7 @@ public class LoginSignupService implements UserDetailsService {
         Pattern numberPattern = Pattern.compile("[0-9]");
         Pattern uppercasePattern = Pattern.compile("[A-Z]");
         Pattern lowercasePattern = Pattern.compile("[a-z]");
-        Pattern specialCharacterPattern = Pattern.compile("[$&+,:;=?@#|'<>.-^*()%!]");
+        Pattern specialCharacterPattern = Pattern.compile(".*[!@#$%^&*(),.?\":{}|<>+].*");
 
         Matcher number = numberPattern.matcher(password);
         Matcher uppercase = uppercasePattern.matcher(password);

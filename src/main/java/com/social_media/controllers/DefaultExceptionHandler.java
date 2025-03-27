@@ -1,9 +1,6 @@
 package com.social_media.controllers;
 
-import com.social_media.exceptions.InvalidCredentialsException;
-import com.social_media.exceptions.InvalidProvidedInfoException;
-import com.social_media.exceptions.RequestNotAllowedException;
-import com.social_media.exceptions.ResourceNotFoundException;
+import com.social_media.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -40,6 +37,14 @@ public class DefaultExceptionHandler {
         return new ResponseEntity<>(
                 e.getMessage(),
                 HttpStatus.NOT_FOUND
+        );
+    }
+
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<String> handle(ResourceAlreadyExistsException e) {
+        return new ResponseEntity<>(
+                e.getMessage(),
+                HttpStatus.CONFLICT
         );
     }
 }
