@@ -66,6 +66,9 @@ class LoginSignupServiceTest {
         String response = loginSignupService.login(user.getEmail(), rawPassword);
 
         assertEquals(token, response);
+
+        verify(userRepository, times(1)).findByEmail(user.getEmail());
+        verify(jwtService, times(1)).generateToken(user.getUsername());
     }
 
     @Test

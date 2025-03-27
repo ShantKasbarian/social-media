@@ -11,6 +11,7 @@ import com.social_media.models.CommentDto;
 import com.social_media.models.PageDto;
 import com.social_media.models.PostDto;
 import com.social_media.repositories.*;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +37,7 @@ public class PostService {
 
     private final LikeRepository likeRepository;
 
+    @Transactional
     public Post createPost(Post post, User user) {
         if (post.getTitle() == null || post.getTitle().isEmpty()) {
             throw new InvalidProvidedInfoException("post must have a title");
@@ -48,6 +50,7 @@ public class PostService {
         return postRepository.save(post);
     }
 
+    @Transactional
     public Post updatePost(String id, String title, User user) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("post not found"));
@@ -65,6 +68,7 @@ public class PostService {
         return postRepository.save(post);
     }
 
+    @Transactional
     public void deletePost(User user, String id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("post not found"));
@@ -99,6 +103,7 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("post not found"));
     }
 
+    @Transactional
     public Post likePost(String id, User user) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("post not found"));

@@ -3,9 +3,9 @@ package com.social_media.services;
 import com.social_media.entities.User;
 import com.social_media.exceptions.InvalidProvidedInfoException;
 import com.social_media.exceptions.ResourceAlreadyExistsException;
-import com.social_media.models.PageDto;
 import com.social_media.models.UserDto;
 import com.social_media.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,6 +31,7 @@ public class UserService {
         return userRepository.findByUsernameContainingIgnoreCase(username);
     }
 
+    @Transactional
     public User updateUser(User user, UserDto userDto) {
         String username = userDto.username();
         if (username == null || username.isEmpty()) {
@@ -42,20 +43,22 @@ public class UserService {
             throw new InvalidProvidedInfoException("username cannot contain spaces");
         }
 
-        if (userRepository.existsByUsername(username)) {
+        if (userRepository.existsByUsername(username) && !user.getUsername().equals(username)) {
             throw new ResourceAlreadyExistsException("username is already taken, try another one");
         }
 
         String email = userDto.email();
-        if (!userRepository.existsByEmail(email)) {
-            user.setEmail(email);
+        if (userRepository.existsByEmail(email) && !user.getEmail().equals(email)) {
+            throw new ResourceAlreadyExistsException("email already in use");
         }
 
         user.setUsername(username);
+        user.setEmail(email);
 
         return userRepository.save(user);
     }
 
+    @Transactional
     public String updatePassword(
             User user,
             String password

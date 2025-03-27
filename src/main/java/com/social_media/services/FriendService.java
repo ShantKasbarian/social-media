@@ -12,6 +12,7 @@ import com.social_media.models.FriendDto;
 import com.social_media.models.PageDto;
 import com.social_media.repositories.FriendRepository;
 import com.social_media.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class FriendService {
 
     private final FriendConverter friendConverter;
 
+    @Transactional
     public Friend addFriend(String friendId, User user) {
         User friend = userRepository.findById(friendId)
                 .orElseThrow(() -> new ResourceNotFoundException("user not found"));
@@ -40,6 +42,7 @@ public class FriendService {
         return friendRepository.save(new Friend(UUID.randomUUID().toString(), userFriend, FriendshipStatus.PENDING));
     }
 
+    @Transactional
     public Friend acceptFriend(String requestId, User user) {
         Friend friend = friendRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException("friend request not found"));
@@ -52,6 +55,7 @@ public class FriendService {
         return friendRepository.save(friend);
     }
 
+    @Transactional
     public Friend blockFriend(String requestId, User user) {
         Friend friend = friendRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException("friend request not found"));
