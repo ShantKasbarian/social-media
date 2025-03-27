@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/user")
@@ -42,6 +44,16 @@ public class UserController {
                         (User) authentication.getPrincipal(),
                         userDto.password()
                 )
+        );
+    }
+
+    @GetMapping("/{username}/search")
+    public ResponseEntity<List<UserDto>> searchByUsername(@PathVariable String username) {
+        return ResponseEntity.ok(
+                userService.searchByUsername(username)
+                    .stream()
+                    .map(userConverter::convertToModel)
+                    .toList()
         );
     }
 }

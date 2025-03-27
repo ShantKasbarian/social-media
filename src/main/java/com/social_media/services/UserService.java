@@ -2,11 +2,15 @@ package com.social_media.services;
 
 import com.social_media.entities.User;
 import com.social_media.exceptions.InvalidProvidedInfoException;
+import com.social_media.exceptions.ResourceAlreadyExistsException;
+import com.social_media.models.PageDto;
 import com.social_media.models.UserDto;
 import com.social_media.repositories.UserRepository;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -23,6 +27,10 @@ public class UserService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
+    public List<User> searchByUsername(String username) {
+        return userRepository.findByUsernameContainingIgnoreCase(username);
+    }
+
     public User updateUser(User user, UserDto userDto) {
         String username = userDto.username();
         if (username == null || username.isEmpty()) {
@@ -35,7 +43,7 @@ public class UserService {
         }
 
         if (userRepository.existsByUsername(username)) {
-            throw new InvalidProvidedInfoException("username is already taken, try another one");
+            throw new ResourceAlreadyExistsException("username is already taken, try another one");
         }
 
         String email = userDto.email();
