@@ -13,7 +13,6 @@ import com.social_media.models.PostDto;
 import com.social_media.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +25,6 @@ public class PostService {
     private final PostRepository postRepository;
 
     private final UserRepository userRepository;
-
-    private final FriendRepository friendRepository;
 
     private final PostConverter postConverter;
 
@@ -104,7 +101,7 @@ public class PostService {
     }
 
     @Transactional
-    public Post likePost(String id, User user) {
+    public Like likePost(String id, User user) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("post not found"));
 
@@ -112,9 +109,7 @@ public class PostService {
             throw new ResourceAlreadyExistsException("cannot like post more than once");
         }
 
-        likeRepository.save(new Like(UUID.randomUUID().toString(), user, post));
-        post.setLikes(likeRepository.findByPost(post));
-        return post;
+        return likeRepository.save(new Like(UUID.randomUUID().toString(), user, post));
     }
 
     public PageDto<Post, PostDto> getUserLikedPosts(User user, Pageable pageable) {
