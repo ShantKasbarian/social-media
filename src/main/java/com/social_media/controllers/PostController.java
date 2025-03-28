@@ -2,9 +2,11 @@ package com.social_media.controllers;
 
 import com.social_media.converters.PostConverter;
 import com.social_media.entities.Comment;
+import com.social_media.entities.Like;
 import com.social_media.entities.Post;
 import com.social_media.entities.User;
 import com.social_media.models.CommentDto;
+import com.social_media.models.LikeDto;
 import com.social_media.models.PageDto;
 import com.social_media.models.PostDto;
 import com.social_media.services.PostService;
@@ -94,9 +96,16 @@ public class PostController {
     }
 
     @PutMapping("/{postId}/like")
-    public ResponseEntity<PostDto> likePost(@PathVariable String postId, Authentication authentication) {
+    public ResponseEntity<LikeDto> likePost(@PathVariable String postId, Authentication authentication) {
+        Like like = postService.likePost(postId, (User) authentication.getPrincipal());
+
         return ResponseEntity.ok(
-                postConverter.convertToModel(postService.likePost(postId, (User) authentication.getPrincipal()))
+                new LikeDto(
+                        like.getId(),
+                        like.getUser().getId(),
+                        like.getUser().getUsername(),
+                        like.getPost().getId()
+                )
         );
     }
 
