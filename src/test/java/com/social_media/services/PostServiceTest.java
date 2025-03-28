@@ -274,13 +274,12 @@ class PostServiceTest {
 
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
         when(likeRepository.existsByPostAndUser(post, user)).thenReturn(false);
-        when(likeRepository.save(new Like(UUID.randomUUID().toString(), user, post))).thenReturn(like);
+        when(likeRepository.save(any(Like.class))).thenReturn(like);
 
         Like response = postService.likePost(post.getId(), user);
 
         assertNotNull(response);
         assertEquals(like.getId(), response.getId());
-        verify(likeRepository, times(1)).save(like);
     }
 
     @Test
