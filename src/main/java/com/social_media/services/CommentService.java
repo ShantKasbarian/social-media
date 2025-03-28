@@ -21,8 +21,6 @@ import java.util.UUID;
 public class CommentService {
     private final CommentRepository commentRepository;
 
-    private final CommentConverter commentConverter;
-
     private final PostRepository postRepository;
 
     @Transactional

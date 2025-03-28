@@ -83,6 +83,7 @@ class FriendServiceTest {
         assertEquals(friend.getUserFriend().getUser().getId(), response.getUserFriend().getUser().getId());
         assertEquals(FriendshipStatus.PENDING, response.getStatus());
         assertEquals(friend.getUserFriend().getFriend().getId(), response.getUserFriend().getFriend().getId());
+        verify(friendRepository, times(1)).save(any(Friend.class));
     }
 
     @Test
