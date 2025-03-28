@@ -280,6 +280,7 @@ class PostServiceTest {
 
         assertNotNull(response);
         assertEquals(like.getId(), response.getId());
+        verify(likeRepository, times(1)).save(any(Like.class));
     }
 
     @Test
