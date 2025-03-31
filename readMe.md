@@ -4,14 +4,14 @@ Social-Media-Application
         Login/signup form
         Check profile
         Create posts
-        Add other users as friends
-        Check their friends posts on their feed
+        Add other users as friendRequests
+        Check their friendRequests posts on their feed
         Like posts
         Comment under posts
         Get post by id
         Delete a post
         Block a user
-        Search for friends based on username
+        Search for friendRequests based on username
         Delete comment
         View all comments
 	Nice to have:
@@ -54,11 +54,11 @@ User:
     
     @ManyToMany
     @JoinTable(
-            name = "friends",
+            name = "friendRequests",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "friend_id")
     )
-    private List<Friend> friends;
+    private List<Friend> friendRequests;
 
 Post:
 
@@ -92,22 +92,21 @@ Like:
     @JoinColumn(name = "post_id")
     private Post post;
 
-Friend:
+FriendRequest:
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "friend_id")
+    private User friendRequest;
     
-    UserFriend { // embeddable
-        @ManyToOne
-        @JoinColumn(name = "user_id")
-        private User user;
-    
-        @ManyToOne
-        @JoinColumn(name = "friend_id")
-        private User friend;
-    }
 
 User one to many -> Post
 User one to many -> Like
 User one to many -> Comment
-User many to many -> Friend
+User many to many -> FriendRequest
 
 Post one to many -> Like
 Post one to many -> Comment
@@ -119,5 +118,5 @@ Comment many to one -> User
 Like many to one -> User
 Like many to one -> Post
 
-Friend.UserFriend many to one -> User
-Friend.UserFriend many to one -> User (friend)
+FriendRequest many to one -> User (sender)
+FriendRequest many to one -> User (recipient)

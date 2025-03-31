@@ -12,13 +12,18 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "friends")
-public class Friend {
+public class FriendRequest {
     @Id
     @Column(name = "id")
     private String id;
 
-    @Embedded
-    private UserFriend userFriend;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "friend_id")
+    private User friend;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)

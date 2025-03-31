@@ -1,6 +1,6 @@
 package com.social_media.models;
 
-public record FriendDto(
+public record FriendRequestDto(
         String id,
         String userId,
         String username,
