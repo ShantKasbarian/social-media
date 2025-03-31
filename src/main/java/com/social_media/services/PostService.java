@@ -112,6 +112,17 @@ public class PostService {
         return likeRepository.save(new Like(UUID.randomUUID().toString(), user, post));
     }
 
+    @Transactional
+    public void removeLike(String id, User user) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("post not found"));
+
+        likeRepository.delete(
+                likeRepository.findByPostAndUser(post, user)
+                        .orElseThrow(() -> new ResourceNotFoundException("you haven't liked this post"))
+        );
+    }
+
     public PageDto<Post, PostDto> getUserLikedPosts(User user, Pageable pageable) {
         return new PageDto<>(
                 postRepository.findByLikesUser(user, pageable),
