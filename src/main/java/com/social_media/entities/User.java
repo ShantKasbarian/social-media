@@ -54,7 +54,7 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "friend_id")
     )
-    private List<Friend> friends;
+    private List<FriendRequest> friendRequests;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

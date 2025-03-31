@@ -23,7 +23,7 @@ class PostRepositoryTest {
     private UserRepository userRepository;
 
     @Autowired
-    private FriendRepository friendRepository;
+    private FriendRequestRepository friendRequestRepository;
 
     @Autowired
     private LikeRepository likeRepository;
@@ -34,7 +34,7 @@ class PostRepositoryTest {
 
     private Post post;
 
-    private Friend friend;
+    private FriendRequest friendRequest;
 
     @BeforeEach
     void setUp() {
@@ -62,10 +62,10 @@ class PostRepositoryTest {
 
         userRepository.save(user2);
 
-        friend = new Friend(UUID.randomUUID().toString(), new UserFriend(user, user2), FriendshipStatus.ACCEPTED);
+        friendRequest = new FriendRequest(UUID.randomUUID().toString(), user, user2, FriendshipStatus.ACCEPTED);
 
         userRepository.save(user);
-        friendRepository.save(friend);
+        friendRequestRepository.save(friendRequest);
     }
 
     @Test
