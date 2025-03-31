@@ -65,17 +65,7 @@ class FriendRepositoryTest {
     @Test
     void existsByUserFriend() {
         friendRepository.save(friend);
-        assertTrue(friendRepository.existsByUserFriend(friend.getUserFriend()));
-    }
-
-    @Test
-    void findByUserFriend() {
-        friendRepository.save(friend);
-
-        Friend response = friendRepository.findByUserFriend(friend.getUserFriend()).orElse(null);
-
-        assertEquals(friend.getId(), response.getId());
-        assertEquals(user1.getId(), response.getUserFriend().getUser().getId());
+        assertTrue(friendRepository.existsByUserFriend_user_id_friend_id(user1.getId(), user2.getId()));
     }
 
     @Test
