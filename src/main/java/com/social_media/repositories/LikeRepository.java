@@ -6,11 +6,10 @@ import com.social_media.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface LikeRepository extends JpaRepository<Like, String> {
-    Long countLikesByPost_id(String postId);
-    List<Like> findByPost(Post post);
     boolean existsByPostAndUser(Post post, User user);
+    Optional<Like> findByPostAndUser(Post post, User user);
 }

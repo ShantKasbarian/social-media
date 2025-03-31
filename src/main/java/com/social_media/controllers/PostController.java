@@ -109,6 +109,12 @@ public class PostController {
         );
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{postId}/dislike")
+    public void removeLike(@PathVariable String postId, Authentication authentication) {
+        postService.removeLike(postId, (User) authentication.getPrincipal());
+    }
+
     @GetMapping("/liked")
     public ResponseEntity<PageDto<Post, PostDto>> getUserLikedPosts(
             Authentication authentication,

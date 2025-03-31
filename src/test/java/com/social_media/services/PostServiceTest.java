@@ -297,6 +297,34 @@ class PostServiceTest {
     }
 
     @Test
+    void removeLike() {
+        Like like = new Like(UUID.randomUUID().toString(), user, post);
+
+        when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
+        when(likeRepository.findByPostAndUser(post, user)).thenReturn(Optional.of(like));
+        doNothing().when(likeRepository).delete(like);
+
+        postService.removeLike(post.getId(), user);
+
+        verify(likeRepository, times(1)).delete(like);
+    }
+
+    @Test
+    void removeLikeShouldThrowResourceNotFoundExceptionWhenUserHasNotLikedPost() {
+        when(postRepository.findById(anyString())).thenReturn(Optional.ofNullable(post));
+        when(likeRepository.findByPostAndUser(any(Post.class), any(User.class))).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> postService.removeLike(post.getId(), user));
+    }
+
+    @Test
+    void removeLikeShouldThrowResourceNotFoundExceptionWhenPostDoesNotExist() {
+        when(postRepository.findById(anyString())).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> postService.removeLike(post.getId(), user));
+    }
+
+    @Test
     void getUserLikedPosts() {
         List<Like> likesPost1 = new ArrayList<>();
         likesPost1.add(new Like(UUID.randomUUID().toString(), user, post));
