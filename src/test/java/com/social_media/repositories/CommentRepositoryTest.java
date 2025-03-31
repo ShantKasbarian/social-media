@@ -34,7 +34,7 @@ class CommentRepositoryTest {
     private Comment comment;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         user = new User();
         user.setId(UUID.randomUUID().toString());
         user.setEmail("someone@example.com");
@@ -56,12 +56,13 @@ class CommentRepositoryTest {
                 post,
                 user
         );
+
+        userRepository.save(user);
+        postRepository.save(post);
     }
 
     @Test
     void save() {
-        userRepository.save(user);
-        postRepository.save(post);
         Comment response = commentRepository.save(comment);
 
         assertEquals(comment.getId(), response.getId());
@@ -70,8 +71,6 @@ class CommentRepositoryTest {
 
     @Test
     void findById() {
-        userRepository.save(user);
-        postRepository.save(post);
         commentRepository.save(comment);
 
         Comment response = commentRepository.findById(comment.getId()).orElse(null);
@@ -82,8 +81,6 @@ class CommentRepositoryTest {
 
     @Test
     void delete() {
-        userRepository.save(user);
-        postRepository.save(post);
         commentRepository.save(comment);
 
         commentRepository.delete(comment);
@@ -93,8 +90,6 @@ class CommentRepositoryTest {
 
     @Test
     void findByPost_id() {
-        userRepository.save(user);
-        postRepository.save(post);
         commentRepository.save(comment);
 
         Page<Comment> comments = commentRepository.findByPost_id(post.getId(), PageRequest.of(0, 10));
