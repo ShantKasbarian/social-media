@@ -33,13 +33,11 @@ public class FriendService {
         User friend = userRepository.findById(friendId)
                 .orElseThrow(() -> new ResourceNotFoundException("user not found"));
 
-        UserFriend userFriend = new UserFriend(user, friend);
-
-        if (friendRepository.existsByUserFriend(userFriend)) {
+        if (friendRepository.existsByUserFriend_user_id_friend_id(user.getId(), friendId)) {
             throw new ResourceAlreadyExistsException("you have already sent a friend request");
         }
 
-        return friendRepository.save(new Friend(UUID.randomUUID().toString(), userFriend, FriendshipStatus.PENDING));
+        return friendRepository.save(new Friend(UUID.randomUUID().toString(), new UserFriend(user, friend), FriendshipStatus.PENDING));
     }
 
     @Transactional

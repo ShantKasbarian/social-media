@@ -75,7 +75,7 @@ class FriendServiceTest {
     @Test
     void addFriend() {
         when(userRepository.findById(user2.getId())).thenReturn(Optional.ofNullable(user2));
-        when(friendRepository.existsByUserFriend(friend.getUserFriend())).thenReturn(false);
+        when(friendRepository.existsByUserFriend_user_id_friend_id(friend.getUserFriend().getUser().getId(), friend.getUserFriend().getFriend().getId())).thenReturn(false);
         when(friendRepository.save(any(Friend.class))).thenReturn(friend);
 
         Friend response = friendService.addFriend(user2.getId(), user1);
@@ -98,7 +98,7 @@ class FriendServiceTest {
     void addFriendShouldThrowResourceAlreadyExistsException() {
         when(userRepository.findById(user2.getId()))
                 .thenReturn(Optional.ofNullable(user2));
-        when(friendRepository.existsByUserFriend(any(UserFriend.class))).thenReturn(true);
+        when(friendRepository.existsByUserFriend_user_id_friend_id(anyString(), anyString())).thenReturn(true);
 
         assertThrows(ResourceAlreadyExistsException.class, () -> friendService.addFriend(user2.getId(), user1));
     }
