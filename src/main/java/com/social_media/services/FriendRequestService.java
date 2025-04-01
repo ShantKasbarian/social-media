@@ -36,7 +36,7 @@ public class FriendRequestService {
             throw new ResourceAlreadyExistsException("you have already sent a friend request");
         }
 
-        return friendRequestRepository.save(new FriendRequest(UUID.randomUUID().toString(), user, friend, FriendshipStatus.PENDING));
+        return friendRequestRepository.save(new FriendRequest(UUID.randomUUID().toString(), user, friend, FriendshipStatus.PENDING, null));
     }
 
     @Transactional
@@ -46,6 +46,12 @@ public class FriendRequestService {
 
         if (!user.getId().equals(friendRequest.getFriend().getId())) {
             throw new RequestNotAllowedException("cannot accept friend of another user");
+        }
+
+        User blocker = friendRequest.getBlocker();
+
+        if (blocker != null && !blocker.getId().equals(user.getId())) {
+            throw new RequestNotAllowedException("user has blocked you");
         }
 
         friendRequest.setStatus(FriendshipStatus.ACCEPTED);
@@ -62,10 +68,28 @@ public class FriendRequestService {
                 user.getId().equals(friendRequest.getFriend().getId())
         ) {
             friendRequest.setStatus(FriendshipStatus.BLOCKED);
+            friendRequest.setBlocker(user);
             return friendRequestRepository.save(friendRequest);
         }
 
         throw new RequestNotAllowedException("cannot block friend of another user");
+    }
+
+    @Transactional
+    public FriendRequest unblockFriend(String id, User user) {
+        FriendRequest friendRequest = friendRequestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("friend request not found"));
+
+        User blocker = friendRequest.getBlocker();
+
+        if (blocker != null && !blocker.getId().equals(user.getId())) {
+            throw new RequestNotAllowedException("cannot unblock user");
+        }
+
+        friendRequest.setBlocker(null);
+        friendRequest.setStatus(FriendshipStatus.PENDING);
+
+        return friendRequestRepository.save(friendRequest);
     }
 
     public PageDto<FriendRequest, FriendRequestDto> getFriends(User user, Pageable pageable) {

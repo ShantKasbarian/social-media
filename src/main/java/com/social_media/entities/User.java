@@ -50,7 +50,7 @@ public class User implements UserDetails {
 
     @ManyToMany
     @JoinTable(
-            name = "friends",
+            name = "friend_requests",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "friend_id")
     )

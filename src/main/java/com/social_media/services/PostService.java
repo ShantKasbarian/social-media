@@ -34,6 +34,8 @@ public class PostService {
 
     private final LikeRepository likeRepository;
 
+    private final FriendRequestRepository friendRequestRepository;
+
     @Transactional
     public Post createPost(Post post, User user) {
         if (post.getTitle() == null || post.getTitle().isEmpty()) {
@@ -84,7 +86,15 @@ public class PostService {
         );
     }
 
-    public PageDto<Post, PostDto> getUserPosts(String userId, Pageable pageable) {
+    public PageDto<Post, PostDto> getUserPosts(String userId, Pageable pageable, User user) {
+        FriendRequest friendRequest = friendRequestRepository
+                .findByUser_idFriend_id(user.getId(), userId)
+                .orElse(null);
+
+        if (friendRequest != null && friendRequest.getStatus().equals(FriendshipStatus.BLOCKED)) {
+            throw new RequestNotAllowedException("user has blocked you");
+        }
+
         return new PageDto<>(
                 postRepository.findByUser(
                         userRepository.findById(userId)
@@ -95,9 +105,19 @@ public class PostService {
         );
     }
 
-    public Post getPostById(String id) {
-        return postRepository.findById(id)
+    public Post getPostById(String id, User user) {
+        Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("post not found"));
+
+        FriendRequest friendRequest = friendRequestRepository
+                .findByUser_idFriend_id(user.getId(), post.getUser().getId())
+                .orElse(null);
+
+        if (friendRequest != null && friendRequest.getStatus().equals(FriendshipStatus.BLOCKED)) {
+            throw new RequestNotAllowedException("user has blocked you");
+        }
+
+        return post;
     }
 
     @Transactional

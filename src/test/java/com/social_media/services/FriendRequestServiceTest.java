@@ -68,7 +68,7 @@ class FriendRequestServiceTest {
         user2.setName("Jack");
         user2.setLastname("Smith");
 
-        friendRequest = new FriendRequest(UUID.randomUUID().toString(), user1, user2, FriendshipStatus.PENDING);
+        friendRequest = new FriendRequest(UUID.randomUUID().toString(), user1, user2, FriendshipStatus.PENDING, null);
     }
 
     @Test
@@ -131,6 +131,7 @@ class FriendRequestServiceTest {
 
         assertEquals(friendRequest.getId(), response.getId());
         assertEquals(FriendshipStatus.BLOCKED, response.getStatus());
+        assertEquals(user1.getId(), response.getUser().getId());
         verify(friendRequestRepository, times(1)).save(friendRequest);
     }
 
@@ -143,6 +144,34 @@ class FriendRequestServiceTest {
                 .thenReturn(Optional.ofNullable(friendRequest));
 
         assertThrows(RequestNotAllowedException.class, () -> friendRequestService.blockFriend(friendRequest.getId(), user3));
+    }
+
+    @Test
+    void unblockFriend() {
+        friendRequest.setBlocker(user1);
+        when(friendRequestRepository.findById(anyString())).thenReturn(Optional.ofNullable(friendRequest));
+        when(friendRequestRepository.save(friendRequest)).thenReturn(friendRequest);
+
+        FriendRequest response = friendRequestService.unblockFriend(friendRequest.getId(), user1);
+
+        assertNotNull(response);
+        assertNull(response.getBlocker());
+        assertEquals(FriendshipStatus.PENDING, response.getStatus());
+        verify(friendRequestRepository, times(1)).save(friendRequest);
+    }
+
+    @Test
+    void unblockFriendShouldThrowResourceNotFoundException() {
+        when(friendRequestRepository.findById(anyString()))
+                .thenThrow(ResourceNotFoundException.class);
+        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.unblockFriend(friendRequest.getId(), user1));
+    }
+
+    @Test
+    void unblockFriendShouldThrowRequestNotAllowedExceptionWhenBlockerIdIsNotEqualToUserId() {
+        friendRequest.setBlocker(user2);
+        when(friendRequestRepository.findById(anyString())).thenReturn(Optional.ofNullable(friendRequest));
+        assertThrows(RequestNotAllowedException.class, () -> friendRequestService.unblockFriend(friendRequest.getId(), user1));
     }
 
     @Test

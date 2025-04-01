@@ -8,6 +8,7 @@ import com.social_media.models.PageDto;
 import com.social_media.services.FriendRequestService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ public class FriendRequestController {
     private final FriendRequestConverter friendRequestConverter;
 
     @PostMapping("/{friendId}")
+    @ResponseStatus(HttpStatus.CREATED)
     public FriendRequestDto addFriend(Authentication authentication, @PathVariable String friendId) {
         return friendRequestConverter.convertToModel(
                 friendRequestService.addFriend(
@@ -30,6 +32,7 @@ public class FriendRequestController {
     }
 
     @PutMapping("/request/{requestId}/accept")
+    @ResponseStatus(HttpStatus.OK)
     public FriendRequestDto acceptFriend(Authentication authentication, @PathVariable String requestId) {
         return friendRequestConverter.convertToModel(
                 friendRequestService.acceptFriend(
@@ -40,9 +43,21 @@ public class FriendRequestController {
     }
 
     @PutMapping("/request/{requestId}/block")
+    @ResponseStatus(HttpStatus.OK)
     public FriendRequestDto blockFriend(Authentication authentication, @PathVariable String requestId) {
         return friendRequestConverter.convertToModel(
                 friendRequestService.blockFriend(
+                        requestId,
+                        (User) authentication.getPrincipal()
+                )
+        );
+    }
+
+    @PutMapping("/request/{requestId}/unblock")
+    @ResponseStatus(HttpStatus.OK)
+    public FriendRequestDto unblockFriend(Authentication authentication, @PathVariable String requestId) {
+        return friendRequestConverter.convertToModel(
+                friendRequestService.unblockFriend(
                         requestId,
                         (User) authentication.getPrincipal()
                 )
