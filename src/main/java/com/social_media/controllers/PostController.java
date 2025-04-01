@@ -43,6 +43,7 @@ public class PostController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<PageDto<Post, PostDto>> getUserPosts(
+            Authentication authentication,
             @PathVariable String userId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
@@ -50,7 +51,8 @@ public class PostController {
         return ResponseEntity.ok(
                 postService.getUserPosts(
                     userId,
-                    PageRequest.of(page, size, Sort.by(Sort.Order.desc("postedTime")))
+                    PageRequest.of(page, size, Sort.by(Sort.Order.desc("postedTime"))),
+                    (User) authentication.getPrincipal()
                 )
         );
     }
@@ -87,10 +89,10 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<PostDto> getPostById(@PathVariable String postId) {
+    public ResponseEntity<PostDto> getPostById(@PathVariable String postId, Authentication authentication) {
         return ResponseEntity.ok(
                 postConverter.convertToModel(
-                    postService.getPostById(postId)
+                    postService.getPostById(postId, (User) authentication.getPrincipal())
                 )
         );
     }

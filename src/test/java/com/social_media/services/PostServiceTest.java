@@ -10,10 +10,7 @@ import com.social_media.exceptions.ResourceNotFoundException;
 import com.social_media.models.CommentDto;
 import com.social_media.models.PageDto;
 import com.social_media.models.PostDto;
-import com.social_media.repositories.CommentRepository;
-import com.social_media.repositories.LikeRepository;
-import com.social_media.repositories.PostRepository;
-import com.social_media.repositories.UserRepository;
+import com.social_media.repositories.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -42,6 +39,9 @@ class PostServiceTest {
 
     @Mock
     private PostConverter postConverter;
+
+    @Mock
+    private FriendRequestRepository friendRequestRepository;
 
     @Mock
     private CommentRepository commentRepository;
@@ -231,11 +231,13 @@ class PostServiceTest {
                 posts, pageable, posts.size()
         );
 
+        when(friendRequestRepository.findByUser_idFriend_id(anyString(), anyString()))
+                .thenReturn(Optional.empty());
         when(userRepository.findById(user.getId())).thenReturn(Optional.ofNullable(user));
         when(postRepository.findByUser(user, pageable))
                 .thenReturn(page);
 
-        PageDto<Post, PostDto> response = postService.getUserPosts(user.getId(), pageable);
+        PageDto<Post, PostDto> response = postService.getUserPosts(user.getId(), pageable, user);
 
         assertEquals(page.getContent().size(), response.getContent().size());
         assertEquals(page.getTotalPages(), response.getTotalPages());
@@ -246,15 +248,19 @@ class PostServiceTest {
 
     @Test
     void getUserPostsShouldThrowResourceNotFoundException() {
+        when(friendRequestRepository.findByUser_idFriend_id(anyString(), anyString()))
+                .thenReturn(Optional.empty());
         when(postRepository.findById(post.getId())).thenThrow(ResourceNotFoundException.class);
-        assertThrows(ResourceNotFoundException.class, () -> postService.getUserPosts(user.getId(), PageRequest.of(0, 10)));
+        assertThrows(ResourceNotFoundException.class, () -> postService.getUserPosts(user.getId(), PageRequest.of(0, 10), user));
     }
 
     @Test
     void getPostById() {
+        when(friendRequestRepository.findByUser_idFriend_id(anyString(), anyString()))
+                .thenReturn(Optional.empty());
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
 
-        Post response = postService.getPostById(post.getId());
+        Post response = postService.getPostById(post.getId(), user);
 
         assertEquals(post.getId(), response.getId());
         assertEquals(post.getTitle(), response.getTitle());
@@ -265,7 +271,7 @@ class PostServiceTest {
     @Test
     void getPostByIdShouldThrowResourceNotFoundException() {
         when(postRepository.findById(post.getId())).thenThrow(ResourceNotFoundException.class);
-        assertThrows(ResourceNotFoundException.class, () -> postService.getPostById(post.getId()));
+        assertThrows(ResourceNotFoundException.class, () -> postService.getPostById(post.getId(), user));
     }
 
     @Test

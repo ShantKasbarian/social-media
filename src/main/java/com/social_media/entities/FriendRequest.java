@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "friends")
+@Table(name = "friend_requests")
 public class FriendRequest {
     @Id
     @Column(name = "id")
@@ -28,4 +28,8 @@ public class FriendRequest {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private FriendshipStatus status;
+
+    @ManyToOne
+    @JoinColumn(name = "blocker_id")
+    private User blocker;
 }
