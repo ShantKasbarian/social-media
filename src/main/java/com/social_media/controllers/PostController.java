@@ -101,13 +101,13 @@ public class PostController {
     public ResponseEntity<LikeDto> likePost(@PathVariable String postId, Authentication authentication) {
         Like like = postService.likePost(postId, (User) authentication.getPrincipal());
 
-        return ResponseEntity.ok(
+        return new ResponseEntity<>(
                 new LikeDto(
                         like.getId(),
                         like.getUser().getId(),
                         like.getUser().getUsername(),
                         like.getPost().getId()
-                )
+                ), HttpStatus.CREATED
         );
     }
 
@@ -133,12 +133,14 @@ public class PostController {
 
     @GetMapping("/{postId}/comments")
     public ResponseEntity<PageDto<Comment, CommentDto>> getComments(
+            Authentication authentication,
             @PathVariable String postId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(
                 postService.getComments(
+                        (User) authentication.getPrincipal(),
                         postId,
                         PageRequest.of(page, size, Sort.by(Sort.Order.desc("commentedTime")))
                 )

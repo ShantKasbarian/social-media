@@ -1,12 +1,11 @@
 package com.social_media.services;
 
-import com.social_media.entities.Comment;
-import com.social_media.entities.Post;
-import com.social_media.entities.User;
+import com.social_media.entities.*;
 import com.social_media.exceptions.InvalidProvidedInfoException;
 import com.social_media.exceptions.RequestNotAllowedException;
 import com.social_media.exceptions.ResourceNotFoundException;
 import com.social_media.repositories.CommentRepository;
+import com.social_media.repositories.FriendRequestRepository;
 import com.social_media.repositories.PostRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +30,9 @@ class CommentServiceTest {
 
     @Mock
     private PostRepository postRepository;
+
+    @Mock
+    private FriendRequestRepository friendRequestRepository;
 
     private User user;
 
@@ -69,6 +71,7 @@ class CommentServiceTest {
     void comment() {
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
+        when(friendRequestRepository.findByUser_idFriend_id(anyString(), anyString())).thenReturn(Optional.empty());
 
         Comment response = commentService.comment(comment.getContent(), post.getId(), user);
 
@@ -91,8 +94,19 @@ class CommentServiceTest {
 
     @Test
     void commentShouldThrowResourceNotFoundExceptionWhenPostIsNotFound() {
-        when(postRepository.findById(post.getId())).thenThrow(ResourceNotFoundException.class);
+        when(postRepository.findById(anyString())).thenThrow(ResourceNotFoundException.class);
         assertThrows(ResourceNotFoundException.class, () -> commentService.comment(comment.getContent(), post.getId(), user));
+    }
+
+    @Test
+    void commentShouldThrowRequestNotAllowedExceptionWhenUserIsBlocked() {
+        FriendRequest friendRequest = new FriendRequest();
+        friendRequest.setStatus(FriendshipStatus.BLOCKED);
+
+        when(postRepository.findById(anyString())).thenReturn(Optional.ofNullable(post));
+        when(friendRequestRepository.findByUser_idFriend_id(anyString(), anyString()))
+                .thenReturn(Optional.of(friendRequest));
+        assertThrows(RequestNotAllowedException.class, () -> commentService.comment(comment.getContent(), post.getId(), user));
     }
 
     @Test

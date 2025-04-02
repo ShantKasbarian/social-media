@@ -133,8 +133,8 @@ public class PostService {
     }
 
     @Transactional
-    public void removeLike(String id, User user) {
-        Post post = postRepository.findById(id)
+    public void removeLike(String postId, User user) {
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("post not found"));
 
         likeRepository.delete(
@@ -150,7 +150,21 @@ public class PostService {
         );
     }
 
-    public PageDto<Comment, CommentDto> getComments(String postId, Pageable pageable) {
+    public PageDto<Comment, CommentDto> getComments(User user, String postId, Pageable pageable) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("post not found"));
+
+        FriendRequest friendRequest = friendRequestRepository
+                .findByUser_idFriend_id(user.getId(), post.getUser().getId())
+                .orElse(null);
+
+        if (
+                friendRequest != null &&
+                friendRequest.getStatus().equals(FriendshipStatus.BLOCKED)
+        ) {
+            throw new RequestNotAllowedException("you have been blocked by this user");
+        }
+
         return new PageDto<>(
                 commentRepository.findByPost_id(postId, pageable),
                 commentConverter
