@@ -279,6 +279,7 @@ class PostServiceTest {
         Like like = new Like(UUID.randomUUID().toString(), user, post);
 
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
+        when(friendRequestRepository.findByUser_idFriend_id(anyString(), anyString())).thenReturn(Optional.empty());
         when(likeRepository.existsByPostAndUser(post, user)).thenReturn(false);
         when(likeRepository.save(any(Like.class))).thenReturn(like);
 
@@ -296,8 +297,20 @@ class PostServiceTest {
     }
 
     @Test
+    void likePostShouldThrowRequestNotAllowedException() {
+        FriendRequest friendRequest = new FriendRequest();
+        friendRequest.setStatus(FriendshipStatus.BLOCKED);
+
+        when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
+        when(friendRequestRepository.findByUser_idFriend_id(anyString(), anyString())).thenReturn(Optional.of(friendRequest));
+
+        assertThrows(RequestNotAllowedException.class, () -> postService.likePost(post.getId(), user));
+    }
+
+    @Test
     void likePostShouldThrowResourceAlreadyExistsException() {
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
+        when(friendRequestRepository.findByUser_idFriend_id(anyString(), anyString())).thenReturn(Optional.empty());
         when(likeRepository.existsByPostAndUser(post, user)).thenReturn(true);
         assertThrows(ResourceAlreadyExistsException.class, () -> postService.likePost(post.getId(), user));
     }
