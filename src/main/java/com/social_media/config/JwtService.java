@@ -33,7 +33,7 @@ public class JwtService {
                 .add(claims)
                 .subject(name)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 50))
+                .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24))
                 .and()
                 .signWith(getKey())
                 .compact();

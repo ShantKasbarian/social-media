@@ -125,6 +125,14 @@ public class PostService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("post not found"));
 
+        FriendRequest friendRequest = friendRequestRepository
+                .findByUser_idFriend_id(user.getId(), post.getUser().getId())
+                .orElse(null);
+
+        if (friendRequest != null && friendRequest.getStatus().equals(FriendshipStatus.BLOCKED)) {
+            throw new RequestNotAllowedException("user has blocked you");
+        }
+
         if (likeRepository.existsByPostAndUser(post, user)) {
             throw new ResourceAlreadyExistsException("cannot like post more than once");
         }
