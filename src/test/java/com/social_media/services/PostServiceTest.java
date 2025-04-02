@@ -367,6 +367,9 @@ class PostServiceTest {
 
     @Test
     void getComments() {
+        User user2 = new User();
+        user2.setId(UUID.randomUUID().toString());
+
         List<Comment> comments = new ArrayList<>();
         Comment comment1 = new Comment();
         comment1.setId(UUID.randomUUID().toString());
@@ -381,13 +384,35 @@ class PostServiceTest {
 
         Page<Comment> page = new PageImpl<>(comments, pageable, comments.size());
 
+        when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
         when(commentRepository.findByPost_id(post.getId(), pageable)).thenReturn(page);
+        when(friendRequestRepository.findByUser_idFriend_id(user.getId(), user2.getId())).thenReturn(Optional.empty());
 
-        PageDto<Comment, CommentDto> response = postService.getComments(post.getId(), pageable);
+        PageDto<Comment, CommentDto> response = postService.getComments(user2, post.getId(), pageable);
 
         assertEquals(page.getContent().size(), response.getContent().size());
         assertEquals(page.getTotalPages(), response.getTotalPages());
         assertEquals(page.getSize(), response.getPageSize());
         verify(commentRepository, times(1)).findByPost_id(post.getId(), pageable);
+    }
+
+    @Test
+    void getCommentsShouldThrowResourceNotFoundExceptionWhenPostNotFound() {
+        when(postRepository.findById(anyString())).thenThrow(ResourceNotFoundException.class);
+        assertThrows(ResourceNotFoundException.class, () -> postService.getComments(user, post.getId(), PageRequest.of(0, 10)));
+    }
+
+    @Test
+    void getCommentsShouldThrowRequestNotAllowedExceptionWhenUserIsBlocked() {
+        User user2 = new User();
+        user2.setId(UUID.randomUUID().toString());
+
+        FriendRequest friendRequest = new FriendRequest(UUID.randomUUID().toString(), user, user2, FriendshipStatus.BLOCKED, user2);
+
+        when(postRepository.findById(anyString())).thenReturn(Optional.ofNullable(post));
+        when(friendRequestRepository.findByUser_idFriend_id(anyString(), anyString()))
+                .thenReturn(Optional.of(friendRequest));
+
+        assertThrows(RequestNotAllowedException.class, () -> postService.getComments(user, post.getId(), PageRequest.of(0, 10)));
     }
 }
