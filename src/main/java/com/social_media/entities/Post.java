@@ -20,7 +20,7 @@ public class Post {
     @Column(name = "id")
     private String id;
 
-    @Column(name = "title")
+    @Column(name = "title", nullable = false)
     private String title;
 
     @OneToMany(mappedBy = "post")

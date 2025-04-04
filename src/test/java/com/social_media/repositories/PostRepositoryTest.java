@@ -62,7 +62,7 @@ class PostRepositoryTest {
 
         userRepository.save(user2);
 
-        friendRequest = new FriendRequest(UUID.randomUUID().toString(), user, user2, FriendshipStatus.ACCEPTED, null);
+        friendRequest = new FriendRequest(UUID.randomUUID().toString(), user, user2, FriendshipStatus.ACCEPTED);
 
         userRepository.save(user);
         friendRequestRepository.save(friendRequest);

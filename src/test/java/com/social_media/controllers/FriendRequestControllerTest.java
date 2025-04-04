@@ -69,14 +69,7 @@ class FriendRequestControllerTest {
         user2.setName("Jack");
         user2.setLastname("Smith");
 
-        friendRequest = new FriendRequest(UUID.randomUUID().toString(), user1, user2, FriendshipStatus.PENDING, null);
-
-        User blocker = friendRequest.getBlocker();
-        String blockerId = null;
-
-        if (blocker != null) {
-            blockerId = blocker.getId();
-        }
+        friendRequest = new FriendRequest(UUID.randomUUID().toString(), user1, user2, FriendshipStatus.PENDING);
 
         friendRequestDto = new FriendRequestDto(
                 friendRequest.getId(),
@@ -84,8 +77,7 @@ class FriendRequestControllerTest {
                 friendRequest.getUser().getUsername(),
                 friendRequest.getFriend().getId(),
                 friendRequest.getFriend().getUsername(),
-                friendRequest.getStatus().toString(),
-                blockerId
+                friendRequest.getStatus().toString()
         );
     }
 
@@ -169,7 +161,7 @@ class FriendRequestControllerTest {
     @Test
     void getBlockedUsers() {
         friendRequest.setStatus(FriendshipStatus.BLOCKED);
-        friendRequest.setBlocker(user2);
+
         List<FriendRequest> content = new ArrayList<>();
         content.add(friendRequest);
 

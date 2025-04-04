@@ -1,6 +1,8 @@
 package com.social_media.controllers;
 
 import com.social_media.converters.UserConverter;
+import com.social_media.models.ResponseDto;
+import com.social_media.models.TokenDto;
 import com.social_media.entities.User;
 import com.social_media.models.UserDto;
 import com.social_media.services.LoginSignupService;
@@ -60,11 +62,12 @@ class LoginSignupControllerTest {
 
         when(loginSignupService.login(anyString(), anyString())).thenReturn(expectedToken);
 
-        ResponseEntity<String> response = loginSignupController.login(userDto);
+        ResponseEntity<TokenDto> response = loginSignupController.login(userDto);
 
         assertNotNull(response);
+        assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expectedToken, response.getBody());
+        assertEquals(expectedToken, response.getBody().token());
     }
 
     @Test
@@ -74,11 +77,11 @@ class LoginSignupControllerTest {
         when(loginSignupService.signup(user)).thenReturn(expected);
         when(userConverter.convertToEntity(userDto)).thenReturn(user);
 
-        ResponseEntity<String> response = loginSignupController.signup(userDto);
+        ResponseEntity<ResponseDto> response = loginSignupController.signup(userDto);
 
         assertNotNull(response);
         assertNotNull(response.getBody());
-        assertEquals(expected, response.getBody());
+        assertEquals(expected, response.getBody().message());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 }

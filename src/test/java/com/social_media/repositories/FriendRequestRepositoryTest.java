@@ -49,7 +49,7 @@ class FriendRequestRepositoryTest {
         userRepository.save(user1);
         userRepository.save(user2);
 
-        friendRequest = new FriendRequest(UUID.randomUUID().toString(), user1, user2, FriendshipStatus.PENDING, null);
+        friendRequest = new FriendRequest(UUID.randomUUID().toString(), user1, user2, FriendshipStatus.PENDING);
     }
 
     @Test

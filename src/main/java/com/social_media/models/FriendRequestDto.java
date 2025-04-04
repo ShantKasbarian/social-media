@@ -6,7 +6,6 @@ public record FriendRequestDto(
         String username,
         String friendId,
         String friendName,
-        String status,
-        String blockerId
+        String status
 ) {
 }

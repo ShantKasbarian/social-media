@@ -59,6 +59,7 @@ class FriendRequestServiceTest {
         user1.setUsername("johnDoe");
         user1.setName("John");
         user1.setLastname("Doe");
+        user1.setBlockedUsers(new ArrayList<>());
 
         user2 = new User();
         user2.setId(UUID.randomUUID().toString());
@@ -67,8 +68,9 @@ class FriendRequestServiceTest {
         user2.setUsername("JackSmith");
         user2.setName("Jack");
         user2.setLastname("Smith");
+        user2.setBlockedUsers(new ArrayList<>());
 
-        friendRequest = new FriendRequest(UUID.randomUUID().toString(), user1, user2, FriendshipStatus.PENDING, null);
+        friendRequest = new FriendRequest(UUID.randomUUID().toString(), user1, user2, FriendshipStatus.PENDING);
     }
 
     @Test
@@ -126,13 +128,16 @@ class FriendRequestServiceTest {
         when(friendRequestRepository.findById(friendRequest.getId()))
                 .thenReturn(Optional.ofNullable(friendRequest));
         when(friendRequestRepository.save(friendRequest)).thenReturn(friendRequest);
+        when(userRepository.save(any(User.class))).thenReturn(user1);
 
         FriendRequest response = friendRequestService.blockFriend(friendRequest.getId(), user1);
 
         assertEquals(friendRequest.getId(), response.getId());
         assertEquals(FriendshipStatus.BLOCKED, response.getStatus());
+        assertEquals(user1.getBlockedUsers().getFirst().getId(), user2.getId());
         assertEquals(user1.getId(), response.getUser().getId());
         verify(friendRequestRepository, times(1)).save(friendRequest);
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
@@ -148,16 +153,20 @@ class FriendRequestServiceTest {
 
     @Test
     void unblockFriend() {
-        friendRequest.setBlocker(user1);
+        user1.getBlockedUsers().add(user2);
+        int initialSize = user1.getBlockedUsers().size();
+
         when(friendRequestRepository.findById(anyString())).thenReturn(Optional.ofNullable(friendRequest));
         when(friendRequestRepository.save(friendRequest)).thenReturn(friendRequest);
+        when(userRepository.save(user1)).thenReturn(user1);
 
         FriendRequest response = friendRequestService.unblockFriend(friendRequest.getId(), user1);
 
         assertNotNull(response);
-        assertNull(response.getBlocker());
         assertEquals(FriendshipStatus.PENDING, response.getStatus());
+        assertEquals(initialSize - 1, user1.getBlockedUsers().size());
         verify(friendRequestRepository, times(1)).save(friendRequest);
+        verify(userRepository, times(1)).save(user1);
     }
 
     @Test
@@ -168,10 +177,20 @@ class FriendRequestServiceTest {
     }
 
     @Test
-    void unblockFriendShouldThrowRequestNotAllowedExceptionWhenBlockerIdIsNotEqualToUserId() {
-        friendRequest.setBlocker(user2);
+    void unblockFriendShouldThrowResourceNotFoundExceptionWhenBlockedUsersSizeIsEmpty() {
         when(friendRequestRepository.findById(anyString())).thenReturn(Optional.ofNullable(friendRequest));
-        assertThrows(RequestNotAllowedException.class, () -> friendRequestService.unblockFriend(friendRequest.getId(), user1));
+        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.unblockFriend(friendRequest.getId(), user1));
+    }
+
+    @Test
+    void unblockFriendShouldThrowResourceNotFoundExceptionWhenTargetUserIsNotFound() {
+        User user3 = new User();
+        user3.setId(UUID.randomUUID().toString());
+
+        user1.getBlockedUsers().add(user3);
+
+        when(friendRequestRepository.findById(anyString())).thenReturn(Optional.ofNullable(friendRequest));
+        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.unblockFriend(friendRequest.getId(), user1));
     }
 
     @Test

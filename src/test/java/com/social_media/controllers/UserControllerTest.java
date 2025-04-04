@@ -2,6 +2,7 @@ package com.social_media.controllers;
 
 import com.social_media.converters.UserConverter;
 import com.social_media.entities.User;
+import com.social_media.models.ResponseDto;
 import com.social_media.models.UserDto;
 import com.social_media.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -123,12 +124,12 @@ class UserControllerTest {
         when(userService.updatePassword(user, userDto2.password())).thenReturn(expected);
         when(authentication.getPrincipal()).thenReturn(user);
 
-        ResponseEntity<String> response = userController.updatePassword(userDto2, authentication);
+        ResponseEntity<ResponseDto> response = userController.updatePassword(userDto2, authentication);
 
         assertNotNull(response);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expected, response.getBody());
+        assertEquals(expected, response.getBody().message());
     }
 
     @Test

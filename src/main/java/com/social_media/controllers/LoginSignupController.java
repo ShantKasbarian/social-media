@@ -1,6 +1,8 @@
 package com.social_media.controllers;
 
 import com.social_media.converters.UserConverter;
+import com.social_media.models.ResponseDto;
+import com.social_media.models.TokenDto;
 import com.social_media.models.UserDto;
 import com.social_media.services.LoginSignupService;
 import lombok.AllArgsConstructor;
@@ -18,17 +20,20 @@ public class LoginSignupController {
     private final UserConverter userConverter;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserDto userDto) {
+    public ResponseEntity<TokenDto> login(@RequestBody UserDto userDto) {
         return ResponseEntity.ok(
-                loginSignupService.login(userDto.email(), userDto.password())
+                new TokenDto(
+                    loginSignupService.login(userDto.email(), userDto.password())
+                )
         );
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody UserDto userDto) {
+    public ResponseEntity<ResponseDto> signup(@RequestBody UserDto userDto) {
         return new ResponseEntity<>(
-                loginSignupService.signup(userConverter.convertToEntity(userDto)),
-                HttpStatus.CREATED
+                new ResponseDto(
+                    loginSignupService.signup(userConverter.convertToEntity(userDto))
+                ), HttpStatus.CREATED
         );
     }
 }

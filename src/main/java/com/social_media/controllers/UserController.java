@@ -2,6 +2,7 @@ package com.social_media.controllers;
 
 import com.social_media.converters.UserConverter;
 import com.social_media.entities.User;
+import com.social_media.models.ResponseDto;
 import com.social_media.models.UserDto;
 import com.social_media.services.UserService;
 import lombok.AllArgsConstructor;
@@ -38,11 +39,13 @@ public class UserController {
     }
 
     @PutMapping("/password")
-    public ResponseEntity<String> updatePassword(@RequestBody UserDto userDto, Authentication authentication) {
+    public ResponseEntity<ResponseDto> updatePassword(@RequestBody UserDto userDto, Authentication authentication) {
         return ResponseEntity.ok(
-                userService.updatePassword(
-                        (User) authentication.getPrincipal(),
-                        userDto.password()
+                new ResponseDto(
+                    userService.updatePassword(
+                            (User) authentication.getPrincipal(),
+                            userDto.password()
+                    )
                 )
         );
     }
