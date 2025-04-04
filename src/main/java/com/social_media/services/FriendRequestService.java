@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -36,7 +37,7 @@ public class FriendRequestService {
             throw new ResourceAlreadyExistsException("you have already sent a friend request");
         }
 
-        return friendRequestRepository.save(new FriendRequest(UUID.randomUUID().toString(), user, friend, FriendshipStatus.PENDING, null));
+        return friendRequestRepository.save(new FriendRequest(UUID.randomUUID().toString(), user, friend, FriendshipStatus.PENDING));
     }
 
     @Transactional
@@ -48,10 +49,8 @@ public class FriendRequestService {
             throw new RequestNotAllowedException("cannot accept friend of another user");
         }
 
-        User blocker = friendRequest.getBlocker();
-
-        if (blocker != null && !blocker.getId().equals(user.getId())) {
-            throw new RequestNotAllowedException("user has blocked you");
+        if (friendRequest.getStatus().equals(FriendshipStatus.BLOCKED)) {
+            throw new RequestNotAllowedException("either you or the targeted user has blocked you");
         }
 
         friendRequest.setStatus(FriendshipStatus.ACCEPTED);
@@ -64,15 +63,25 @@ public class FriendRequestService {
                 .orElseThrow(() -> new ResourceNotFoundException("friend request not found"));
 
         if (
-                user.getId().equals(friendRequest.getUser().getId()) ||
-                user.getId().equals(friendRequest.getFriend().getId())
+                !user.getId().equals(friendRequest.getUser().getId()) &&
+                !user.getId().equals(friendRequest.getFriend().getId())
         ) {
-            friendRequest.setStatus(FriendshipStatus.BLOCKED);
-            friendRequest.setBlocker(user);
-            return friendRequestRepository.save(friendRequest);
+            throw new RequestNotAllowedException("cannot block friend of another user");
         }
 
-        throw new RequestNotAllowedException("cannot block friend of another user");
+        User target = null;
+
+        if (friendRequest.getFriend().getId().equals(user.getId())) {
+            target = friendRequest.getUser();
+        }
+        else {
+            target = friendRequest.getFriend();
+        }
+
+        user.getBlockedUsers().add(target);
+        userRepository.save(user);
+        friendRequest.setStatus(FriendshipStatus.BLOCKED);
+        return friendRequestRepository.save(friendRequest);
     }
 
     @Transactional
@@ -80,13 +89,35 @@ public class FriendRequestService {
         FriendRequest friendRequest = friendRequestRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("friend request not found"));
 
-        User blocker = friendRequest.getBlocker();
+        User target = null;
 
-        if (blocker != null && !blocker.getId().equals(user.getId())) {
-            throw new RequestNotAllowedException("cannot unblock user");
+        if (friendRequest.getFriend().getId().equals(user.getId())) {
+            target = friendRequest.getUser();
+        }
+        else {
+            target = friendRequest.getFriend();
         }
 
-        friendRequest.setBlocker(null);
+        List<User> blockedUsers = user.getBlockedUsers();
+
+        if (blockedUsers.isEmpty()) {
+            throw new ResourceNotFoundException("you haven't blocked this user");
+        }
+
+        for (int i = 0; i < blockedUsers.size(); i++) {
+            User blockedUser = blockedUsers.get(i);
+
+            if (blockedUser.getId().equals(target.getId())) {
+                user.getBlockedUsers().remove(blockedUser);
+                break;
+            }
+
+            if (i == blockedUsers.size() - 1) {
+                throw new ResourceNotFoundException("you haven't blocked this user");
+            }
+        }
+
+        userRepository.save(user);
         friendRequest.setStatus(FriendshipStatus.PENDING);
 
         return friendRequestRepository.save(friendRequest);

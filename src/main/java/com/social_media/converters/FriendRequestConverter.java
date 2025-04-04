@@ -21,19 +21,13 @@ public class FriendRequestConverter implements Converter<FriendRequest, FriendRe
         User user = entity.getUser();
         User friend = entity.getFriend();
 
-        String blockerId = null;
-        if (entity.getBlocker() != null) {
-            blockerId = entity.getBlocker().getId();
-        }
-
         return new FriendRequestDto(
                 entity.getId(),
                 user.getId(),
                 user.getUsername(),
                 friend.getId(),
                 friend.getUsername(),
-                entity.getStatus().toString(),
-                blockerId
+                entity.getStatus().toString()
         );
     }
 }

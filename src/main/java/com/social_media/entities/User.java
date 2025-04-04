@@ -24,13 +24,13 @@ public class User implements UserDetails {
     @Column(name = "id")
     private String id;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "username", unique = true)
+    @Column(name = "username", unique = true, nullable = false)
     private String username;
 
     @Column(name = "name")
@@ -55,6 +55,14 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "friend_id")
     )
     private List<FriendRequest> friendRequests;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "blocked_users",
+            joinColumns = @JoinColumn(name = "blocker_id"),
+            inverseJoinColumns = @JoinColumn(name = "target_id")
+    )
+    private List<User> blockedUsers;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

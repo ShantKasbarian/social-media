@@ -420,7 +420,7 @@ class PostServiceTest {
         User user2 = new User();
         user2.setId(UUID.randomUUID().toString());
 
-        FriendRequest friendRequest = new FriendRequest(UUID.randomUUID().toString(), user, user2, FriendshipStatus.BLOCKED, user2);
+        FriendRequest friendRequest = new FriendRequest(UUID.randomUUID().toString(), user, user2, FriendshipStatus.BLOCKED);
 
         when(postRepository.findById(anyString())).thenReturn(Optional.ofNullable(post));
         when(friendRequestRepository.findByUser_idFriend_id(anyString(), anyString()))
