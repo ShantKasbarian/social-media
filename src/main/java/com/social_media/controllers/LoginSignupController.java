@@ -22,9 +22,7 @@ public class LoginSignupController {
     @PostMapping("/login")
     public ResponseEntity<TokenDto> login(@RequestBody UserDto userDto) {
         return ResponseEntity.ok(
-                new TokenDto(
-                    loginSignupService.login(userDto.email(), userDto.password())
-                )
+                loginSignupService.login(userDto.email(), userDto.password())
         );
     }
 

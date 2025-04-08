@@ -23,7 +23,7 @@ public class CommentController {
         return new ResponseEntity<>(
                 commentConverter.convertToModel(
                         commentService.comment(
-                                commentDto.content(),
+                                commentDto.comment(),
                                 commentDto.postId(),
                                 (User) authentication.getPrincipal()
                         )
@@ -46,7 +46,7 @@ public class CommentController {
                 commentConverter.convertToModel(
                         commentService.editComment(
                                 commentDto.id(),
-                                commentDto.content(),
+                                commentDto.comment(),
                                 (User) authentication.getPrincipal()
                         )
                 )

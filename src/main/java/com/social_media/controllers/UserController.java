@@ -27,13 +27,24 @@ public class UserController {
         );
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto, Authentication authentication) {
+    @PutMapping("/update/username")
+    public ResponseEntity<UserDto> updateUsername(@RequestBody UserDto userDto, Authentication authentication) {
         return ResponseEntity.ok(
                 userConverter.convertToModel(
-                    userService.updateUser((User) authentication.getPrincipal(),
-                            userDto
+                    userService.updateUsername((User) authentication.getPrincipal(),
+                            userDto.username()
                     )
+                )
+        );
+    }
+
+    @PutMapping("/update/email")
+    public ResponseEntity<UserDto> updateEmail(@RequestBody UserDto userDto, Authentication authentication) {
+        return ResponseEntity.ok(
+                userConverter.convertToModel(
+                        userService.updateEmail((User) authentication.getPrincipal(),
+                                userDto.email()
+                        )
                 )
         );
     }

@@ -5,6 +5,7 @@ import com.social_media.entities.User;
 import com.social_media.exceptions.InvalidCredentialsException;
 import com.social_media.exceptions.InvalidProvidedInfoException;
 import com.social_media.exceptions.ResourceAlreadyExistsException;
+import com.social_media.models.TokenDto;
 import com.social_media.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,9 +64,9 @@ class LoginSignupServiceTest {
         when(bCryptPasswordEncoder.matches(rawPassword, user.getPassword()))
                 .thenReturn(true);
 
-        String response = loginSignupService.login(user.getEmail(), rawPassword);
+        TokenDto response = loginSignupService.login(user.getEmail(), rawPassword);
 
-        assertEquals(token, response);
+        assertEquals(token, response.token());
 
         verify(userRepository, times(1)).findByEmail(user.getEmail());
         verify(jwtService, times(1)).generateToken(user.getUsername());

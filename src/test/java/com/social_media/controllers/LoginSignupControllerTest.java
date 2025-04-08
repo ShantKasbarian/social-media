@@ -60,7 +60,7 @@ class LoginSignupControllerTest {
     void login() {
         String expectedToken = "some token";
 
-        when(loginSignupService.login(anyString(), anyString())).thenReturn(expectedToken);
+        when(loginSignupService.login(anyString(), anyString())).thenReturn(new TokenDto(expectedToken, user.getUsername(), user.getId()));
 
         ResponseEntity<TokenDto> response = loginSignupController.login(userDto);
 

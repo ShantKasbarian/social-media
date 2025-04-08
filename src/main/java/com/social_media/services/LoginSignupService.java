@@ -5,6 +5,7 @@ import com.social_media.entities.User;
 import com.social_media.exceptions.InvalidCredentialsException;
 import com.social_media.exceptions.InvalidProvidedInfoException;
 import com.social_media.exceptions.ResourceAlreadyExistsException;
+import com.social_media.models.TokenDto;
 import com.social_media.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Lazy;
@@ -37,7 +38,7 @@ public class LoginSignupService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public String login(String email, String password) {
+    public TokenDto login(String email, String password) {
         User user = userRepository
                 .findByEmail(email)
                 .orElseThrow(() -> new InvalidCredentialsException("wrong email or password"));
@@ -46,7 +47,7 @@ public class LoginSignupService implements UserDetailsService {
             throw new InvalidCredentialsException("wrong email or password");
         }
 
-        return jwtService.generateToken(user.getUsername());
+        return new TokenDto(jwtService.generateToken(user.getUsername()), user.getUsername(), user.getId());
     }
 
     @Transactional

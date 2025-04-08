@@ -91,7 +91,7 @@ class CommentControllerTest {
         assertNotNull(response);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(commentDto.content(), response.getBody().content());
+        assertEquals(commentDto.comment(), response.getBody().comment());
     }
 
     @Test
@@ -115,7 +115,7 @@ class CommentControllerTest {
 
         assertNotNull(response);
         assertNotNull(response.getBody());
-        assertEquals(comment.getContent(), response.getBody().content());
+        assertEquals(comment.getContent(), response.getBody().comment());
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 }

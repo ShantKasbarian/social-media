@@ -13,7 +13,7 @@ public class CommentConverter implements Converter<Comment, CommentDto> {
     public Comment convertToEntity(CommentDto model) {
         Comment comment = new Comment();
         comment.setId(model.id());
-        comment.setContent(model.content());
+        comment.setContent(model.comment());
         return comment;
     }
 
