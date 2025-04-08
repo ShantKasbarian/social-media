@@ -75,7 +75,7 @@ class UserControllerTest {
     }
 
     @Test
-    void updateUser() {
+    void updateUsername() {
         UserDto userDto2 = new UserDto(
                 null,
                 "someNewEmail@example.com",
@@ -95,9 +95,43 @@ class UserControllerTest {
 
         when(userConverter.convertToModel(any(User.class))).thenReturn(userDto2);
         when(authentication.getPrincipal()).thenReturn(user);
-        when(userService.updateUser(user, userDto2)).thenReturn(user2);
+        when(userService.updateUsername(user, userDto2.username())).thenReturn(user2);
 
-        ResponseEntity<UserDto> response = userController.updateUser(userDto2, authentication);
+        ResponseEntity<UserDto> response = userController.updateUsername(userDto2, authentication);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertNotEquals(user.getEmail(), response.getBody().email());
+        assertEquals(userDto2.email(), response.getBody().email());
+        assertNotEquals(user.getUsername(), response.getBody().username());
+        assertEquals(userDto2.username(), response.getBody().username());
+    }
+
+    @Test
+    void updateEmail() {
+        UserDto userDto2 = new UserDto(
+                null,
+                "someNewEmail@example.com",
+                null,
+                "someNewUsername",
+                null,
+                null
+        );
+
+        User user2 = new User();
+        user2.setId(user.getId());
+        user2.setEmail(userDto2.email());
+        user2.setPassword(user.getPassword());
+        user2.setUsername(userDto2.username());
+        user2.setName(user.getName());
+        user2.setLastname(user.getLastname());
+
+        when(userConverter.convertToModel(any(User.class))).thenReturn(userDto2);
+        when(authentication.getPrincipal()).thenReturn(user);
+        when(userService.updateEmail(user, userDto2.email())).thenReturn(user2);
+
+        ResponseEntity<UserDto> response = userController.updateEmail(userDto2, authentication);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());

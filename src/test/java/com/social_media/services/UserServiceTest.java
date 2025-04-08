@@ -73,57 +73,50 @@ class UserServiceTest {
     }
 
     @Test
-    void updateUser() {
-        String oldEmail = user.getEmail();
+    void updateUsername() {
         String oldUsername = user.getUsername();
 
         when(userRepository.existsByUsername(user.getUsername())).thenReturn(false);
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
         when(userRepository.save(user)).thenReturn(user);
 
-        User response = userService.updateUser(user, userDto);
+        User response = userService.updateUsername(user, userDto.username());
 
         assertEquals(userDto.username(), response.getUsername());
         assertEquals(user.getUsername(), response.getUsername());
-        assertNotEquals(oldEmail, response.getEmail());
         assertNotEquals(oldUsername, response.getUsername());
+        verify(userRepository, times(1)).existsByUsername(user.getUsername());
+        verify(userRepository, times(1)).save(user);
+    }
+
+    @Test
+    void updateEmail() {
+        String oldEmail = user.getEmail();
+
+        when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
+        when(userRepository.save(user)).thenReturn(user);
+
+        User response = userService.updateEmail(user, userDto.email());
+
+        assertNotEquals(oldEmail, response.getEmail());
         assertEquals(userDto.email(), response.getEmail());
         assertEquals(user.getEmail(), response.getEmail());
-        verify(userRepository, times(1)).existsByUsername(user.getUsername());
         verify(userRepository, times(1)).existsByEmail(user.getEmail());
         verify(userRepository, times(1)).save(user);
     }
 
     @Test
-    void updateUserShouldThrowInvalidProvidedInfoExceptionWhenUsernameIsNull() {
-        userDto = new UserDto(
-                user.getId(),
-                "someone1@example.com",
-                user.getPassword(),
-                null,
-                user.getName(),
-                user.getLastname()
-        );
-
-        assertThrows(InvalidProvidedInfoException.class, () -> userService.updateUser(user, userDto));
+    void updateUsernameShouldThrowInvalidProvidedInfoExceptionWhenUsernameIsNull() {
+        assertThrows(InvalidProvidedInfoException.class, () -> userService.updateUsername(user, null));
     }
 
     @Test
-    void updateUserShouldThrowInvalidProvidedInfoExceptionWhenUsernameIsEmpty() {
-        userDto = new UserDto(
-                user.getId(),
-                "someone1@example.com",
-                user.getPassword(),
-                "",
-                user.getName(),
-                user.getLastname()
-        );
-
-        assertThrows(InvalidProvidedInfoException.class, () -> userService.updateUser(user, userDto));
+    void updateUsernameShouldThrowInvalidProvidedInfoExceptionWhenUsernameIsEmpty() {
+        assertThrows(InvalidProvidedInfoException.class, () -> userService.updateUsername(user, ""));
     }
 
     @Test
-    void updateUserShouldThrowInvalidProvidedInfoExceptionWhenUsernameContainsSpace() {
+    void updateUsernameShouldThrowInvalidProvidedInfoExceptionWhenUsernameContainsSpace() {
         userDto = new UserDto(
                 user.getId(),
                 "someone1@example.com",
@@ -133,22 +126,21 @@ class UserServiceTest {
                 user.getLastname()
         );
 
-        assertThrows(InvalidProvidedInfoException.class, () -> userService.updateUser(user, userDto));
+        assertThrows(InvalidProvidedInfoException.class, () -> userService.updateUsername(user, userDto.username()));
     }
 
     @Test
-    void updateUserShouldThrowResourceAlreadyExistsExceptionWhenAnotherUserWithProvidedEmailExists() {
-        when(userRepository.existsByUsername(userDto.username())).thenReturn(false);
+    void updateEmailShouldThrowResourceAlreadyExistsExceptionWhenAnotherUserWithProvidedEmailExists() {
         when(userRepository.existsByEmail(userDto.email())).thenReturn(true);
 
-        assertThrows(ResourceAlreadyExistsException.class, () -> userService.updateUser(user, userDto));
+        assertThrows(ResourceAlreadyExistsException.class, () -> userService.updateEmail(user, userDto.email()));
     }
 
     @Test
     void updateUserShouldThrowResourceAlreadyExistsExceptionWhenAnotherUserWithProvidedUsernameExists() {
         when(userRepository.existsByUsername(userDto.username())).thenReturn(true);
 
-        assertThrows(ResourceAlreadyExistsException.class, () -> userService.updateUser(user, userDto));
+        assertThrows(ResourceAlreadyExistsException.class, () -> userService.updateUsername(user, userDto.username()));
     }
 
     @Test

@@ -6,6 +6,7 @@ import com.social_media.exceptions.ResourceAlreadyExistsException;
 import com.social_media.models.UserDto;
 import com.social_media.repositories.UserRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Email;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,8 +33,7 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUser(User user, UserDto userDto) {
-        String username = userDto.username();
+    public User updateUsername(User user, String username) {
         if (username == null || username.isEmpty()) {
             throw new InvalidProvidedInfoException("username must be specified");
         }
@@ -47,14 +47,17 @@ public class UserService {
             throw new ResourceAlreadyExistsException("username is already taken, try another one");
         }
 
-        String email = userDto.email();
+        user.setUsername(username);
+
+        return userRepository.save(user);
+    }
+
+    public User updateEmail(User user, @Email String email) {
         if (userRepository.existsByEmail(email) && !user.getEmail().equals(email)) {
             throw new ResourceAlreadyExistsException("email already in use");
         }
 
-        user.setUsername(username);
         user.setEmail(email);
-
         return userRepository.save(user);
     }
 
