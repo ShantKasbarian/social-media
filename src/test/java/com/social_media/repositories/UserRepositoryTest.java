@@ -5,6 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.UUID;
@@ -89,10 +92,14 @@ class UserRepositoryTest {
     void findByUsernameContainingIgnoreCase() {
         userRepository.save(user);
 
-        List<User> response = userRepository.findByUsernameContainingIgnoreCase("J");
+        Page<User> response = userRepository.findByUsernameContainingIgnoreCase("J", PageRequest.of(
+                0,
+                10,
+                Sort.by(Sort.Order.asc("username"))
+        ));
 
         assertFalse(response.isEmpty());
-        assertEquals(user.getId(), response.getFirst().getId());
-        assertEquals(user.getEmail(), response.getFirst().getEmail());
+        assertEquals(user.getId(), response.getContent().getFirst().getId());
+        assertEquals(user.getEmail(), response.getContent().getFirst().getEmail());
     }
 }

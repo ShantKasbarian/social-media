@@ -1,17 +1,18 @@
 package com.social_media.services;
 
+import com.social_media.converters.UserConverter;
 import com.social_media.entities.User;
 import com.social_media.exceptions.InvalidProvidedInfoException;
 import com.social_media.exceptions.ResourceAlreadyExistsException;
+import com.social_media.models.PageDto;
 import com.social_media.models.UserDto;
 import com.social_media.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Email;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class UserService {
@@ -19,17 +20,21 @@ public class UserService {
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    private final UserConverter userConverter;
+
     public UserService(
             UserRepository userRepository,
             @Lazy
-            BCryptPasswordEncoder bCryptPasswordEncoder
+            BCryptPasswordEncoder bCryptPasswordEncoder,
+            UserConverter userConverter
     ) {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.userConverter = userConverter;
     }
 
-    public List<User> searchByUsername(String username) {
-        return userRepository.findByUsernameContainingIgnoreCase(username);
+    public PageDto<User, UserDto> searchByUsername(String username, Pageable pageable) {
+        return new PageDto<>(userRepository.findByUsernameContainingIgnoreCase(username, pageable), userConverter);
     }
 
     @Transactional
@@ -53,6 +58,10 @@ public class UserService {
     }
 
     public User updateEmail(User user, @Email String email) {
+        if (email == null|| email.isEmpty()) {
+            throw new InvalidProvidedInfoException("email cannot be empty");
+        }
+
         if (userRepository.existsByEmail(email) && !user.getEmail().equals(email)) {
             throw new ResourceAlreadyExistsException("email already in use");
         }

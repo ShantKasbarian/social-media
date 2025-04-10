@@ -2,6 +2,7 @@ package com.social_media.controllers;
 
 import com.social_media.converters.UserConverter;
 import com.social_media.entities.User;
+import com.social_media.models.PageDto;
 import com.social_media.models.ResponseDto;
 import com.social_media.models.UserDto;
 import com.social_media.services.UserService;
@@ -10,6 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -193,16 +197,22 @@ class UserControllerTest {
         users.add(user2);
         users.add(user3);
 
-        when(userService.searchByUsername("o")).thenReturn(users);
+        PageDto<User, UserDto> pageDto = new PageDto<>(new PageImpl<>(users), userConverter);
+
+        when(userService.searchByUsername("o", PageRequest.of(
+                0,
+                10,
+                Sort.by(Sort.Order.asc("username"))
+        ))).thenReturn(pageDto);
         when(userConverter.convertToModel(user)).thenReturn(userDto);
         when(userConverter.convertToModel(user2)).thenReturn(userDto2);
         when(userConverter.convertToModel(user3)).thenReturn(userDto3);
 
-        ResponseEntity<List<UserDto>> response = userController.searchByUsername("o");
+        ResponseEntity<PageDto<User, UserDto>> response = userController.searchByUsername("o", 0, 10);
 
         assertNotNull(response);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(users.size(), response.getBody().size());
+        assertEquals(users.size(), response.getBody().getContent().size());
     }
 }
