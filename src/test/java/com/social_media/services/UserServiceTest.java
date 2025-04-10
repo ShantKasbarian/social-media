@@ -1,8 +1,10 @@
 package com.social_media.services;
 
+import com.social_media.converters.UserConverter;
 import com.social_media.entities.User;
 import com.social_media.exceptions.InvalidProvidedInfoException;
 import com.social_media.exceptions.ResourceAlreadyExistsException;
+import com.social_media.models.PageDto;
 import com.social_media.models.UserDto;
 import com.social_media.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.ArrayList;
@@ -28,6 +34,9 @@ class UserServiceTest {
 
     @Mock
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Mock
+    private UserConverter userConverter;
 
     private User user;
 
@@ -64,12 +73,21 @@ class UserServiceTest {
         users.add(user);
         users.add(user2);
 
-        when(userRepository.findByUsernameContainingIgnoreCase("J")).thenReturn(users);
+        when(userRepository.findByUsernameContainingIgnoreCase(anyString(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(users));
 
-        List<User> response = userService.searchByUsername("J");
+        PageDto<User, UserDto> response = userService.searchByUsername("J", PageRequest.of(
+                0,
+                10,
+                Sort.by(Sort.Order.asc("username"))
+        ));
 
-        assertEquals(users.size(), response.size());
-        verify(userRepository, times(1)).findByUsernameContainingIgnoreCase("J");
+        assertEquals(users.size(), response.getContent().size());
+        verify(userRepository, times(1)).findByUsernameContainingIgnoreCase("J", PageRequest.of(
+                0,
+                10,
+                Sort.by(Sort.Order.asc("username"))
+        ));
     }
 
     @Test
