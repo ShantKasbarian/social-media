@@ -29,15 +29,34 @@ public class FriendRequestService {
     private final FriendRequestConverter friendRequestConverter;
 
     @Transactional
-    public FriendRequest addFriend(String friendId, User user) {
-        User friend = userRepository.findById(friendId)
+    public FriendRequest addFriend(String targetUserId, User user) {
+        User targetUser = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("user not found"));
 
-        if (friendRequestRepository.existsByUser_idFriend_id(user.getId(), friendId)) {
+        List<User> targetUserBlockedUsers = targetUser.getBlockedUsers();
+        String currentUserId = user.getId();
+
+        for (User blockedUser: targetUserBlockedUsers) {
+            if (blockedUser.getId().equals(currentUserId)) {
+                throw new RequestNotAllowedException("user has blocked you");
+            }
+        }
+
+        List<User> currentUserBlockedUsers = user.getBlockedUsers();
+
+        for (User blockedUser: currentUserBlockedUsers) {
+            if (blockedUser.getId().equals(targetUserId)) {
+                user.getBlockedUsers().remove(blockedUser);
+                userRepository.save(user);
+                break;
+            }
+        }
+
+        if (friendRequestRepository.existsByUser_idFriend_id(currentUserId, targetUserId)) {
             throw new ResourceAlreadyExistsException("you have already sent a friend request");
         }
 
-        return friendRequestRepository.save(new FriendRequest(UUID.randomUUID().toString(), user, friend, FriendshipStatus.PENDING));
+        return friendRequestRepository.save(new FriendRequest(UUID.randomUUID().toString(), user, targetUser, FriendshipStatus.PENDING));
     }
 
     @Transactional
@@ -57,72 +76,6 @@ public class FriendRequestService {
         return friendRequestRepository.save(friendRequest);
     }
 
-    @Transactional
-    public FriendRequest blockFriend(String requestId, User user) {
-        FriendRequest friendRequest = friendRequestRepository.findById(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException("friend request not found"));
-
-        if (
-                !user.getId().equals(friendRequest.getUser().getId()) &&
-                !user.getId().equals(friendRequest.getFriend().getId())
-        ) {
-            throw new RequestNotAllowedException("cannot block friend of another user");
-        }
-
-        User target = null;
-
-        if (friendRequest.getFriend().getId().equals(user.getId())) {
-            target = friendRequest.getUser();
-        }
-        else {
-            target = friendRequest.getFriend();
-        }
-
-        user.getBlockedUsers().add(target);
-        userRepository.save(user);
-        friendRequest.setStatus(FriendshipStatus.BLOCKED);
-        return friendRequestRepository.save(friendRequest);
-    }
-
-    @Transactional
-    public FriendRequest unblockFriend(String id, User user) {
-        FriendRequest friendRequest = friendRequestRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("friend request not found"));
-
-        User target = null;
-
-        if (friendRequest.getFriend().getId().equals(user.getId())) {
-            target = friendRequest.getUser();
-        }
-        else {
-            target = friendRequest.getFriend();
-        }
-
-        List<User> blockedUsers = user.getBlockedUsers();
-
-        if (blockedUsers.isEmpty()) {
-            throw new ResourceNotFoundException("you haven't blocked this user");
-        }
-
-        for (int i = 0; i < blockedUsers.size(); i++) {
-            User blockedUser = blockedUsers.get(i);
-
-            if (blockedUser.getId().equals(target.getId())) {
-                user.getBlockedUsers().remove(blockedUser);
-                break;
-            }
-
-            if (i == blockedUsers.size() - 1) {
-                throw new ResourceNotFoundException("you haven't blocked this user");
-            }
-        }
-
-        userRepository.save(user);
-        friendRequest.setStatus(FriendshipStatus.PENDING);
-
-        return friendRequestRepository.save(friendRequest);
-    }
-
     public PageDto<FriendRequest, FriendRequestDto> getFriends(User user, Pageable pageable) {
         return new PageDto<>(
                 friendRequestRepository.findByUserFriend_FriendAndStatus(
@@ -131,10 +84,6 @@ public class FriendRequestService {
                         pageable
                 ), friendRequestConverter
         );
-    }
-
-    public PageDto<FriendRequest, FriendRequestDto> getBlockedUsers(User user, Pageable pageable) {
-        return new PageDto<>(friendRequestRepository.findByUserFriend_FriendAndStatus(user, FriendshipStatus.BLOCKED, pageable), friendRequestConverter);
     }
 
     public PageDto<FriendRequest, FriendRequestDto> getPendingUsers(User user, Pageable pageable) {

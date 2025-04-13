@@ -45,30 +45,6 @@ public class FriendRequestController {
         );
     }
 
-    @PutMapping("/request/{requestId}/block")
-    public ResponseEntity<FriendRequestDto> blockFriend(Authentication authentication, @PathVariable String requestId) {
-        return ResponseEntity.ok(
-                friendRequestConverter.convertToModel(
-                    friendRequestService.blockFriend(
-                            requestId,
-                            (User) authentication.getPrincipal()
-                    )
-                )
-        );
-    }
-
-    @PutMapping("/request/{requestId}/unblock")
-    public ResponseEntity<FriendRequestDto> unblockFriend(Authentication authentication, @PathVariable String requestId) {
-        return ResponseEntity.ok(
-                friendRequestConverter.convertToModel(
-                    friendRequestService.unblockFriend(
-                            requestId,
-                            (User) authentication.getPrincipal()
-                    )
-                )
-        );
-    }
-
     @GetMapping
     public ResponseEntity<PageDto<FriendRequest, FriendRequestDto>> getFriends(
             Authentication authentication,
@@ -83,19 +59,6 @@ public class FriendRequestController {
         );
     }
 
-    @GetMapping("/blocked")
-    public ResponseEntity<PageDto<FriendRequest, FriendRequestDto>> getBlockedUsers(
-            Authentication authentication,
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size
-    ) {
-        return ResponseEntity.ok(
-                friendRequestService.getBlockedUsers(
-                    (User) authentication.getPrincipal(),
-                    PageRequest.of(page, size)
-                )
-        );
-    }
 
     @GetMapping("/pending")
     public ResponseEntity<PageDto<FriendRequest, FriendRequestDto>> getPendingUsers(

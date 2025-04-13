@@ -110,34 +110,6 @@ class FriendRequestControllerTest {
     }
 
     @Test
-    void blockFriend() {
-        when(friendRequestConverter.convertToModel(any(FriendRequest.class))).thenReturn(friendRequestDto);
-        when(friendRequestService.blockFriend(friendRequest.getId(), user2)).thenReturn(friendRequest);
-        when(authentication.getPrincipal()).thenReturn(user2);
-
-        ResponseEntity<FriendRequestDto> response = friendRequestController.blockFriend(authentication, friendRequest.getId());
-
-        assertNotNull(response);
-        assertNotNull(response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(friendRequest.getId(), response.getBody().id());
-    }
-
-    @Test
-    void unblockFriend() {
-        when(friendRequestConverter.convertToModel(any(FriendRequest.class))).thenReturn(friendRequestDto);
-        when(friendRequestService.unblockFriend(friendRequest.getId(), user2)).thenReturn(friendRequest);
-        when(authentication.getPrincipal()).thenReturn(user2);
-
-        ResponseEntity<FriendRequestDto> response = friendRequestController.unblockFriend(authentication, friendRequest.getId());
-
-        assertNotNull(response);
-        assertNotNull(response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(friendRequest.getId(), response.getBody().id());
-    }
-
-    @Test
     void getFriends() {
         friendRequest.setStatus(FriendshipStatus.ACCEPTED);
         List<FriendRequest> content = new ArrayList<>();
@@ -151,28 +123,6 @@ class FriendRequestControllerTest {
         when(authentication.getPrincipal()).thenReturn(user1);
 
         ResponseEntity<PageDto<FriendRequest, FriendRequestDto>> response = friendRequestController.getFriends(authentication, 0, 10);
-
-        assertNotNull(response);
-        assertNotNull(response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(page.getContent().size(), response.getBody().getContent().size());
-    }
-
-    @Test
-    void getBlockedUsers() {
-        friendRequest.setStatus(FriendshipStatus.BLOCKED);
-
-        List<FriendRequest> content = new ArrayList<>();
-        content.add(friendRequest);
-
-        Page<FriendRequest> page = new PageImpl<>(content);
-        PageDto<FriendRequest, FriendRequestDto> pageDto = new PageDto<>(page, friendRequestConverter);
-
-        when(friendRequestService.getBlockedUsers(user1, PageRequest.of(0, 10)))
-                .thenReturn(pageDto);
-        when(authentication.getPrincipal()).thenReturn(user1);
-
-        ResponseEntity<PageDto<FriendRequest, FriendRequestDto>> response = friendRequestController.getBlockedUsers(authentication, 0, 10);
 
         assertNotNull(response);
         assertNotNull(response.getBody());

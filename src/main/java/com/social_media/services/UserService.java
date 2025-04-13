@@ -1,18 +1,25 @@
 package com.social_media.services;
 
 import com.social_media.converters.UserConverter;
+import com.social_media.entities.FriendRequest;
+import com.social_media.entities.FriendshipStatus;
 import com.social_media.entities.User;
 import com.social_media.exceptions.InvalidProvidedInfoException;
 import com.social_media.exceptions.ResourceAlreadyExistsException;
+import com.social_media.exceptions.ResourceNotFoundException;
 import com.social_media.models.PageDto;
 import com.social_media.models.UserDto;
+import com.social_media.repositories.FriendRequestRepository;
 import com.social_media.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Email;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -22,15 +29,19 @@ public class UserService {
 
     private final UserConverter userConverter;
 
+    private final FriendRequestRepository friendRequestRepository;
+
     public UserService(
             UserRepository userRepository,
             @Lazy
             BCryptPasswordEncoder bCryptPasswordEncoder,
-            UserConverter userConverter
+            UserConverter userConverter,
+            FriendRequestRepository friendRequestRepository
     ) {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.userConverter = userConverter;
+        this.friendRequestRepository = friendRequestRepository;
     }
 
     public PageDto<User, UserDto> searchByUsername(String username, Pageable pageable) {
@@ -82,5 +93,82 @@ public class UserService {
         user.setPassword(bCryptPasswordEncoder.encode(password));
         userRepository.save(user);
         return "password has been changed";
+    }
+
+    @Transactional
+    public String blockUser(String targetId, User user) {
+        User targetUser = userRepository.findById(targetId)
+                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
+
+        List<User> blockedUsers = user.getBlockedUsers();
+
+        for (User blockedUser: blockedUsers) {
+            if (blockedUser.getId().equals(targetId)) {
+                throw new ResourceAlreadyExistsException("cannot block user more than once");
+            }
+        }
+
+        user.getBlockedUsers().add(targetUser);
+        userRepository.save(user);
+
+        FriendRequest friendRequest = friendRequestRepository.findByUser_idFriend_id(user.getId(), targetId)
+                .orElse(null);
+
+        if (friendRequest != null) {
+            friendRequest.setStatus(FriendshipStatus.BLOCKED);
+            friendRequestRepository.save(friendRequest);
+        }
+
+        return "user has been blocked";
+    }
+
+    @Transactional
+    public String unblockUser(String id, User user) {
+        String message = null;
+
+        User targetUser = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
+
+        List<User> blockedUsers = user.getBlockedUsers();
+
+        for(User blockedUser: blockedUsers) {
+            if (blockedUser.getId().equals(id)) {
+                user.getBlockedUsers().remove(blockedUser);
+                userRepository.save(user);
+                break;
+            }
+        }
+
+        List<User> targetUserBlockedUsers = targetUser.getBlockedUsers();
+        String currentUserId = user.getId();
+
+        for (User blockedUser: targetUserBlockedUsers) {
+            if (blockedUser.getId().equals(currentUserId)) {
+                message = "waiting for other user to unblock you";
+            }
+        }
+
+        FriendRequest friendRequest = friendRequestRepository.findByUser_idFriend_id(currentUserId, id)
+                .orElse(null);
+
+        if (friendRequest != null && message == null) {
+            friendRequest.setStatus(FriendshipStatus.PENDING);
+            friendRequestRepository.save(friendRequest);
+        }
+
+        if (message == null) {
+            message = "user has been unblocked";
+        }
+
+        return message;
+    }
+
+    public PageDto<User, UserDto> getBlockedUsers(User user, Pageable pageable) {
+        List<User> blockedUsers = user.getBlockedUsers();
+
+        return new PageDto<>(
+                new PageImpl<>(blockedUsers, pageable, blockedUsers.size()),
+                userConverter
+        );
     }
 }
