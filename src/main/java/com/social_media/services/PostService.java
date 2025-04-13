@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -87,12 +88,24 @@ public class PostService {
     }
 
     public PageDto<Post, PostDto> getUserPosts(String userId, Pageable pageable, User user) {
-        FriendRequest friendRequest = friendRequestRepository
-                .findByUser_idFriend_id(user.getId(), userId)
-                .orElse(null);
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
 
-        if (friendRequest != null && friendRequest.getStatus().equals(FriendshipStatus.BLOCKED)) {
-            throw new RequestNotAllowedException("user has blocked you");
+        List<User> currentUserBlockedUsers = user.getBlockedUsers();
+
+        for(User blockedUser: currentUserBlockedUsers) {
+            if (blockedUser.getId().equals(userId)) {
+                throw new RequestNotAllowedException("you have blocked this user");
+            }
+        }
+
+        List<User> targetUserBlockedUsers = targetUser.getBlockedUsers();
+        String currentUserId = user.getId();
+
+        for (User blockedUser: targetUserBlockedUsers) {
+            if (blockedUser.getId().equals(currentUserId)) {
+                throw new RequestNotAllowedException("you have blocked this user");
+            }
         }
 
         return new PageDto<>(
@@ -109,12 +122,22 @@ public class PostService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("post not found"));
 
-        FriendRequest friendRequest = friendRequestRepository
-                .findByUser_idFriend_id(user.getId(), post.getUser().getId())
-                .orElse(null);
+        User postUser = post.getUser();
+        List<User> postUserBlockedUsers = postUser.getBlockedUsers();
+        String currentUserId = postUser.getId();
 
-        if (friendRequest != null && friendRequest.getStatus().equals(FriendshipStatus.BLOCKED)) {
-            throw new RequestNotAllowedException("user has blocked you");
+        for(User blockedUser: postUserBlockedUsers) {
+            if (blockedUser.getId().equals(currentUserId)) {
+                throw new RequestNotAllowedException("you have blocked this user");
+            }
+        }
+
+        List<User> currentUserBlockedUsers = user.getBlockedUsers();
+        String postUserId = postUser.getId();
+        for(User blockedUser: currentUserBlockedUsers) {
+            if (blockedUser.getId().equals(postUserId)) {
+                throw new RequestNotAllowedException("you have blocked this user");
+            }
         }
 
         return post;

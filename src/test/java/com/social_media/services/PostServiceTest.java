@@ -66,6 +66,7 @@ class PostServiceTest {
         user.setUsername("johnDoe");
         user.setName("John");
         user.setLastname("Doe");
+        user.setBlockedUsers(new ArrayList<>());
 
         post = new Post();
         post.setId(UUID.randomUUID().toString());
@@ -256,8 +257,6 @@ class PostServiceTest {
 
     @Test
     void getPostById() {
-        when(friendRequestRepository.findByUser_idFriend_id(anyString(), anyString()))
-                .thenReturn(Optional.empty());
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
 
         Post response = postService.getPostById(post.getId(), user);

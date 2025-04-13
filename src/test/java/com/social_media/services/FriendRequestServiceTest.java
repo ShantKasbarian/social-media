@@ -124,76 +124,6 @@ class FriendRequestServiceTest {
     }
 
     @Test
-    void blockFriend() {
-        when(friendRequestRepository.findById(friendRequest.getId()))
-                .thenReturn(Optional.ofNullable(friendRequest));
-        when(friendRequestRepository.save(friendRequest)).thenReturn(friendRequest);
-        when(userRepository.save(any(User.class))).thenReturn(user1);
-
-        FriendRequest response = friendRequestService.blockFriend(friendRequest.getId(), user1);
-
-        assertEquals(friendRequest.getId(), response.getId());
-        assertEquals(FriendshipStatus.BLOCKED, response.getStatus());
-        assertEquals(user1.getBlockedUsers().getFirst().getId(), user2.getId());
-        assertEquals(user1.getId(), response.getUser().getId());
-        verify(friendRequestRepository, times(1)).save(friendRequest);
-        verify(userRepository, times(1)).save(any(User.class));
-    }
-
-    @Test
-    void blockFriendShouldThrowRequestNotAllowedException() {
-        User user3 = new User();
-        user3.setId(UUID.randomUUID().toString());
-
-        when(friendRequestRepository.findById(friendRequest.getId()))
-                .thenReturn(Optional.ofNullable(friendRequest));
-
-        assertThrows(RequestNotAllowedException.class, () -> friendRequestService.blockFriend(friendRequest.getId(), user3));
-    }
-
-    @Test
-    void unblockFriend() {
-        user1.getBlockedUsers().add(user2);
-        int initialSize = user1.getBlockedUsers().size();
-
-        when(friendRequestRepository.findById(anyString())).thenReturn(Optional.ofNullable(friendRequest));
-        when(friendRequestRepository.save(friendRequest)).thenReturn(friendRequest);
-        when(userRepository.save(user1)).thenReturn(user1);
-
-        FriendRequest response = friendRequestService.unblockFriend(friendRequest.getId(), user1);
-
-        assertNotNull(response);
-        assertEquals(FriendshipStatus.PENDING, response.getStatus());
-        assertEquals(initialSize - 1, user1.getBlockedUsers().size());
-        verify(friendRequestRepository, times(1)).save(friendRequest);
-        verify(userRepository, times(1)).save(user1);
-    }
-
-    @Test
-    void unblockFriendShouldThrowResourceNotFoundException() {
-        when(friendRequestRepository.findById(anyString()))
-                .thenThrow(ResourceNotFoundException.class);
-        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.unblockFriend(friendRequest.getId(), user1));
-    }
-
-    @Test
-    void unblockFriendShouldThrowResourceNotFoundExceptionWhenBlockedUsersSizeIsEmpty() {
-        when(friendRequestRepository.findById(anyString())).thenReturn(Optional.ofNullable(friendRequest));
-        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.unblockFriend(friendRequest.getId(), user1));
-    }
-
-    @Test
-    void unblockFriendShouldThrowResourceNotFoundExceptionWhenTargetUserIsNotFound() {
-        User user3 = new User();
-        user3.setId(UUID.randomUUID().toString());
-
-        user1.getBlockedUsers().add(user3);
-
-        when(friendRequestRepository.findById(anyString())).thenReturn(Optional.ofNullable(friendRequest));
-        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.unblockFriend(friendRequest.getId(), user1));
-    }
-
-    @Test
     void getFriends() {
         List<FriendRequest> friendRequests = new ArrayList<>();
         friendRequest.setStatus(FriendshipStatus.ACCEPTED);
@@ -212,27 +142,6 @@ class FriendRequestServiceTest {
         assertEquals(page.getTotalPages(), response.getTotalPages());
         assertEquals(page.getNumber(), response.getPageNo());
         verify(friendRequestRepository, times(1)).findByUserFriend_FriendAndStatus(user1, FriendshipStatus.ACCEPTED,pageable);
-    }
-
-    @Test
-    void getBlockedUsers() {
-        List<FriendRequest> friendRequests = new ArrayList<>();
-        friendRequest.setStatus(FriendshipStatus.BLOCKED);
-        friendRequests.add(friendRequest);
-
-        Pageable pageable = PageRequest.of(0, 10);
-
-        Page<FriendRequest> page = new PageImpl<>(friendRequests, pageable, friendRequests.size());
-
-        when(friendRequestRepository.findByUserFriend_FriendAndStatus(user1, FriendshipStatus.BLOCKED, pageable))
-                .thenReturn(page);
-
-        PageDto<FriendRequest, FriendRequestDto> response = friendRequestService.getBlockedUsers(user1, pageable);
-
-        assertEquals(page.getContent().size(), response.getContent().size());
-        assertEquals(page.getTotalPages(), response.getTotalPages());
-        assertEquals(page.getNumber(), response.getPageNo());
-        verify(friendRequestRepository, times(1)).findByUserFriend_FriendAndStatus(user1, FriendshipStatus.BLOCKED,pageable);
     }
 
     @Test

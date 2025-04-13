@@ -1,7 +1,10 @@
 package com.social_media.controllers;
 
 import com.social_media.converters.UserConverter;
+import com.social_media.entities.FriendRequest;
+import com.social_media.entities.FriendshipStatus;
 import com.social_media.entities.User;
+import com.social_media.models.FriendRequestDto;
 import com.social_media.models.PageDto;
 import com.social_media.models.ResponseDto;
 import com.social_media.models.UserDto;
@@ -11,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -54,6 +58,7 @@ class UserControllerTest {
         user.setUsername("johnDoe");
         user.setName("John");
         user.setLastname("Doe");
+        user.setBlockedUsers(new ArrayList<>());
 
         userDto = new UserDto(
                 user.getId(),
@@ -214,5 +219,63 @@ class UserControllerTest {
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(users.size(), response.getBody().getContent().size());
+    }
+
+    @Test
+    void blockUser() {
+        User user2 = new User();
+        user2.setId(UUID.randomUUID().toString());
+
+        String expected = "user has been blocked";
+
+        when(userService.blockUser(user2.getId(), user)).thenReturn(expected);
+        when(authentication.getPrincipal()).thenReturn(user);
+
+        ResponseEntity<ResponseDto> response = userController.blockUser(authentication, user2.getId());
+
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expected, response.getBody().message());
+    }
+
+    @Test
+    void unblockUser() {
+        User user2 = new User();
+        user2.setId(UUID.randomUUID().toString());
+
+        String expected = "user has been unblocked";
+
+        when(userService.unblockUser(user2.getId(), user)).thenReturn(expected);
+        when(authentication.getPrincipal()).thenReturn(user);
+
+        ResponseEntity<ResponseDto> response = userController.unblockUser(authentication, user2.getId());
+
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expected, response.getBody().message());
+    }
+
+    @Test
+    void getBlockedUsers() {
+        User user2 = new User();
+        user2.setId(UUID.randomUUID().toString());
+
+        user.getBlockedUsers().add(user2);
+
+        Page<User> page = new PageImpl<>(user.getBlockedUsers());
+        PageDto<User, UserDto> pageDto = new PageDto<>(page, userConverter);
+
+        when(userService.getBlockedUsers(user, PageRequest.of(0, 10)))
+                .thenReturn(pageDto);
+        when(authentication.getPrincipal()).thenReturn(user);
+
+        ResponseEntity<PageDto<User, UserDto>> response = userController.getBlockedUsers(authentication, 0, 10);
+
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(page.getContent().size(), response.getBody().getContent().size());
     }
 }
