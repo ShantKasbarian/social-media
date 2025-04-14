@@ -8,7 +8,10 @@ import org.springframework.stereotype.Component;
 import java.time.format.DateTimeFormatter;
 
 @Component
-public class CommentConverter implements Converter<Comment, CommentDto> {
+public class CommentConverter implements
+        ToEntityConverter<Comment, CommentDto>,
+        ToModelConverter<Comment, CommentDto> {
+
     @Override
     public Comment convertToEntity(CommentDto model) {
         Comment comment = new Comment();

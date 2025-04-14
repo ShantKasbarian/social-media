@@ -153,7 +153,7 @@ class FriendRequestServiceTest {
 
         Page<FriendRequest> page = new PageImpl<>(friendRequests, pageable, friendRequests.size());
 
-        when(friendRequestRepository.findByUserFriend_FriendAndStatus(user1, FriendshipStatus.PENDING, pageable))
+        when(friendRequestRepository.findByFriend(user1, pageable))
                 .thenReturn(page);
 
         PageDto<FriendRequest, FriendRequestDto> response = friendRequestService.getPendingUsers(user1, pageable);
@@ -161,6 +161,34 @@ class FriendRequestServiceTest {
         assertEquals(page.getContent().size(), response.getContent().size());
         assertEquals(page.getTotalPages(), response.getTotalPages());
         assertEquals(page.getNumber(), response.getPageNo());
-        verify(friendRequestRepository, times(1)).findByUserFriend_FriendAndStatus(user1, FriendshipStatus.PENDING, pageable);
+        verify(friendRequestRepository, times(1)).findByFriend(user1, pageable);
+    }
+
+    @Test
+    void declineFriendRequest() {
+        user1.setBlockedUsers(new ArrayList<>());
+        user2.setBlockedUsers(new ArrayList<>());
+
+        when(friendRequestRepository.findById(anyString())).thenReturn(Optional.ofNullable(friendRequest));
+        when(friendRequestRepository.save(friendRequest)).thenReturn(friendRequest);
+
+        FriendRequest response = friendRequestService.declineFriendRequest(friendRequest.getId(), user2);
+
+        assertNotNull(response);
+        assertNotNull(response.getStatus());
+        assertEquals(FriendshipStatus.DECLINED, response.getStatus());
+        verify(friendRequestRepository, times(1)).findById(anyString());
+        verify(friendRequestRepository, times(1)).save(friendRequest);
+    }
+    @Test
+    void declineFriendRequestShouldThrowResourceNotFoundException() {
+        when(friendRequestRepository.findById(anyString())).thenThrow(ResourceNotFoundException.class);
+        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.declineFriendRequest(friendRequest.getId(), user2));
+    }
+
+    @Test
+    void declineFriendRequestShouldThrowRequestNotAllowedException() {
+        when(friendRequestRepository.findById(anyString())).thenReturn(Optional.ofNullable(friendRequest));
+        assertThrows(RequestNotAllowedException.class, () -> friendRequestService.declineFriendRequest(friendRequest.getId(), user1));
     }
 }

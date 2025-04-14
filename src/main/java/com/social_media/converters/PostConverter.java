@@ -8,7 +8,10 @@ import org.springframework.stereotype.Component;
 import java.time.format.DateTimeFormatter;
 
 @Component
-public class PostConverter implements Converter<Post, PostDto> {
+public class PostConverter implements
+        ToEntityConverter<Post, PostDto>,
+        ToModelConverter<Post, PostDto> {
+
     @Override
     public Post convertToEntity(PostDto model) {
         Post post = new Post();

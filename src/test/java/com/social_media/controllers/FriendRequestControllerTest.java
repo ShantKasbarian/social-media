@@ -149,4 +149,18 @@ class FriendRequestControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(page.getContent().size(), response.getBody().getContent().size());
     }
+
+    @Test
+    void declineFriendRequest() {
+        when(friendRequestConverter.convertToModel(friendRequest)).thenReturn(friendRequestDto);
+        when(friendRequestService.declineFriendRequest(anyString(), any(User.class))).thenReturn(friendRequest);
+        when(authentication.getPrincipal()).thenReturn(user2);
+
+        ResponseEntity<FriendRequestDto> response = friendRequestController.declineFriendRequest(friendRequest.getId(), authentication);
+
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(friendRequest.getId(), response.getBody().id());
+    }
 }
