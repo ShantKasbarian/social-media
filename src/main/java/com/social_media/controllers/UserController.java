@@ -82,14 +82,14 @@ public class UserController {
         );
     }
 
-    @PutMapping("/{userId}/block")
+    @PostMapping("/{userId}/block")
     public ResponseEntity<ResponseDto> blockUser(Authentication authentication, @PathVariable String userId) {
         return ResponseEntity.ok(
                 new ResponseDto(userService.blockUser(userId, (User) authentication.getPrincipal()))
         );
     }
 
-    @PutMapping("/{userId}/unblock")
+    @DeleteMapping("/{userId}/unblock")
     public ResponseEntity<ResponseDto> unblockUser(Authentication authentication, @PathVariable String userId) {
         return ResponseEntity.ok(
                 new ResponseDto(userService.unblockUser(userId, (User) authentication.getPrincipal()))

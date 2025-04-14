@@ -97,7 +97,7 @@ public class PostController {
         );
     }
 
-    @PutMapping("/{postId}/like")
+    @PostMapping("/{postId}/like")
     public ResponseEntity<LikeDto> likePost(@PathVariable String postId, Authentication authentication) {
         Like like = postService.likePost(postId, (User) authentication.getPrincipal());
 
