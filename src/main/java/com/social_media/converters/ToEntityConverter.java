@@ -1,6 +1,5 @@
 package com.social_media.converters;
 
-public interface Converter<E, M> {
+public interface ToEntityConverter<E, M> {
     E convertToEntity(M model);
-    M convertToModel(E entity);
 }

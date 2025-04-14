@@ -73,4 +73,20 @@ public class FriendRequestController {
                 )
         );
     }
+
+    @PutMapping("/request/{requestId}/decline")
+    public ResponseEntity<FriendRequestDto> declineFriendRequest(
+            @PathVariable String requestId,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(
+                friendRequestConverter.convertToModel(
+                        friendRequestService.declineFriendRequest(
+                            requestId,
+                            (User) authentication.getPrincipal()
+                        )
+                )
+        );
+    }
+
 }

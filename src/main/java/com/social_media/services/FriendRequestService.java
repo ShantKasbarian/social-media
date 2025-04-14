@@ -88,8 +88,40 @@ public class FriendRequestService {
 
     public PageDto<FriendRequest, FriendRequestDto> getPendingUsers(User user, Pageable pageable) {
         return new PageDto<>(
-                friendRequestRepository.findByUserFriend_FriendAndStatus(user, FriendshipStatus.PENDING, pageable),
+                friendRequestRepository.findByFriend(user, pageable),
                 friendRequestConverter
         );
+    }
+
+    @Transactional
+    public FriendRequest declineFriendRequest(String requestId, User user) {
+        FriendRequest friendRequest = friendRequestRepository.findById(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException("friend request not found"));
+
+        if (!friendRequest.getFriend().getId().equals(user.getId())) {
+            throw new RequestNotAllowedException("cannot decline friend request");
+        }
+
+        String targetUserId = user.getId();
+        List<User> blockedUsers = user.getBlockedUsers();
+
+        for(User blockedUser: blockedUsers) {
+            if (blockedUser.getId().equals(targetUserId)) {
+                throw new RequestNotAllowedException("you have to unblock this user first");
+            }
+        }
+
+        User targetUser = friendRequest.getUser();
+        List<User> targetUserBlockedUsers = targetUser.getBlockedUsers();
+        String currentUserId = user.getId();
+
+        for (User blockedUser: targetUserBlockedUsers) {
+            if (blockedUser.getId().equals(currentUserId)) {
+                throw new RequestNotAllowedException("user has to unblock you first");
+            }
+        }
+
+        friendRequest.setStatus(FriendshipStatus.DECLINED);
+        return friendRequestRepository.save(friendRequest);
     }
 }

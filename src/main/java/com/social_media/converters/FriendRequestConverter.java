@@ -7,7 +7,10 @@ import com.social_media.models.FriendRequestDto;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FriendRequestConverter implements Converter<FriendRequest, FriendRequestDto> {
+public class FriendRequestConverter implements
+        ToEntityConverter<FriendRequest, FriendRequestDto>,
+        ToModelConverter<FriendRequest, FriendRequestDto> {
+
     @Override
     public FriendRequest convertToEntity(FriendRequestDto model) {
         FriendRequest friendRequest = new FriendRequest();

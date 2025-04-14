@@ -1,6 +1,6 @@
 package com.social_media.models;
 
-import com.social_media.converters.Converter;
+import com.social_media.converters.ToModelConverter;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
 
@@ -20,7 +20,7 @@ public class PageDto<E, M> {
 
     private final boolean empty;
 
-    public PageDto(Page<E> page, Converter<E, M> converter) {
+    public PageDto(Page<E> page, ToModelConverter<E, M> converter) {
         this.content = page.getContent().stream().map(converter:: convertToModel).toList();
         this.pageNo = page.getNumber();
         this.pageSize = page.getSize();

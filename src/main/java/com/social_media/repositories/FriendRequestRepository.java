@@ -22,4 +22,7 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, St
 
     @Query("from FriendRequest f where (f.friend = :friend OR f.user = :friend) and f.status = :status ")
     Page<FriendRequest> findByUserFriend_FriendAndStatus(User friend, FriendshipStatus status, Pageable pageable);
+
+    @Query("from FriendRequest f where f.friend = :friend and f.status = PENDING")
+    Page<FriendRequest> findByFriend(User friend, Pageable pageable);
 }

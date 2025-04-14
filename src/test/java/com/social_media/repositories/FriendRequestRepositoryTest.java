@@ -86,4 +86,15 @@ class FriendRequestRepositoryTest {
 
         assertEquals(friendRequest.getId(), response.getContent().getFirst().getId());
     }
+
+    @Test
+    void findByFriend() {
+        friendRequestRepository.save(friendRequest);
+
+        Page<FriendRequest> response = friendRequestRepository.findByFriend(user2, PageRequest.of(0, 10));
+
+        assertNotNull(response);
+        assertEquals(friendRequest.getId(), response.getContent().getFirst().getId());
+        assertEquals(1, response.getContent().size());
+    }
 }
