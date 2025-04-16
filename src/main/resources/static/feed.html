@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feed</title>
+  <link rel="stylesheet" href="css/feed.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.4/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet" />
+  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.4/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg bg-primary">
+      <div class="container-fluid">
+        <a class="navbar-brand">
+          <img src="images/logo.png" alt="logo" class="logo">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <form class="d-flex" role="search">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" id="search-input">
+            <button class="btn btn-outline-success" type="reset" onclick="search()">Search</button>
+          </form>
+
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+            <li class="nav-item">
+
+              <li class="nav-item dropdown" onclick="getFriends()">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                  style="color: #fff">
+                  My Friends
+                </a>
+  
+                <ul class="dropdown-menu" id="friends" style="overflow-y: auto; max-height: 100px;"></ul>
+              </li>
+  
+              <li class="nav-item dropdown" onclick="getPendingFriendRequests()">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                  style="color: #fff;" id="pending-friend-requests-dropdown">
+                  Pending Friend Requests
+                </a>
+  
+                <ul class="dropdown-menu" id="pending-friend-requests-container" style="overflow-y: auto; max-height: 150px; width: 355px;"></ul>
+              </li>
+
+              <a href="http://localhost:8000/currentUserProfile.html"
+                target="_blank" type="reset" onclick="myProfile()"
+                style="background-color: transparent; border: none; color: #fff; text-decoration: none; padding: 10px 20px;">
+                Me
+              </a>
+
+              <a href="http://localhost:8000/likedPosts.html"
+                target="_blank"
+                style="background-color: transparent; border: none; color: #fff; text-decoration: none; padding: 10px 20px;"
+              
+              >My liked posts</a>
+
+              <button type="button" class="btn btn-warning" style="color: #fff" data-bs-toggle="modal"
+                data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">create post</button>
+
+              <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="exampleModalLabel">New post</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <form>
+                        <div class="mb-3">
+                          <label for="message-text" class="col-form-label">input your text here:</label>
+                          <textarea class="form-control" id="message-text"></textarea>
+                        </div>
+                      </form>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-primary" id="post" onclick="post()">post</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                data-bs-target="#logout">logout</button>
+              <div class="modal fade" id="logout" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="exampleModalLabel">Logout</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      Are you sure you want to logout?
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                      <button type="button" class="btn btn-primary" id="logout-yes">Yes</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>
+
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="d-flex flex-column justify-content-center align-items-center gap-4" id="posts">
+
+  </div>
+
+  <div class="collapse" id="comments">
+
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="postToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        post successfully created
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="likeToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        post has been liked
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="commentToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        comment successful
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="acceptFriendRequestToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        Friend request accepted
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="declineFriendRequestToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        Friend request declined
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function search() {
+
+      localStorage.setItem('item-to-search', await document.getElementById('search-input').value);
+      window.location.href = 'http://localhost:8000/searchResults.html';
+    }
+  </script>
+  <script>
+    async function myProfile() {
+      const userId = await localStorage.getItem('userId');
+      localStorage.setItem('userId-posts', userId);
+      window.location.href = 'http://localhost:8000/currentUserProfile.html';
+    }
+  </script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = 'http://localhost:8000/login.html';
+    }
+  </script>
+  <script src="javascript/feed.js"></script>
+  <script src="javascript/post.js"></script>
+  <script src="javascript/friends.js"></script>
+  <script src="javascript/logout.js"></script>
+  <script src="javascript/likePost.js"></script>
+  <script src="javascript/comment.js"></script>
+</body>
+
+</html>

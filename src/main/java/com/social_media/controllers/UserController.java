@@ -1,9 +1,7 @@
 package com.social_media.controllers;
 
 import com.social_media.converters.UserConverter;
-import com.social_media.entities.FriendRequest;
 import com.social_media.entities.User;
-import com.social_media.models.FriendRequestDto;
 import com.social_media.models.PageDto;
 import com.social_media.models.ResponseDto;
 import com.social_media.models.UserDto;
