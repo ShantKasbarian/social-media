@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="title"></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.4/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet" />
+  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.4/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+  <div style="display: flex; flex-direction: column; gap: 5px;">
+    <div class="card" style="align-items: center">
+      <div class="card-body" id="profile-container" style="display: flex; flex-direction: column; gap: 10px;">
+        <p id="name"></p>
+  
+        <p id="lastname"></p>
+  
+        <div id="email-container" style="display: flex; flex-direction: row; gap: 10px">
+          <p id="email"></p>
+          
+          <div style="display: flex; flex-direction: row; gap: 6px;">
+            <input id="email-input" class="form-control" style="background-color: rgb(255, 255, 255); max-height: 30px; max-width: 250px;">
+            <button class="btn btn-warning" style="color: rgb(255, 255, 255); white-space: nowrap; "
+            data-bs-target="#change-email" data-bs-toggle="modal">change email</button>
+            
+            <div class="modal fade" id="change-email" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Change email</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    Are you sure you want to change your email?
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-primary" onclick="changeEmail()">Yes</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="username-container" style="display: flex; flex-direction: row; gap: 85px">
+          <p id="username"></p>
+          <div style="display: flex; flex-direction: row; gap: 6px;">
+            <input id="username-input" class="form-control" style="background-color: rgb(255, 255, 255); max-height: 30px; max-width: 250px;">
+            <button class="btn btn-warning" style="color: rgb(255, 255, 255); white-space: nowrap;" 
+            data-bs-target="#change-username" data-bs-toggle="modal">change username</button>
+  
+            <div class="modal fade" id="change-username" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Change username</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    Are you sure you want to change your username?
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-primary" onclick="changeUsername()">Yes</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+        
+        <div id="password-container" style="display: flex; flex-direction: row; gap: 93px;">
+          <p>password: ***********</p>
+          <div style="display: flex; flex-direction: row; gap: 6px;">
+            <input id="password-input" class="form-control" type="password" style="background-color: rgb(255, 255, 255); max-height: 30px; max-width: 250px;">
+            <button class="btn btn-warning" style="color: rgb(255, 255, 255); white-space: nowrap;"
+            data-bs-target="#change-password" data-bs-toggle="modal">change password</button>
+          
+            <div class="modal fade" id="change-password" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Change password</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    Are you sure you want to change your password?
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-primary" onclick="changePassword()">Yes</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div id = "posts" class="d-flex flex-column justify-content-center align-items-center gap-4"  style="
+     margin-bottom: auto;"
+      id="posts-container">
+    </div>
+    
+    <div class="collapse" id="comments">
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="likeToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        post has been liked
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="commentToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        comment successful
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('close', () => {
+      localStorage.removeItem('userId-posts');
+    });
+  </script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = 'http://localhost:8000/login.html';
+    }
+  </script>
+  <script src="javascript/profile.js"></script>
+  <script src="javascript/comment.js"></script>
+  <script src="javascript/likePost.js"></script>
+  <script src="javascript/getPostsByUserId.js"></script>
+  <script src="javascript/changeUsername.js"></script>
+  <script src="javascript/changeEmail.js"></script>
+  <script src="javascript/changePassword.js"></script>
+</body>
+</html>

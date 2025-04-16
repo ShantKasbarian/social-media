@@ -42,10 +42,22 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("login", "signup").permitAll()
+                        .requestMatchers(
+                                "login",
+                                "signup",
+                                "/login.html",
+                                "/signup.html",
+                                "/feed.html",
+                                "/currentUserProfile.html",
+                                "/likedPosts.html",
+                                "/searchResults.html",
+                                "/userProfile.html",
+                                "/css/**",
+                                "/javascript/**",
+                                "/images/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
-                .httpBasic(withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                 .build();
