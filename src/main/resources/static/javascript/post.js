@@ -3,7 +3,7 @@ async function post() {
         title: document.getElementById('message-text').value
     };
 
-    const response = await fetch('http://localhost:8000/post', {
+    const response = await fetch('http://localhost:8080/post', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

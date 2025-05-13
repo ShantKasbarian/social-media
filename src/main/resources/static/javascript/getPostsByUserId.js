@@ -6,7 +6,7 @@ let id;
 async function getUserPosts() {
     const userId = await localStorage.getItem('userId-posts');
 
-    const response = await fetch(`http://localhost:8000/post/user/${userId}?page=${userPostsPageNo}&size=10`, {
+    const response = await fetch(`http://localhost:8080/post/user/${userId}?page=${userPostsPageNo}&size=10`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

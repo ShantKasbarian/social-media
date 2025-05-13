@@ -1,5 +1,5 @@
 async function getCurrentUserProfile() {
-    const userInfo = await fetch('http://localhost:8000/user/profile', {
+    const userInfo = await fetch('http://localhost:8080/user/profile', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

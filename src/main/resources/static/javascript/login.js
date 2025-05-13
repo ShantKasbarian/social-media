@@ -6,7 +6,7 @@ document.addEventListener('submit', async function (event) {
         password: document.getElementById('password').value
     };
 
-    const response = await fetch('http://localhost:8000/login', {
+    const response = await fetch('http://localhost:8080/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -26,7 +26,7 @@ document.addEventListener('submit', async function (event) {
         localStorage.setItem('username', data.username);
         localStorage.setItem('userId', data.userId);
 
-        window.location.href = 'http://localhost:8000/feed.html';
+        window.location.href = 'http://localhost:8080/feed.html';
     }
     catch(error) {
         alert(`Error: ${error.message}`);

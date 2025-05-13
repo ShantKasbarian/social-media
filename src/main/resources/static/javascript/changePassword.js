@@ -3,7 +3,7 @@ async function changePassword() {
         password: await document.getElementById('password-input').value
     };
 
-    const response = await fetch('http://localhost:8000/user/password', {
+    const response = await fetch('http://localhost:8080/user/password', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -21,7 +21,7 @@ async function changePassword() {
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         localStorage.removeItem('userId');
-        window.location.href = 'http://localhost:8000/login.html';
+        window.location.href = 'http://localhost:8080/login.html';
         
     } catch (error) {
         alert(`Error: ${error.message}`);

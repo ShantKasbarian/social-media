@@ -3,7 +3,7 @@ let pageNo = 0;
 let totalPages = 0;
 
 async function loadPosts() {
-    const response = await fetch(`http://localhost:8000/post?page=${pageNo}&size=10`, {
+    const response = await fetch(`http://localhost:8080/post?page=${pageNo}&size=10`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

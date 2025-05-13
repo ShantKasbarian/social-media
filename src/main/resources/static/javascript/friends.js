@@ -7,7 +7,7 @@ let pendingFriendRequestsPageNo = 0;
 let isFriendRequestsLoading = false;
 
 async function getFriends() {
-    const response = await fetch(`http://localhost:8000/friend?page=${friendsPageNo}&size=3`, {
+    const response = await fetch(`http://localhost:8080/friend?page=${friendsPageNo}&size=3`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ async function getFriends() {
 
             link.addEventListener('click', () => {
                 localStorage.setItem('userId-posts', userId);
-                window.location.href = 'http://localhost:8000/userProfile.html';
+                window.location.href = 'http://localhost:8080/userProfile.html';
             });
             
             let currentUserUsername = localStorage.getItem('username');
@@ -105,7 +105,7 @@ var checkIsFriendsAtBottom = async function (maindiv) {
 };
 
 async function addFriend(userId) {
-    const response = await fetch(`http://localhost:8000/friend/${userId}`, {
+    const response = await fetch(`http://localhost:8080/friend/${userId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -131,7 +131,7 @@ async function addFriend(userId) {
 }
 
 async function blockUser(userId) {
-    const response = await fetch(`http://localhost:8000/user/${userId}/block`, {
+    const response = await fetch(`http://localhost:8080/user/${userId}/block`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -157,7 +157,7 @@ async function blockUser(userId) {
 }
 
 async function unblockUser(userId) {
-    const response = await fetch(`http://localhost:8000/user/${userId}/unblock`, {
+    const response = await fetch(`http://localhost:8080/user/${userId}/unblock`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -188,7 +188,7 @@ async function unblockUser(userId) {
 }
 
 async function getPendingFriendRequests() {
-    const response = await fetch(`http://localhost:8000/friend/pending?page=${pendingFriendRequestsPageNo}&size=3`, {
+    const response = await fetch(`http://localhost:8080/friend/pending?page=${pendingFriendRequestsPageNo}&size=3`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -235,7 +235,7 @@ async function getPendingFriendRequests() {
 
             getUserProfileButton.addEventListener('click', () => {
                 localStorage.setItem('userId-posts', userId);
-                window.location.href = 'http://localhost:8000/userProfile.html';
+                window.location.href = 'http://localhost:8080/userProfile.html';
             });
 
             getUserProfileButton.innerHTML = username;
@@ -298,7 +298,7 @@ var checkIsPendingFriendRequestsAtBottom = async function (maindiv) {
 };
 
 async function declineFriendRequest(requestId) {
-    const response = await fetch(`http://localhost:8000/friend/request/${requestId}/decline`, {
+    const response = await fetch(`http://localhost:8080/friend/request/${requestId}/decline`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -321,7 +321,7 @@ async function declineFriendRequest(requestId) {
 }
 
 async function acceptFriendRequest(requestId) {
-    const response = await fetch(`http://localhost:8000/friend/request/${requestId}/accept`, {
+    const response = await fetch(`http://localhost:8080/friend/request/${requestId}/accept`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
