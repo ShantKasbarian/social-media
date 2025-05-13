@@ -12,7 +12,7 @@ async function getComments(id) {
         commentPageNo = 0;
     }
 
-    const response = await fetch(`http://localhost:8000/post/${id}/comments?page=${commentPageNo}&size=3`, {
+    const response = await fetch(`http://localhost:8080/post/${id}/comments?page=${commentPageNo}&size=3`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -137,7 +137,7 @@ async function postComment(id) {
         'comment': document.getElementById(`comment-input-${id}`).value,
     };
 
-    const response = await fetch('http://localhost:8000/comment', {
+    const response = await fetch('http://localhost:8080/comment', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

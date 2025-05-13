@@ -11,7 +11,7 @@ async function getSearchResults() {
         return;
     }
 
-    const response = await fetch(`http://localhost:8000/user/${input}/search?page=${searchResultsPageNo}&size=5`, {
+    const response = await fetch(`http://localhost:8080/user/${input}/search?page=${searchResultsPageNo}&size=5`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

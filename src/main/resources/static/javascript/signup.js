@@ -53,7 +53,7 @@ document.addEventListener('submit', async function (event) {
     };
 
     try {
-        const response = await fetch('http://localhost:8000/signup', {
+        const response = await fetch('http://localhost:8080/signup', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ document.addEventListener('submit', async function (event) {
             throw new Error(text);
         }
 
-        window.location.href = 'http://localhost:8000/login.html';
+        window.location.href = 'http://localhost:8080/login.html';
     } catch (error) {
         alert(`Error: ${error.message}`);
     }

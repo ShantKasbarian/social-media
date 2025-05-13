@@ -1,5 +1,5 @@
 async function likePost(id) {
-    const response = await fetch(`http://localhost:8000/post/${id}/like`, {
+    const response = await fetch(`http://localhost:8080/post/${id}/like`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

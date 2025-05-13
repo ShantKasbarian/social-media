@@ -55,13 +55,13 @@
                 <ul class="dropdown-menu" id="pending-friend-requests-container" style="overflow-y: auto; max-height: 150px; width: 355px;"></ul>
               </li>
 
-              <a href="http://localhost:8000/currentUserProfile.html"
+              <a href="http://localhost:8080/currentUserProfile.html"
                 target="_blank" type="reset" onclick="myProfile()"
                 style="background-color: transparent; border: none; color: #fff; text-decoration: none; padding: 10px 20px;">
                 Me
               </a>
 
-              <a href="http://localhost:8000/likedPosts.html"
+              <a href="http://localhost:8080/likedPosts.html"
                 target="_blank"
                 style="background-color: transparent; border: none; color: #fff; text-decoration: none; padding: 10px 20px;"
               
@@ -188,20 +188,20 @@
     async function search() {
 
       localStorage.setItem('item-to-search', await document.getElementById('search-input').value);
-      window.location.href = 'http://localhost:8000/searchResults.html';
+      window.location.href = 'http://localhost:8080/searchResults.html';
     }
   </script>
   <script>
     async function myProfile() {
       const userId = await localStorage.getItem('userId');
       localStorage.setItem('userId-posts', userId);
-      window.location.href = 'http://localhost:8000/currentUserProfile.html';
+      window.location.href = 'http://localhost:8080/currentUserProfile.html';
     }
   </script>
   <script>
     const token = localStorage.getItem('token');
     if (!token) {
-      window.location.href = 'http://localhost:8000/login.html';
+      window.location.href = 'http://localhost:8080/login.html';
     }
   </script>
   <script src="javascript/feed.js"></script>

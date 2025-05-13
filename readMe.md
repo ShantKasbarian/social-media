@@ -52,7 +52,7 @@ In the application.properties file change the following:
     spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.your-dasource-dialect
 
 ```endpoints:
-    http://localhost:8000/signup
+    http://localhost:8080/signup
     Method: POST
     Description: Allows new user to create an account
     Payload:
@@ -70,7 +70,7 @@ In the application.properties file change the following:
     note: username must be unique and password must include
     at least 1 uppercase, 1 lowercase, 1 number, 1 special character
 
-    http://localhost:8000/auth/login
+    http://localhost:8080/auth/login
     Method: POST
     Description: Allows user to login
     Payload:
@@ -84,7 +84,7 @@ In the application.properties file change the following:
         "userId": "your-id"
     }
     
-    http://localhost:8000/user/profile
+    http://localhost:8080/user/profile
     Method: GET
     Description: Allows user to check profile
     Response: {
@@ -95,7 +95,7 @@ In the application.properties file change the following:
         "lastname": "your-lastname"
     }
 
-    http://localhost:8000/user/update/username
+    http://localhost:8080/user/update/username
     Method: PUT
     Description: Allows user to update username
     Payload: {
@@ -109,7 +109,7 @@ In the application.properties file change the following:
         "lastname": "your-lastname"
     }
     
-    http://localhost:8000/user/update/email
+    http://localhost:8080/user/update/email
     Method: PUT
     Description: Allows user to update email
     Payload: {
@@ -123,7 +123,7 @@ In the application.properties file change the following:
         "lastname": "your-lastname"
     }
     
-    http://localhost:8000/user/password
+    http://localhost:8080/user/password
     Method: PUT
     Description: Allows user to update password
     Payload: {
@@ -137,7 +137,7 @@ In the application.properties file change the following:
         "lastname": "your-lastname"
     }
     
-    http://localhost:8000/user/{username}/search
+    http://localhost:8080/user/{username}/search
     Method: GET
     Description: Allows user to search other users by username
     Payload: {
@@ -164,7 +164,7 @@ In the application.properties file change the following:
         "empty": false
     }
 
-    http://localhost:8000/post
+    http://localhost:8080/post
     Method: POST
     Description: Allows user to create a post
     Payload: {
@@ -179,7 +179,7 @@ In the application.properties file change the following:
         "postedTime": "posted-time"
     }
     
-    http://localhost:8000/post/{postId}
+    http://localhost:8080/post/{postId}
     Method: GET
     Description: Allows user to get a post by id
     Payload: String postId: "postId"
@@ -192,7 +192,7 @@ In the application.properties file change the following:
         "postedTime": "posted-time"
     }
     
-    http://localhost:8000/post/user/{userId}
+    http://localhost:8080/post/user/{userId}
     Method: GET
     Description: Allows user to get a user's posts by user id
     Payload: String userId: "userIdId"
@@ -222,7 +222,7 @@ In the application.properties file change the following:
         "empty": false
     }
     
-    http://localhost:8000/post/update
+    http://localhost:8080/post/update
     Method: PUT
     Description: Allows user to update post
     Payload: {
@@ -238,13 +238,13 @@ In the application.properties file change the following:
         "postedTime": "posted-time"
     }
     
-    http://localhost:8000/post/{postId}/delete
+    http://localhost:8080/post/{postId}/delete
     Method: DELETE
     Description: Allows user to delete post
     Payload: String postId: "post-id"
     Response: status-code-204
 
-    http://localhost:8000/post/{postId}/like
+    http://localhost:8080/post/{postId}/like
     Method: POST
     Description: Allows user to like post
     Payload: String postId: "post-id"
@@ -255,7 +255,7 @@ In the application.properties file change the following:
         "postId": "post-id"
     }
 
-    http://localhost:8000/post/{postId}/comments
+    http://localhost:8080/post/{postId}/comments
     Method: GET
     Description: Allows to check post comments
     Payload: String postId: "post-id"
@@ -285,7 +285,7 @@ In the application.properties file change the following:
         "empty": false
     }
 
-    http://localhost:8000/post
+    http://localhost:8080/post
     Description: Allows user to check feed
     Response: {
         "content": [
@@ -313,7 +313,7 @@ In the application.properties file change the following:
         "empty": false
     }
     
-    http://localhost:8000/post/liked
+    http://localhost:8080/post/liked
     Method: GET
     Description: Allows user to get their liked posts
     Response: {
@@ -342,19 +342,19 @@ In the application.properties file change the following:
         "empty": false
     }
 
-    http://localhost:8000/post/{postId}/dislike
+    http://localhost:8080/post/{postId}/dislike
     Method: DELETE
     Description: Allows user to remove like
     Payload: String postId: "post-id"
     Response: status-code-204
 
-    http://localhost:8000/comment/{commentId}
+    http://localhost:8080/comment/{commentId}
     Method: DELETE
     Description: Allows user to delete comment
     Payload: String commentId: "comment-id"
     Response: status-code-204
 
-    http://localhost:8000/comment
+    http://localhost:8080/comment
     Method: POST
     Description: Allows user to comment under a post
     Payload: {
@@ -370,7 +370,7 @@ In the application.properties file change the following:
         "commentedTime": "commented-time"
     }
 
-    http://localhost:8000/comment
+    http://localhost:8080/comment
     Method: PUT
     Description: Allows user to update comment
     Payload: {
@@ -386,7 +386,7 @@ In the application.properties file change the following:
         "commentedTime": "commented-time"
     }
 
-    http://localhost:8000/friend/{userId}
+    http://localhost:8080/friend/{userId}
     Method: POST
     Description: Allows user to send user a friend request
     Payload: String userId: "user-id"
@@ -399,7 +399,7 @@ In the application.properties file change the following:
         "status": "PENDING"
     }
     
-    http://localhost:8000/friend/request/{requestId}/accept
+    http://localhost:8080/friend/request/{requestId}/accept
     Method: PUT
     Description: Allows user to accept a friend request
     Payload: String requestId: "request-id"
@@ -412,7 +412,7 @@ In the application.properties file change the following:
         "status": "ACCEPTED"
     }
     
-    http://localhost:8000/friend/pending
+    http://localhost:8080/friend/pending
     Method: GET
     Description: Allows user to check for pending friend requests
     Response: {
@@ -441,7 +441,7 @@ In the application.properties file change the following:
         "empty": false
     }
     
-    http://localhost:8000/user/blocked
+    http://localhost:8080/user/blocked
     Method: GET
     Description: Allows user to check for blocked users
     Response: {
@@ -470,7 +470,7 @@ In the application.properties file change the following:
         "empty": false
     }
 
-    http://localhost:8000/friend
+    http://localhost:8080/friend
     Method: GET
     Description: Allows user to check for friend requests with "ACCEPTED" status
     Response: {
@@ -499,19 +499,19 @@ In the application.properties file change the following:
         "empty": false
     }
 
-    http://localhost:8000/user/{userId}/block
+    http://localhost:8080/user/{userId}/block
     Method: POST
     Description: Allows user to block other user
     Payload: String userId: "user-id"
     Response: "user has been blocked"
 
-    http://localhost:8000/user/{userId}/unblock
+    http://localhost:8080/user/{userId}/unblock
     Method: DELETE
     Description: Allows user to unblock a blocked user
     Payload: String userId: "user-id"
     Response: "user has been unblocked"
 
-    http://localhost:8000/friend/request/{requestId}/decline
+    http://localhost:8080/friend/request/{requestId}/decline
     Method: PUT
     Description: Allows user to decline friend request
     Payload: String requestId: "request-id"

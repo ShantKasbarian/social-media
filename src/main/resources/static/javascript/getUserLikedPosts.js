@@ -3,7 +3,7 @@ let totalLikedPostsPages = 0;
 let currentLikedPostsPageNo = 0;
 
 async function loadLikedPosts() {
-    const response = await fetch(`http://localhost:8000/post/liked?page=${currentLikedPostsPageNo}&size=10`, {
+    const response = await fetch(`http://localhost:8080/post/liked?page=${currentLikedPostsPageNo}&size=10`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

@@ -3,7 +3,7 @@ async function changeUsername() {
         username: await document.getElementById('username-input').value
     };
 
-    const response = await fetch('http://localhost:8000/user/update/username', {
+    const response = await fetch('http://localhost:8080/user/update/username', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -21,7 +21,7 @@ async function changeUsername() {
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         localStorage.removeItem('userId');
-        window.location.href = 'http://localhost:8000/login.html';
+        window.location.href = 'http://localhost:8080/login.html';
         
     } catch (error) {
         alert(`Error: ${error.message}`);
