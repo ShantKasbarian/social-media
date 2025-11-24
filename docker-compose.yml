@@ -1,0 +1,29 @@
+services:
+  postgres:
+    container_name: social-media-postgres
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 2435
+      POSTGRES_DB: social-media
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - social-media-network
+
+  social-media-app:
+    container_name: social-media-container-v1
+    image: social-media-app:v1
+    ports:
+      - "8080:8080"
+    networks:
+      - social-media-network
+
+volumes:
+  postgres:
+
+networks:
+  social-media-network:
+    driver: bridge
