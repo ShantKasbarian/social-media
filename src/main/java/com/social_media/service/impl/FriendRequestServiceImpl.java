@@ -17,12 +17,21 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
 @AllArgsConstructor
 public class FriendRequestServiceImpl implements FriendRequestService {
+    private static final String USER_NOT_FOUND_MESSAGE = "user not found";
+
+    private static final String BLOCKED_USER_MESSAGE = "user has blocked you";
+
+    private static final String FRIEND_REQUEST_ALREADY_SENT_MESSAGE = "you have already sent a friend request";
+
+    private static final String FRIEND_REQUEST_NOT_FOUND_MESSAGE = "friend request not found";
+
+    private static final String UNABLE_TO_DECLINE_FRIEND_REQUEST = "cannot decline friend request";
+
     private final FriendRequestRepository friendRequestRepository;
 
     private final UserRepository userRepository;
@@ -33,29 +42,16 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     @Transactional
     public FriendRequest addFriend(String targetUserId, User user) {
         User targetUser = userRepository.findById(targetUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
 
-        List<User> targetUserBlockedUsers = targetUser.getBlockedUsers();
         String currentUserId = user.getId();
 
-        for (User blockedUser: targetUserBlockedUsers) {
-            if (blockedUser.getId().equals(currentUserId)) {
-                throw new RequestNotAllowedException("user has blocked you");
-            }
+        if (friendRequestRepository.isFriendRequestBlockedByUserIdFriendId(currentUserId, targetUserId)) {
+            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
-        List<User> currentUserBlockedUsers = user.getBlockedUsers();
-
-        for (User blockedUser: currentUserBlockedUsers) {
-            if (blockedUser.getId().equals(targetUserId)) {
-                user.getBlockedUsers().remove(blockedUser);
-                userRepository.save(user);
-                break;
-            }
-        }
-
-        if (friendRequestRepository.existsByUser_idFriend_id(currentUserId, targetUserId)) {
-            throw new ResourceAlreadyExistsException("you have already sent a friend request");
+        if (friendRequestRepository.existsByUserIdFriendId(currentUserId, targetUserId)) {
+            throw new ResourceAlreadyExistsException(FRIEND_REQUEST_ALREADY_SENT_MESSAGE);
         }
 
         return friendRequestRepository.save(new FriendRequest(UUID.randomUUID().toString(), user, targetUser, FriendshipStatus.PENDING));
@@ -65,14 +61,14 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     @Transactional
     public FriendRequest acceptFriend(String requestId, User user) {
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException("friend request not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
         if (!user.getId().equals(friendRequest.getFriend().getId())) {
-            throw new RequestNotAllowedException("cannot accept friend of another user");
+            throw new RequestNotAllowedException(FRIEND_REQUEST_NOT_FOUND_MESSAGE);
         }
 
         if (friendRequest.getStatus().equals(FriendshipStatus.BLOCKED)) {
-            throw new RequestNotAllowedException("either you or the targeted user has blocked you");
+            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
         friendRequest.setStatus(FriendshipStatus.ACCEPTED);
@@ -102,29 +98,16 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     @Transactional
     public FriendRequest declineFriendRequest(String requestId, User user) {
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException("friend request not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
-        if (!friendRequest.getFriend().getId().equals(user.getId())) {
-            throw new RequestNotAllowedException("cannot decline friend request");
+        String userId = user.getId();
+
+        if (!friendRequest.getFriend().getId().equals(userId)) {
+            throw new RequestNotAllowedException(UNABLE_TO_DECLINE_FRIEND_REQUEST);
         }
 
-        String targetUserId = user.getId();
-        List<User> blockedUsers = user.getBlockedUsers();
-
-        for(User blockedUser: blockedUsers) {
-            if (blockedUser.getId().equals(targetUserId)) {
-                throw new RequestNotAllowedException("you have to unblock this user first");
-            }
-        }
-
-        User targetUser = friendRequest.getUser();
-        List<User> targetUserBlockedUsers = targetUser.getBlockedUsers();
-        String currentUserId = user.getId();
-
-        for (User blockedUser: targetUserBlockedUsers) {
-            if (blockedUser.getId().equals(currentUserId)) {
-                throw new RequestNotAllowedException("user has to unblock you first");
-            }
+        if (friendRequestRepository.isFriendRequestBlocked(requestId)) {
+            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
         friendRequest.setStatus(FriendshipStatus.DECLINED);

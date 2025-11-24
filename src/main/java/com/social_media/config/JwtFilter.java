@@ -1,6 +1,5 @@
 package com.social_media.config;
 
-import com.social_media.service.impl.AuthenticationServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

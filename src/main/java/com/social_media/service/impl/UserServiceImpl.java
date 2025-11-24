@@ -5,6 +5,7 @@ import com.social_media.entity.FriendRequest;
 import com.social_media.entity.FriendshipStatus;
 import com.social_media.entity.User;
 import com.social_media.exception.InvalidProvidedInfoException;
+import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.model.PageDto;
@@ -22,8 +23,23 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.social_media.utils.PasswordValidator.INVALID_PASSWORD_MESSAGE;
+import static com.social_media.utils.PasswordValidator.isPasswordValid;
+
 @Service
 public class UserServiceImpl implements UserService {
+    private static final String USERNAME_CANNOT_CONTAIN_SPACES_MESSAGE = "username cannot contain spaces";
+
+    private static final String USERNAME_ALREADY_TAKEN_MESSAGE = "username is already taken";
+
+    private static final String EMAIL_ALREADY_TAKEN_MESSAGE = "email is already taken";
+
+    private static final String USER_NOT_FOUND_MESSAGE = "user not found";
+
+    private static final String FRIEND_REQUEST_NOT_FOUND_MESSAGE = "friend request not found";
+
+    private static final String BLOCKED_USER_MESSAGE = "you have been blocked by this user";
+
     private final UserRepository userRepository;
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -51,119 +67,79 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User updateUsername(User user, String username) {
+    public void updateUsername(User user, String username) {
         if (username == null || username.isEmpty()) {
             throw new InvalidProvidedInfoException("username must be specified");
         }
 
         username = username.trim();
         if (username.contains(" ")) {
-            throw new InvalidProvidedInfoException("username cannot contain spaces");
+            throw new InvalidProvidedInfoException(USERNAME_CANNOT_CONTAIN_SPACES_MESSAGE);
         }
 
         if (userRepository.existsByUsername(username) && !user.getUsername().equals(username)) {
-            throw new ResourceAlreadyExistsException("username is already taken, try another one");
+            throw new ResourceAlreadyExistsException(USERNAME_ALREADY_TAKEN_MESSAGE);
         }
 
         user.setUsername(username);
 
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
     @Override
-    public User updateEmail(User user, @Email String email) {
+    public void updateEmail(User user, @Email String email) {
         if (email == null|| email.isEmpty()) {
             throw new InvalidProvidedInfoException("email cannot be empty");
         }
 
         if (userRepository.existsByEmail(email) && !user.getEmail().equals(email)) {
-            throw new ResourceAlreadyExistsException("email already in use");
+            throw new ResourceAlreadyExistsException(EMAIL_ALREADY_TAKEN_MESSAGE);
         }
 
         user.setEmail(email);
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
     @Override
     @Transactional
-    public String updatePassword(User user, String password) {
-        if (password == null || password.isEmpty() || !AuthenticationServiceImpl.isPasswordValid(password)) {
-            throw new InvalidProvidedInfoException("invalid password");
+    public void updatePassword(User user, String password) {
+        if (password == null || password.isEmpty() || !isPasswordValid(password)) {
+            throw new InvalidProvidedInfoException(INVALID_PASSWORD_MESSAGE);
         }
 
         user.setPassword(bCryptPasswordEncoder.encode(password));
         userRepository.save(user);
-        return "password has been changed";
     }
 
     @Override
     @Transactional
-    public String blockUser(String targetId, User user) {
+    public FriendRequest blockUser(String targetId, User user) {
         User targetUser = userRepository.findById(targetId)
-                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
 
-        List<User> blockedUsers = user.getBlockedUsers();
+        FriendRequest friendRequest = friendRequestRepository.findByUserIdFriendId(user.getId(), targetId)
+                .orElse(new FriendRequest(user, targetUser));
 
-        for (User blockedUser: blockedUsers) {
-            if (blockedUser.getId().equals(targetId)) {
-                throw new ResourceAlreadyExistsException("cannot block user more than once");
-            }
-        }
+        friendRequest.setStatus(FriendshipStatus.BLOCKED);
+        friendRequestRepository.save(friendRequest);
 
-        user.getBlockedUsers().add(targetUser);
-        userRepository.save(user);
-
-        FriendRequest friendRequest = friendRequestRepository.findByUser_idFriend_id(user.getId(), targetId)
-                .orElse(null);
-
-        if (friendRequest != null) {
-            friendRequest.setStatus(FriendshipStatus.BLOCKED);
-            friendRequestRepository.save(friendRequest);
-        }
-
-        return "user has been blocked";
+        return friendRequest;
     }
 
     @Override
     @Transactional
-    public String unblockUser(String id, User user) {
-        String message = null;
+    public FriendRequest unblockUser(String id, User user) {
+        FriendRequest friendRequest = friendRequestRepository.findByUserIdFriendId(user.getId(), id)
+                .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
-        User targetUser = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
-
-        List<User> blockedUsers = user.getBlockedUsers();
-
-        for(User blockedUser: blockedUsers) {
-            if (blockedUser.getId().equals(id)) {
-                user.getBlockedUsers().remove(blockedUser);
-                userRepository.save(user);
-                break;
-            }
+        if (friendRequest.getUser().getId().equals(id)) {
+            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
-        List<User> targetUserBlockedUsers = targetUser.getBlockedUsers();
-        String currentUserId = user.getId();
+        friendRequest.setStatus(FriendshipStatus.PENDING);
+        friendRequestRepository.save(friendRequest);
 
-        for (User blockedUser: targetUserBlockedUsers) {
-            if (blockedUser.getId().equals(currentUserId)) {
-                message = "waiting for other user to unblock you";
-            }
-        }
-
-        FriendRequest friendRequest = friendRequestRepository.findByUser_idFriend_id(currentUserId, id)
-                .orElse(null);
-
-        if (friendRequest != null && message == null) {
-            friendRequest.setStatus(FriendshipStatus.PENDING);
-            friendRequestRepository.save(friendRequest);
-        }
-
-        if (message == null) {
-            message = "user has been unblocked";
-        }
-
-        return message;
+        return friendRequest;
     }
 
     @Override

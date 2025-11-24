@@ -14,24 +14,35 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.social_media.utils.PasswordValidator.INVALID_PASSWORD_MESSAGE;
+import static com.social_media.utils.PasswordValidator.isPasswordValid;
+
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
+    private static final String WRONG_USERNAME_OR_PASSWORD_MESSAGE = "wrong username or password";
+
+    private static final String EMAIL_ALREADY_TAKEN_MESSAGE = "email is already taken";
+
+    private static final String USERNAME_ALREADY_TAKEN_MESSAGE = "username is already taken";
+
+
     private final UserRepository userRepository;
 
     private final JwtService jwtService;
 
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthenticationServiceImpl(
             UserRepository userRepository,
             JwtService jwtService,
-            @Lazy BCryptPasswordEncoder passwordEncoder
+            @Lazy PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
@@ -39,14 +50,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public TokenDto login(String email, String password) {
-        User user = userRepository
-                .findByEmail(email)
-                .orElseThrow(() -> new InvalidCredentialsException("wrong email or password"));
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new InvalidCredentialsException("wrong email or password");
-        }
+    public TokenDto login(String username, String password) {
+        User user = userRepository.findByUsername(username)
+                .filter(u -> passwordEncoder.matches(password, u.getPassword()))
+                .orElseThrow(() -> new InvalidCredentialsException(WRONG_USERNAME_OR_PASSWORD_MESSAGE));
 
         return new TokenDto(jwtService.generateToken(user.getUsername()), user.getUsername(), user.getId());
     }
@@ -55,11 +62,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public String signup(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new ResourceAlreadyExistsException("email already in use");
+            throw new ResourceAlreadyExistsException(EMAIL_ALREADY_TAKEN_MESSAGE);
         }
 
         if (!isPasswordValid(user.getPassword())) {
-            throw new InvalidProvidedInfoException("invalid password");
+            throw new InvalidProvidedInfoException(INVALID_PASSWORD_MESSAGE);
         }
 
         if (user.getName() == null || user.getName().isEmpty()) {
@@ -77,7 +84,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         if (userRepository.existsByUsername(username)) {
-            throw new ResourceAlreadyExistsException("username already exist try a different one");
+            throw new ResourceAlreadyExistsException(USERNAME_ALREADY_TAKEN_MESSAGE);
         }
 
         if (username.trim().contains(" ")) {
@@ -89,23 +96,5 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         userRepository.save(user);
 
         return "signup successful";
-    }
-
-    public static boolean isPasswordValid(String password) {
-        if (password.length() < 6) {
-            throw new InvalidCredentialsException("password must be at least 6 characters long");
-        }
-
-        Pattern numberPattern = Pattern.compile("[0-9]");
-        Pattern uppercasePattern = Pattern.compile("[A-Z]");
-        Pattern lowercasePattern = Pattern.compile("[a-z]");
-        Pattern specialCharacterPattern = Pattern.compile(".*[!@#$%^&*(),.?\":{}|<>+].*");
-
-        Matcher number = numberPattern.matcher(password);
-        Matcher uppercase = uppercasePattern.matcher(password);
-        Matcher lowercase = lowercasePattern.matcher(password);
-        Matcher specialCharacter = specialCharacterPattern.matcher(password);
-
-        return number.find() && uppercase.find() && lowercase.find() && specialCharacter.find();
     }
 }

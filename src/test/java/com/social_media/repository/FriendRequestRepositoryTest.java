@@ -64,15 +64,15 @@ class FriendRequestRepositoryTest {
     @Test
     void existsByUserFriend() {
         friendRequestRepository.save(friendRequest);
-        assertTrue(friendRequestRepository.existsByUser_idFriend_id(user1.getId(), user2.getId()));
+        assertTrue(friendRequestRepository.existsByUserIdFriendId(user1.getId(), user2.getId()));
     }
 
     @Test
-    void findByUser_idFriend_id() {
+    void findByUserIdFriendId() {
         friendRequestRepository.save(friendRequest);
 
         FriendRequest response = friendRequestRepository
-                .findByUser_idFriend_id(user1.getId(), user2.getId()).orElse(null);
+                .findByUserIdFriendId(user1.getId(), user2.getId()).orElse(null);
 
         assertNotNull(response);
         assertEquals(friendRequest.getId(), response.getId());

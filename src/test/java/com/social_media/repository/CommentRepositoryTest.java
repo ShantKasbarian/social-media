@@ -89,10 +89,10 @@ class CommentRepositoryTest {
     }
 
     @Test
-    void findByPost_id() {
+    void findByPostId() {
         commentRepository.save(comment);
 
-        Page<Comment> comments = commentRepository.findByPost_id(post.getId(), PageRequest.of(0, 10));
+        Page<Comment> comments = commentRepository.findByPostId(post.getId(), PageRequest.of(0, 10));
 
         assertNotNull(comments.getContent().getFirst());
         assertEquals(comment.getId(), comments.getContent().getFirst().getId());

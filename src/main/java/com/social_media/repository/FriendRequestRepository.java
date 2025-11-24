@@ -14,15 +14,42 @@ import java.util.Optional;
 
 @Repository
 public interface FriendRequestRepository extends JpaRepository<FriendRequest, String> {
-    @Query("SELECT COUNT(f) = 1 from FriendRequest f where (f.user.id = :userId and f.friend.id = :friendId) or (f.user.id = :friendId and f.friend.id = :userId)")
-    boolean existsByUser_idFriend_id(@Param("userId") String userId, @Param("friendId") String friendId);
+    @Query("""
+        SELECT COUNT(f) = 1 FROM FriendRequest f
+        WHERE (f.user.id = :userId AND f.friend.id = :friendId) OR
+        (f.user.id = :friendId AND f.friend.id = :userId)
+    """)
+    boolean existsByUserIdFriendId(@Param("userId") String userId, @Param("friendId") String friendId);
 
-    @Query("from FriendRequest f where (f.user.id = :userId and f.friend.id = :friendId) or (f.user.id = :friendId and f.friend.id = :userId)")
-    Optional<FriendRequest> findByUser_idFriend_id(@Param("userId") String userId, @Param("friendId") String friendId);
+    @Query("""
+        FROM FriendRequest f
+        WHERE (f.user.id = :userId AND f.friend.id = :friendId) OR
+        (f.user.id = :friendId AND f.friend.id = :userId)
+    """)
+    Optional<FriendRequest> findByUserIdFriendId(@Param("userId") String userId, @Param("friendId") String friendId);
 
-    @Query("from FriendRequest f where (f.friend = :friend OR f.user = :friend) and f.status = :status ")
+    @Query("""
+        FROM FriendRequest f
+        WHERE (f.friend = :friend OR f.user = :friend) AND
+        f.status = :status
+    """)
     Page<FriendRequest> findByUserFriend_FriendAndStatus(User friend, FriendshipStatus status, Pageable pageable);
 
-    @Query("from FriendRequest f where f.friend = :friend and f.status = PENDING")
+    @Query("""
+        FROM FriendRequest f
+        WHERE f.friend = :friend AND
+        f.status = PENDING
+    """)
     Page<FriendRequest> findByFriend(User friend, Pageable pageable);
+
+    @Query("""
+        SELECT COUNT(f) > 0 FROM FriendRequest f
+        WHERE (f.user.id = :currentUserId AND f.friend.id = :targetUserId) OR
+        (f.user.id = :targetUserId AND f.friend.id = :currentUserId) AND
+        f.status = BLOCKED
+    """)
+    boolean isFriendRequestBlockedByUserIdFriendId(String currentUserId, String targetUserId);
+
+    @Query("SELECT COUNT(f) > 0 FROM FriendRequest f WHERE f.id = :id AND f.status = BLOCKED")
+    boolean isFriendRequestBlocked(String id);
 }

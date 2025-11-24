@@ -72,7 +72,7 @@ class CommentServiceImplTest {
     void comment() {
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
-        when(friendRequestRepository.findByUser_idFriend_id(anyString(), anyString())).thenReturn(Optional.empty());
+        when(friendRequestRepository.findByUserIdFriendId(anyString(), anyString())).thenReturn(Optional.empty());
 
         Comment response = commentService.comment(comment.getContent(), post.getId(), user);
 
@@ -105,7 +105,7 @@ class CommentServiceImplTest {
         friendRequest.setStatus(FriendshipStatus.BLOCKED);
 
         when(postRepository.findById(anyString())).thenReturn(Optional.ofNullable(post));
-        when(friendRequestRepository.findByUser_idFriend_id(anyString(), anyString()))
+        when(friendRequestRepository.findByUserIdFriendId(anyString(), anyString()))
                 .thenReturn(Optional.of(friendRequest));
         assertThrows(RequestNotAllowedException.class, () -> commentService.comment(comment.getContent(), post.getId(), user));
     }

@@ -1,14 +1,16 @@
 package com.social_media.controller;
 
+import com.social_media.converter.FriendRequestConverter;
 import com.social_media.converter.UserConverter;
 import com.social_media.entity.User;
+import com.social_media.model.FriendRequestDto;
 import com.social_media.model.PageDto;
-import com.social_media.model.ResponseDto;
 import com.social_media.model.UserDto;
 import com.social_media.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,8 @@ public class UserController {
 
     private final UserConverter userConverter;
 
+    private final FriendRequestConverter friendRequestConverter;
+
     @GetMapping("/profile")
     public ResponseEntity<UserDto> getProfile(Authentication authentication) {
         return ResponseEntity.ok(
@@ -29,37 +33,18 @@ public class UserController {
     }
 
     @PutMapping("/update/username")
-    public ResponseEntity<UserDto> updateUsername(@RequestBody UserDto userDto, Authentication authentication) {
-        return ResponseEntity.ok(
-                userConverter.convertToModel(
-                    userService.updateUsername((User) authentication.getPrincipal(),
-                            userDto.username()
-                    )
-                )
-        );
+    public void updateUsername(@RequestBody UserDto userDto, Authentication authentication) {
+        userService.updateUsername((User) authentication.getPrincipal(), userDto.username());
     }
 
     @PutMapping("/update/email")
-    public ResponseEntity<UserDto> updateEmail(@RequestBody UserDto userDto, Authentication authentication) {
-        return ResponseEntity.ok(
-                userConverter.convertToModel(
-                        userService.updateEmail((User) authentication.getPrincipal(),
-                                userDto.email()
-                        )
-                )
-        );
+    public void updateEmail(@RequestBody UserDto userDto, Authentication authentication) {
+        userService.updateEmail((User) authentication.getPrincipal(), userDto.email());
     }
 
     @PutMapping("/password")
-    public ResponseEntity<ResponseDto> updatePassword(@RequestBody UserDto userDto, Authentication authentication) {
-        return ResponseEntity.ok(
-                new ResponseDto(
-                    userService.updatePassword(
-                            (User) authentication.getPrincipal(),
-                            userDto.password()
-                    )
-                )
-        );
+    public void updatePassword(@RequestBody UserDto userDto, Authentication authentication) {
+        userService.updatePassword((User) authentication.getPrincipal(), userDto.password());
     }
 
     @GetMapping("/{username}/search")
@@ -81,16 +66,20 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/block")
-    public ResponseEntity<ResponseDto> blockUser(Authentication authentication, @PathVariable String userId) {
+    public ResponseEntity<FriendRequestDto> blockUser(Authentication authentication, @PathVariable String userId) {
         return ResponseEntity.ok(
-                new ResponseDto(userService.blockUser(userId, (User) authentication.getPrincipal()))
+                friendRequestConverter.convertToModel(
+                        userService.blockUser(userId, (User) authentication.getPrincipal())
+                )
         );
     }
 
-    @DeleteMapping("/{userId}/unblock")
-    public ResponseEntity<ResponseDto> unblockUser(Authentication authentication, @PathVariable String userId) {
+    @PatchMapping("/{userId}/unblock")
+    public ResponseEntity<FriendRequestDto> unblockUser(Authentication authentication, @PathVariable String userId) {
         return ResponseEntity.ok(
-                new ResponseDto(userService.unblockUser(userId, (User) authentication.getPrincipal()))
+                friendRequestConverter.convertToModel(
+                        userService.unblockUser(userId, (User) authentication.getPrincipal())
+                )
         );
     }
 

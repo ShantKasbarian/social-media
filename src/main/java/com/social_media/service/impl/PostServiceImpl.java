@@ -24,6 +24,14 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class PostServiceImpl implements PostService {
+    private static final String POST_NOT_FOUND_MESSAGE = "post not found";
+
+    private static final String UNABLE_TO_DELETE_OR_MODIFY_POST_MESSAGE = "unable to delete or modify post";
+
+    private static final String USER_NOT_FOUND_MESSAGE = "user not found";
+
+    private static final String BLOCKED_USER_MESSAGE = "you have blocked or have been blocked by this user";
+
     private final PostRepository postRepository;
 
     private final UserRepository userRepository;
@@ -56,10 +64,10 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public Post updatePost(String id, String title, User user) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("post not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
         if (!post.getUser().getId().equals(user.getId())) {
-            throw new RequestNotAllowedException("cannot modify the post of another user");
+            throw new RequestNotAllowedException(UNABLE_TO_DELETE_OR_MODIFY_POST_MESSAGE);
         }
 
         if (title == null || title.isEmpty()) {
@@ -75,10 +83,10 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public void deletePost(User user, String id) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("post not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
         if (!post.getUser().getId().equals(user.getId())) {
-            throw new RequestNotAllowedException("cannot delete the post of another user");
+            throw new RequestNotAllowedException(UNABLE_TO_DELETE_OR_MODIFY_POST_MESSAGE);
         }
 
         postRepository.delete(post);
@@ -95,58 +103,27 @@ public class PostServiceImpl implements PostService {
     @Override
     public PageDto<Post, PostDto> getUserPosts(String userId, Pageable pageable, User user) {
         User targetUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
 
-        List<User> currentUserBlockedUsers = user.getBlockedUsers();
-
-        for(User blockedUser: currentUserBlockedUsers) {
-            if (blockedUser.getId().equals(userId)) {
-                throw new RequestNotAllowedException("you have blocked this user");
-            }
-        }
-
-        List<User> targetUserBlockedUsers = targetUser.getBlockedUsers();
         String currentUserId = user.getId();
 
-        for (User blockedUser: targetUserBlockedUsers) {
-            if (blockedUser.getId().equals(currentUserId)) {
-                throw new RequestNotAllowedException("you have blocked this user");
-            }
+        if (friendRequestRepository.isFriendRequestBlockedByUserIdFriendId(currentUserId, userId)) {
+            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
         return new PageDto<>(
-                postRepository.findByUser(
-                        userRepository.findById(userId)
-                            .orElseThrow(() -> new ResourceNotFoundException("user not found")),
-                        pageable
-                ),
-                postConverter
+                postRepository.findByUser(targetUser, pageable), postConverter
         );
     }
 
     @Override
     public Post getPostById(String id, User user) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("post not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
-        User postUser = post.getUser();
-        List<User> postUserBlockedUsers = postUser.getBlockedUsers();
-        String currentUserId = postUser.getId();
-
-        for(User blockedUser: postUserBlockedUsers) {
-            if (blockedUser.getId().equals(currentUserId)) {
-                throw new RequestNotAllowedException("you have blocked this user");
-            }
+        if (friendRequestRepository.isFriendRequestBlockedByUserIdFriendId(user.getId(), post.getUser().getId())) {
+            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
-
-        List<User> currentUserBlockedUsers = user.getBlockedUsers();
-        String postUserId = postUser.getId();
-        for(User blockedUser: currentUserBlockedUsers) {
-            if (blockedUser.getId().equals(postUserId)) {
-                throw new RequestNotAllowedException("you have blocked this user");
-            }
-        }
-
         return post;
     }
 
@@ -154,10 +131,10 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public Like likePost(String id, User user) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("post not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
         FriendRequest friendRequest = friendRequestRepository
-                .findByUser_idFriend_id(user.getId(), post.getUser().getId())
+                .findByUserIdFriendId(user.getId(), post.getUser().getId())
                 .orElse(null);
 
         if (friendRequest != null && friendRequest.getStatus().equals(FriendshipStatus.BLOCKED)) {
@@ -175,7 +152,7 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public void removeLike(String postId, User user) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("post not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
         likeRepository.delete(
                 likeRepository.findByPostAndUser(post, user)
@@ -194,22 +171,14 @@ public class PostServiceImpl implements PostService {
     @Override
     public PageDto<Comment, CommentDto> getComments(User user, String postId, Pageable pageable) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("post not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
-        FriendRequest friendRequest = friendRequestRepository
-                .findByUser_idFriend_id(user.getId(), post.getUser().getId())
-                .orElse(null);
-
-        if (
-                friendRequest != null &&
-                friendRequest.getStatus().equals(FriendshipStatus.BLOCKED)
-        ) {
-            throw new RequestNotAllowedException("you have been blocked by this user");
+        if (friendRequestRepository.isFriendRequestBlockedByUserIdFriendId(user.getId(), post.getUser().getId())) {
+            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
         return new PageDto<>(
-                commentRepository.findByPost_id(postId, pageable),
-                commentConverter
+                commentRepository.findByPostId(postId, pageable), commentConverter
         );
     }
 }

@@ -18,6 +18,14 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class CommentServiceImpl implements CommentService {
+    private static final String POST_NOT_FOUND_MESSAGE = "post not found";
+
+    private static final String BLOCKED_MESSAGE = "you have been blocked by this user";
+
+    private static final String COMMENT_NOT_FOUND_MESSAGE = "comment not found";
+
+    private static final String UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE = "cannot modify or delete the comment of another user";
+
     private final CommentRepository commentRepository;
 
     private final PostRepository postRepository;
@@ -32,13 +40,13 @@ public class CommentServiceImpl implements CommentService {
         }
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("post not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
-        FriendRequest friendRequest = friendRequestRepository.findByUser_idFriend_id(user.getId(), post.getUser().getId())
+        FriendRequest friendRequest = friendRequestRepository.findByUserIdFriendId(user.getId(), post.getUser().getId())
                 .orElse(null);
 
         if (friendRequest != null && friendRequest.getStatus().equals(FriendshipStatus.BLOCKED)) {
-            throw new RequestNotAllowedException("you have been blocked by this user");
+            throw new RequestNotAllowedException(BLOCKED_MESSAGE);
         }
 
         return commentRepository.save(
@@ -60,10 +68,10 @@ public class CommentServiceImpl implements CommentService {
         }
 
         Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("comment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(COMMENT_NOT_FOUND_MESSAGE));
 
         if (!comment.getUser().getId().equals(user.getId())) {
-            throw new RequestNotAllowedException("cannot modify the comment of another user");
+            throw new RequestNotAllowedException(UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE);
         }
 
         comment.setContent(content);
@@ -74,10 +82,10 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public void deleteComment(String id, User user) {
         Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("comment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(COMMENT_NOT_FOUND_MESSAGE));
 
         if (!comment.getUser().getId().equals(user.getId())) {
-            throw new RequestNotAllowedException("cannot delete the comment of another user");
+            throw new RequestNotAllowedException(UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE);
         }
 
         commentRepository.delete(comment);

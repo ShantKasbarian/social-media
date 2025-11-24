@@ -28,4 +28,9 @@ public class FriendRequest {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private FriendshipStatus status;
+
+    public FriendRequest(User user, User friend) {
+        this.user = user;
+        this.friend = friend;
+    }
 }

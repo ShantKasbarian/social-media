@@ -56,7 +56,6 @@ public class User implements UserDetails {
     )
     private List<FriendRequest> friendRequests;
 
-    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "blocked_users",
             joinColumns = @JoinColumn(name = "blocker_id"),
@@ -76,7 +75,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.username;
+        return username;
     }
 
     @Override

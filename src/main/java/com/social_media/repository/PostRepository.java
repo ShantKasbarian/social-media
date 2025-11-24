@@ -13,19 +13,20 @@ import org.springframework.stereotype.Repository;
 public interface PostRepository extends JpaRepository<Post, String> {
     Page<Post> findByUser(@Param("user") User user, Pageable pageable);
     
-    @Query(
-            value = "select p.* from posts p " +
-                "left join users u on u.id = p.user_id " +
-                "left join friend_requests f on f.user_id = u.id or f.friend_id = u.id " +
-                "where (f.user_id = :userId or f.friend_id = :userId) and p.user_id != :userId and f.status = 'ACCEPTED' " +
-                "order by p.posted_time DESC", nativeQuery = true
-    )
+    @Query(value = """
+        SELECT p.* FROM posts p
+        LEFT JOIN users u ON u.id = p.user_id
+        LEFT JOIN friend_requests f ON f.user_id = u.id OR f.friend_id = u.id
+        WHERE (f.user_id = :userId OR f.friend_id = :userId) AND
+        p.user_id != :userId AND f.status = 'ACCEPTED'
+        ORDER BY p.posted_time DESC
+    """, nativeQuery = true)
     Page<Post> findByUser_Friends(@Param("userId") String userId, Pageable pageable);
 
-    @Query(
-            "from Post p " +
-                "left join Like l on l.post.id = p.id " +
-                "where l.user = :user"
-    )
+    @Query("""
+        FROM Post p
+        LEFT JOIN Like l ON l.post.id = p.id
+        WHERE l.user = :user
+    """)
     Page<Post> findByLikesUser(@Param("user") User user, Pageable pageable);
 }
