@@ -112,7 +112,7 @@ class PostControllerTest {
         Page<Post> page = new PageImpl<>(posts, PageRequest.of(0, 10), posts.size());
         PageDto<Post, PostDto> pageDto = new PageDto<>(page, postConverter);
 
-        when(postService.getUserPosts(anyString(), any(Pageable.class), any(User.class))).thenReturn(pageDto);
+        when(postService.getUserPosts(any(User.class), anyString(), any(Pageable.class))).thenReturn(pageDto);
         when(authentication.getPrincipal()).thenReturn(user);
 
         ResponseEntity<PageDto<Post, PostDto>> response = postController.getUserPosts(authentication, user.getId(), 0, 10);
@@ -142,7 +142,7 @@ class PostControllerTest {
     @Test
     void updatePost() {
         when(postConverter.convertToModel(post)).thenReturn(postDto);
-        when(postService.updatePost(postDto.id(), postDto.title(), user)).thenReturn(post);
+        when(postService.updatePost(user, postDto.id(), postDto.title())).thenReturn(post);
         when(authentication.getPrincipal()).thenReturn(user);
 
         ResponseEntity<PostDto> response = postController.updatePost(postDto, authentication);
@@ -166,7 +166,7 @@ class PostControllerTest {
     @Test
     void getPostById() {
         when(postConverter.convertToModel(post)).thenReturn(postDto);
-        when(postService.getPostById(post.getId(), user)).thenReturn(post);
+        when(postService.getPostById(user, post.getId())).thenReturn(post);
         when(authentication.getPrincipal()).thenReturn(user);
 
         ResponseEntity<PostDto> response = postController.getPostById(post.getId(), authentication);
@@ -180,7 +180,7 @@ class PostControllerTest {
     @Test
     void likePost() {
         Like like = new Like(UUID.randomUUID().toString(), user, post);
-        when(postService.likePost(post.getId(), user)).thenReturn(like);
+        when(postService.likePost(user, post.getId())).thenReturn(like);
         when(authentication.getPrincipal()).thenReturn(user);
 
         ResponseEntity<LikeDto> response = postController.likePost(post.getId(), authentication);
@@ -193,12 +193,12 @@ class PostControllerTest {
 
     @Test
     void removeLike() {
-        doNothing().when(postService).removeLike(post.getId(), user);
+        doNothing().when(postService).removeLike(user, post.getId());
         when(authentication.getPrincipal()).thenReturn(user);
 
         postController.removeLike(post.getId(), authentication);
 
-        verify(postService, times(1)).removeLike(post.getId(), user);
+        verify(postService, times(1)).removeLike(user, post.getId());
     }
 
     @Test

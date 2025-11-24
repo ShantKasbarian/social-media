@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/comments")
 @AllArgsConstructor
@@ -23,9 +25,9 @@ public class CommentController {
         return new ResponseEntity<>(
                 commentConverter.convertToModel(
                         commentService.comment(
-                                commentDto.comment(),
+                                (User) authentication.getPrincipal(),
                                 commentDto.postId(),
-                                (User) authentication.getPrincipal()
+                                commentDto.comment()
                         )
                 ), HttpStatus.CREATED
         );
@@ -33,8 +35,10 @@ public class CommentController {
 
     @DeleteMapping("/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteComment(@PathVariable String commentId, Authentication authentication) {
-        commentService.deleteComment(commentId, (User) authentication.getPrincipal());
+    public void deleteComment(
+            Authentication authentication, @PathVariable UUID commentId
+    ) {
+        commentService.deleteComment((User) authentication.getPrincipal(), commentId);
     }
 
     @PutMapping
@@ -45,9 +49,8 @@ public class CommentController {
         return ResponseEntity.ok(
                 commentConverter.convertToModel(
                         commentService.editComment(
-                                commentDto.id(),
-                                commentDto.comment(),
-                                (User) authentication.getPrincipal()
+                                (User) authentication.getPrincipal(), commentDto.id(),
+                                commentDto.comment()
                         )
                 )
         );

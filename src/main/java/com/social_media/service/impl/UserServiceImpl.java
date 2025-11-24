@@ -2,26 +2,25 @@ package com.social_media.service.impl;
 
 import com.social_media.converter.UserConverter;
 import com.social_media.entity.FriendRequest;
-import com.social_media.entity.FriendshipStatus;
 import com.social_media.entity.User;
 import com.social_media.exception.InvalidProvidedInfoException;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.exception.ResourceNotFoundException;
-import com.social_media.model.PageDto;
-import com.social_media.model.UserDto;
 import com.social_media.repository.FriendRequestRepository;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.UserService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Email;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 import static com.social_media.utils.PasswordValidator.INVALID_PASSWORD_MESSAGE;
 import static com.social_media.utils.PasswordValidator.isPasswordValid;
@@ -61,8 +60,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PageDto<User, UserDto> searchByUsername(String username, Pageable pageable) {
-        return new PageDto<>(userRepository.findByUsernameContainingIgnoreCase(username, pageable), userConverter);
+    public Page<User> searchByUsername(String username, Pageable pageable) {
+        return userRepository.findByUsernameContainingIgnoreCase(username, pageable);
     }
 
     @Override
@@ -113,14 +112,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public FriendRequest blockUser(String targetId, User user) {
+    public FriendRequest blockUser(UUID targetId, User user) {
         User targetUser = userRepository.findById(targetId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
 
         FriendRequest friendRequest = friendRequestRepository.findByUserIdFriendId(user.getId(), targetId)
-                .orElse(new FriendRequest(user, targetUser));
+                .orElse(new FriendRequest(user, targetUser, FriendRequest.Status.BLOCKED));
 
-        friendRequest.setStatus(FriendshipStatus.BLOCKED);
         friendRequestRepository.save(friendRequest);
 
         return friendRequest;
@@ -128,7 +126,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public FriendRequest unblockUser(String id, User user) {
+    public FriendRequest unblockUser(UUID id, User user) {
         FriendRequest friendRequest = friendRequestRepository.findByUserIdFriendId(user.getId(), id)
                 .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
@@ -136,19 +134,16 @@ public class UserServiceImpl implements UserService {
             throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
-        friendRequest.setStatus(FriendshipStatus.PENDING);
+        friendRequest.setStatus(FriendRequest.Status.PENDING);
         friendRequestRepository.save(friendRequest);
 
         return friendRequest;
     }
 
     @Override
-    public PageDto<User, UserDto> getBlockedUsers(User user, Pageable pageable) {
+    public Page<User> getBlockedUsers(User user, Pageable pageable) {
         List<User> blockedUsers = user.getBlockedUsers();
 
-        return new PageDto<>(
-                new PageImpl<>(blockedUsers, pageable, blockedUsers.size()),
-                userConverter
-        );
+        return new PageImpl<>(blockedUsers, pageable, blockedUsers.size());
     }
 }

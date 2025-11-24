@@ -1,10 +1,12 @@
 package com.social_media.model;
 
+import java.util.UUID;
+
 public record CommentDto(
-        String id,
-        String postId,
+        UUID id,
+        UUID postId,
         String comment,
-        String userId,
+        UUID userId,
         String username,
         String commentedTime
 ) {

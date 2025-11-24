@@ -1,10 +1,12 @@
 package com.social_media.model;
 
+import java.util.UUID;
+
 public record FriendRequestDto(
-        String id,
-        String userId,
+        UUID id,
+        UUID userId,
         String username,
-        String friendId,
+        UUID friendId,
         String friendName,
         String status
 ) {

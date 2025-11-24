@@ -1,9 +1,11 @@
 package com.social_media.model;
 
+import java.util.UUID;
+
 public record LikeDto(
-        String id,
-        String userId,
+        UUID id,
+        UUID userId,
         String username,
-        String postId
+        UUID postId
 ) {
 }

@@ -7,9 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface LikeRepository extends JpaRepository<Like, String> {
+public interface LikeRepository extends JpaRepository<Like, UUID> {
     boolean existsByPostAndUser(Post post, User user);
     Optional<Like> findByPostAndUser(Post post, User user);
 }

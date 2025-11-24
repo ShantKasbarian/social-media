@@ -1,11 +1,14 @@
 package com.social_media.model;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 public record PostDto(
-        String id,
-        String userId,
+        UUID id,
+        UUID userId,
         String username,
         String title,
         Long likes,
-        String postedTime
+        LocalDateTime postedTime
 ) {
 }

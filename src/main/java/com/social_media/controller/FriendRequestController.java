@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/friends")
@@ -22,24 +24,22 @@ public class FriendRequestController {
     private final FriendRequestConverter friendRequestConverter;
 
     @PostMapping("/{friendId}")
-    public ResponseEntity<FriendRequestDto> addFriend(Authentication authentication, @PathVariable String friendId) {
+    public ResponseEntity<FriendRequestDto> addFriend(Authentication authentication, @PathVariable UUID friendId) {
         return new ResponseEntity<>(
                 friendRequestConverter.convertToModel(
                     friendRequestService.addFriend(
-                            friendId,
-                            (User) authentication.getPrincipal()
+                            (User) authentication.getPrincipal(), friendId
                     )
                 ), HttpStatus.CREATED
         );
     }
 
     @PutMapping("/request/{requestId}/accept")
-    public ResponseEntity<FriendRequestDto> acceptFriend(Authentication authentication, @PathVariable String requestId) {
+    public ResponseEntity<FriendRequestDto> acceptFriend(Authentication authentication, @PathVariable UUID requestId) {
         return ResponseEntity.ok(
                 friendRequestConverter.convertToModel(
                     friendRequestService.acceptFriend(
-                            requestId,
-                            (User) authentication.getPrincipal()
+                            (User) authentication.getPrincipal(), requestId
                     )
                 )
         );
@@ -52,9 +52,11 @@ public class FriendRequestController {
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(
-                friendRequestService.getFriends(
-                    (User) authentication.getPrincipal(),
-                    PageRequest.of(page, size)
+                new PageDto<>(
+                    friendRequestService.getFriends(
+                        (User) authentication.getPrincipal(),
+                        PageRequest.of(page, size)
+                    ), friendRequestConverter
                 )
         );
     }
@@ -67,23 +69,25 @@ public class FriendRequestController {
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(
-                friendRequestService.getPendingUsers(
-                    (User) authentication.getPrincipal(),
-                    PageRequest.of(page, size)
+
+                new PageDto<>(
+                    friendRequestService.getPendingUsers(
+                        (User) authentication.getPrincipal(),
+                        PageRequest.of(page, size)
+                    ), friendRequestConverter
                 )
         );
     }
 
     @PutMapping("/request/{requestId}/decline")
     public ResponseEntity<FriendRequestDto> declineFriendRequest(
-            @PathVariable String requestId,
-            Authentication authentication
+            @PathVariable UUID requestId, Authentication authentication
     ) {
         return ResponseEntity.ok(
                 friendRequestConverter.convertToModel(
                         friendRequestService.declineFriendRequest(
-                            requestId,
-                            (User) authentication.getPrincipal()
+                            (User) authentication.getPrincipal(),
+                            requestId
                         )
                 )
         );

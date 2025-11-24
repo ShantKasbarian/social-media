@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,8 +17,10 @@ import lombok.Setter;
 @Table(name = "friend_requests")
 public class FriendRequest {
     @Id
+    @GeneratedValue
+    @UuidGenerator
     @Column(name = "id")
-    private String id;
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -27,10 +32,18 @@ public class FriendRequest {
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private FriendshipStatus status;
+    private Status status;
 
-    public FriendRequest(User user, User friend) {
+    public FriendRequest(User user, User friend, Status status) {
         this.user = user;
         this.friend = friend;
+        this.status = status;
+    }
+
+    public enum Status {
+        ACCEPTED,
+        DECLINED,
+        BLOCKED,
+        PENDING
     }
 }

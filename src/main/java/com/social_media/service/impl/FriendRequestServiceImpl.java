@@ -1,19 +1,16 @@
 package com.social_media.service.impl;
 
-import com.social_media.converter.FriendRequestConverter;
 import com.social_media.entity.FriendRequest;
-import com.social_media.entity.FriendshipStatus;
 import com.social_media.entity.User;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.exception.ResourceNotFoundException;
-import com.social_media.model.FriendRequestDto;
-import com.social_media.model.PageDto;
 import com.social_media.repository.FriendRequestRepository;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.FriendRequestService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -36,15 +33,13 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     private final UserRepository userRepository;
 
-    private final FriendRequestConverter friendRequestConverter;
-
     @Override
     @Transactional
-    public FriendRequest addFriend(String targetUserId, User user) {
+    public FriendRequest addFriend(User user, UUID targetUserId) {
         User targetUser = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
 
-        String currentUserId = user.getId();
+        UUID currentUserId = user.getId();
 
         if (friendRequestRepository.isFriendRequestBlockedByUserIdFriendId(currentUserId, targetUserId)) {
             throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
@@ -54,12 +49,17 @@ public class FriendRequestServiceImpl implements FriendRequestService {
             throw new ResourceAlreadyExistsException(FRIEND_REQUEST_ALREADY_SENT_MESSAGE);
         }
 
-        return friendRequestRepository.save(new FriendRequest(UUID.randomUUID().toString(), user, targetUser, FriendshipStatus.PENDING));
+        FriendRequest friendRequest = new FriendRequest();
+        friendRequest.setUser(user);
+        friendRequest.setFriend(targetUser);
+        friendRequest.setStatus(FriendRequest.Status.PENDING);
+
+        return friendRequestRepository.save(friendRequest);
     }
 
     @Override
     @Transactional
-    public FriendRequest acceptFriend(String requestId, User user) {
+    public FriendRequest acceptFriend(User user, UUID requestId) {
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
@@ -67,40 +67,35 @@ public class FriendRequestServiceImpl implements FriendRequestService {
             throw new RequestNotAllowedException(FRIEND_REQUEST_NOT_FOUND_MESSAGE);
         }
 
-        if (friendRequest.getStatus().equals(FriendshipStatus.BLOCKED)) {
+        if (friendRequest.getStatus().equals(FriendRequest.Status.BLOCKED)) {
             throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
-        friendRequest.setStatus(FriendshipStatus.ACCEPTED);
+        friendRequest.setStatus(FriendRequest.Status.ACCEPTED);
         return friendRequestRepository.save(friendRequest);
     }
 
     @Override
-    public PageDto<FriendRequest, FriendRequestDto> getFriends(User user, Pageable pageable) {
-        return new PageDto<>(
-                friendRequestRepository.findByUserFriend_FriendAndStatus(
-                        user,
-                        FriendshipStatus.ACCEPTED,
-                        pageable
-                ), friendRequestConverter
+    public Page<FriendRequest> getFriends(User user, Pageable pageable) {
+        return friendRequestRepository.findByUserFriend_FriendAndStatus(
+                user,
+                FriendRequest.Status.ACCEPTED,
+                pageable
         );
     }
 
     @Override
-    public PageDto<FriendRequest, FriendRequestDto> getPendingUsers(User user, Pageable pageable) {
-        return new PageDto<>(
-                friendRequestRepository.findByFriend(user, pageable),
-                friendRequestConverter
-        );
+    public Page<FriendRequest> getPendingUsers(User user, Pageable pageable) {
+        return friendRequestRepository.findByFriend(user, pageable);
     }
 
     @Override
     @Transactional
-    public FriendRequest declineFriendRequest(String requestId, User user) {
+    public FriendRequest declineFriendRequest(User user, UUID requestId) {
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
-        String userId = user.getId();
+        UUID userId = user.getId();
 
         if (!friendRequest.getFriend().getId().equals(userId)) {
             throw new RequestNotAllowedException(UNABLE_TO_DECLINE_FRIEND_REQUEST);
@@ -110,7 +105,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
             throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
-        friendRequest.setStatus(FriendshipStatus.DECLINED);
+        friendRequest.setStatus(FriendRequest.Status.DECLINED);
         return friendRequestRepository.save(friendRequest);
     }
 }

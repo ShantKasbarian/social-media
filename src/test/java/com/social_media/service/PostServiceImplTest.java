@@ -108,7 +108,7 @@ class PostServiceImplTest {
         String oldTitle = post.getTitle();
         String expectedTitle = "some title 2";
 
-        Post response = postService.updatePost(post.getId(), expectedTitle, user);
+        Post response = postService.updatePost(user, post.getId(), expectedTitle);
 
         assertEquals(post.getId(), response.getId());
         assertNotEquals(oldTitle, response.getTitle());
@@ -122,7 +122,7 @@ class PostServiceImplTest {
         when(postRepository.findById(post.getId()))
                 .thenThrow(new ResourceNotFoundException("post not found"));
 
-        assertThrows(ResourceNotFoundException.class, () -> postService.updatePost(post.getId(), "some title 2", user));
+        assertThrows(ResourceNotFoundException.class, () -> postService.updatePost(user, post.getId(), "some title 2"));
     }
 
     @Test
@@ -132,20 +132,20 @@ class PostServiceImplTest {
 
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
 
-        assertThrows(RequestNotAllowedException.class, () -> postService.updatePost(post.getId(), "some title 2", user2));
+        assertThrows(RequestNotAllowedException.class, () -> postService.updatePost(user2, post.getId(), "some title 2"));
 
     }
 
     @Test
     void updatePostShouldThrowInvalidProvidedInfoExceptionWhenTitleIsNull() {
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
-        assertThrows(InvalidProvidedInfoException.class, () -> postService.updatePost(post.getId(), null, user));
+        assertThrows(InvalidProvidedInfoException.class, () -> postService.updatePost(user, post.getId(), null));
     }
 
     @Test
     void updatePostShouldThrowInvalidProvidedInfoExceptionWhenTitleIsEmpty() {
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
-        assertThrows(InvalidProvidedInfoException.class, () -> postService.updatePost(post.getId(), "", user));
+        assertThrows(InvalidProvidedInfoException.class, () -> postService.updatePost(user, post.getId(), ""));
     }
 
     @Test
@@ -239,7 +239,7 @@ class PostServiceImplTest {
         when(postRepository.findByUser(user, pageable))
                 .thenReturn(page);
 
-        PageDto<Post, PostDto> response = postService.getUserPosts(user.getId(), pageable, user);
+        PageDto<Post, PostDto> response = postService.getUserPosts(user, user.getId(), pageable);
 
         assertEquals(page.getContent().size(), response.getContent().size());
         assertEquals(page.getTotalPages(), response.getTotalPages());
@@ -253,14 +253,14 @@ class PostServiceImplTest {
         when(friendRequestRepository.findByUserIdFriendId(anyString(), anyString()))
                 .thenReturn(Optional.empty());
         when(postRepository.findById(post.getId())).thenThrow(ResourceNotFoundException.class);
-        assertThrows(ResourceNotFoundException.class, () -> postService.getUserPosts(user.getId(), PageRequest.of(0, 10), user));
+        assertThrows(ResourceNotFoundException.class, () -> postService.getUserPosts(user, user.getId(), PageRequest.of(0, 10)));
     }
 
     @Test
     void getPostById() {
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
 
-        Post response = postService.getPostById(post.getId(), user);
+        Post response = postService.getPostById(user, post.getId());
 
         assertEquals(post.getId(), response.getId());
         assertEquals(post.getTitle(), response.getTitle());
@@ -271,7 +271,7 @@ class PostServiceImplTest {
     @Test
     void getPostByIdShouldThrowResourceNotFoundException() {
         when(postRepository.findById(post.getId())).thenThrow(ResourceNotFoundException.class);
-        assertThrows(ResourceNotFoundException.class, () -> postService.getPostById(post.getId(), user));
+        assertThrows(ResourceNotFoundException.class, () -> postService.getPostById(user, post.getId()));
     }
 
     @Test
@@ -283,7 +283,7 @@ class PostServiceImplTest {
         when(likeRepository.existsByPostAndUser(post, user)).thenReturn(false);
         when(likeRepository.save(any(Like.class))).thenReturn(like);
 
-        Like response = postService.likePost(post.getId(), user);
+        Like response = postService.likePost(user, post.getId());
 
         assertNotNull(response);
         assertEquals(like.getId(), response.getId());
@@ -293,7 +293,7 @@ class PostServiceImplTest {
     @Test
     void likePostShouldThrowResourceNotFoundException() {
         when(postRepository.findById(post.getId())).thenThrow(ResourceNotFoundException.class);
-        assertThrows(ResourceNotFoundException.class, () -> postService.likePost(post.getId(), user));
+        assertThrows(ResourceNotFoundException.class, () -> postService.likePost(user, post.getId()));
     }
 
     @Test
@@ -304,7 +304,7 @@ class PostServiceImplTest {
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
         when(friendRequestRepository.findByUserIdFriendId(anyString(), anyString())).thenReturn(Optional.of(friendRequest));
 
-        assertThrows(RequestNotAllowedException.class, () -> postService.likePost(post.getId(), user));
+        assertThrows(RequestNotAllowedException.class, () -> postService.likePost(user, post.getId()));
     }
 
     @Test
@@ -312,7 +312,7 @@ class PostServiceImplTest {
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
         when(friendRequestRepository.findByUserIdFriendId(anyString(), anyString())).thenReturn(Optional.empty());
         when(likeRepository.existsByPostAndUser(post, user)).thenReturn(true);
-        assertThrows(ResourceAlreadyExistsException.class, () -> postService.likePost(post.getId(), user));
+        assertThrows(ResourceAlreadyExistsException.class, () -> postService.likePost(user, post.getId()));
     }
 
     @Test
@@ -323,7 +323,7 @@ class PostServiceImplTest {
         when(likeRepository.findByPostAndUser(post, user)).thenReturn(Optional.of(like));
         doNothing().when(likeRepository).delete(like);
 
-        postService.removeLike(post.getId(), user);
+        postService.removeLike(user, post.getId());
 
         verify(likeRepository, times(1)).delete(like);
     }
@@ -333,14 +333,14 @@ class PostServiceImplTest {
         when(postRepository.findById(anyString())).thenReturn(Optional.ofNullable(post));
         when(likeRepository.findByPostAndUser(any(Post.class), any(User.class))).thenThrow(ResourceNotFoundException.class);
 
-        assertThrows(ResourceNotFoundException.class, () -> postService.removeLike(post.getId(), user));
+        assertThrows(ResourceNotFoundException.class, () -> postService.removeLike(user, post.getId()));
     }
 
     @Test
     void removeLikeShouldThrowResourceNotFoundExceptionWhenPostDoesNotExist() {
         when(postRepository.findById(anyString())).thenThrow(ResourceNotFoundException.class);
 
-        assertThrows(ResourceNotFoundException.class, () -> postService.removeLike(post.getId(), user));
+        assertThrows(ResourceNotFoundException.class, () -> postService.removeLike(user, post.getId()));
     }
 
     @Test

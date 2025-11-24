@@ -7,17 +7,20 @@ import com.social_media.entity.User;
 import com.social_media.model.CommentDto;
 import com.social_media.model.PageDto;
 import com.social_media.model.PostDto;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.UUID;
+
 public interface PostService {
-    Post createPost(Post post, User user);
-    Post updatePost(String id, String title, User user);
-    void deletePost(User user, String id);
-    PageDto<Post, PostDto> getFriendsPosts(User user, Pageable pageable);
-    PageDto<Post, PostDto> getUserPosts(String userId, Pageable pageable, User user);
-    Post getPostById(String id, User user);
-    Like likePost(String id, User user);
-    void removeLike(String postId, User user);
-    PageDto<Post, PostDto> getUserLikedPosts(User user, Pageable pageable);
-    PageDto<Comment, CommentDto> getComments(User user, String postId, Pageable pageable);
+    Post createPost(User user, Post post);
+    Post updatePost(User user, UUID id, String title);
+    void deletePost(User user, UUID id);
+    Page<Post> getFriendsPosts(User user, Pageable pageable);
+    Page<Post> getUserPosts(User user, UUID userId, Pageable pageable);
+    Post getPostById(User user, UUID id);
+    Like likePost(User user, UUID id);
+    void removeLike(User user, UUID postId);
+    Page<Post> getUserLikedPosts(User user, Pageable pageable);
+    Page<Comment> getComments(User user, UUID postId, Pageable pageable);
 }

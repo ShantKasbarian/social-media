@@ -9,8 +9,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.UUID;
+
 @Repository
-public interface PostRepository extends JpaRepository<Post, String> {
+public interface PostRepository extends JpaRepository<Post, UUID> {
     Page<Post> findByUser(@Param("user") User user, Pageable pageable);
     
     @Query(value = """
@@ -21,7 +23,7 @@ public interface PostRepository extends JpaRepository<Post, String> {
         p.user_id != :userId AND f.status = 'ACCEPTED'
         ORDER BY p.posted_time DESC
     """, nativeQuery = true)
-    Page<Post> findByUser_Friends(@Param("userId") String userId, Pageable pageable);
+    Page<Post> findByUser_Friends(@Param("userId") UUID userId, Pageable pageable);
 
     @Query("""
         FROM Post p

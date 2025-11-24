@@ -1,24 +1,19 @@
 package com.social_media.service.impl;
 
-import com.social_media.converter.CommentConverter;
-import com.social_media.converter.PostConverter;
 import com.social_media.entity.*;
 import com.social_media.exception.InvalidProvidedInfoException;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.exception.ResourceNotFoundException;
-import com.social_media.model.CommentDto;
-import com.social_media.model.PageDto;
-import com.social_media.model.PostDto;
 import com.social_media.repository.*;
 import com.social_media.service.PostService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -36,11 +31,7 @@ public class PostServiceImpl implements PostService {
 
     private final UserRepository userRepository;
 
-    private final PostConverter postConverter;
-
     private final CommentRepository commentRepository;
-
-    private final CommentConverter commentConverter;
 
     private final LikeRepository likeRepository;
 
@@ -48,12 +39,11 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Post createPost(Post post, User user) {
+    public Post createPost(User user, Post post) {
         if (post.getTitle() == null || post.getTitle().isEmpty()) {
             throw new InvalidProvidedInfoException("post must have a title");
         }
 
-        post.setId(UUID.randomUUID().toString());
         post.setPostedTime(LocalDateTime.now());
         post.setUser(user);
 
@@ -62,7 +52,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Post updatePost(String id, String title, User user) {
+    public Post updatePost(User user, UUID id, String title) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
@@ -81,7 +71,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void deletePost(User user, String id) {
+    public void deletePost(User user, UUID id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
@@ -93,31 +83,24 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PageDto<Post, PostDto> getFriendsPosts(User user, Pageable pageable) {
-        return new PageDto<>(
-                postRepository.findByUser_Friends(user.getId(), pageable),
-                postConverter
-        );
+    public Page<Post> getFriendsPosts(User user, Pageable pageable) {
+        return postRepository.findByUser_Friends(user.getId(), pageable);
     }
 
     @Override
-    public PageDto<Post, PostDto> getUserPosts(String userId, Pageable pageable, User user) {
+    public Page<Post> getUserPosts(User user, UUID userId, Pageable pageable) {
         User targetUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
 
-        String currentUserId = user.getId();
-
-        if (friendRequestRepository.isFriendRequestBlockedByUserIdFriendId(currentUserId, userId)) {
+        if (friendRequestRepository.isFriendRequestBlockedByUserIdFriendId(user.getId(), userId)) {
             throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
-        return new PageDto<>(
-                postRepository.findByUser(targetUser, pageable), postConverter
-        );
+        return postRepository.findByUser(targetUser, pageable);
     }
 
     @Override
-    public Post getPostById(String id, User user) {
+    public Post getPostById(User user, UUID id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
@@ -129,7 +112,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Like likePost(String id, User user) {
+    public Like likePost(User user, UUID id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
@@ -137,7 +120,7 @@ public class PostServiceImpl implements PostService {
                 .findByUserIdFriendId(user.getId(), post.getUser().getId())
                 .orElse(null);
 
-        if (friendRequest != null && friendRequest.getStatus().equals(FriendshipStatus.BLOCKED)) {
+        if (friendRequest != null && friendRequest.getStatus().equals(FriendRequest.Status.BLOCKED)) {
             throw new RequestNotAllowedException("user has blocked you");
         }
 
@@ -145,31 +128,32 @@ public class PostServiceImpl implements PostService {
             throw new ResourceAlreadyExistsException("cannot like post more than once");
         }
 
-        return likeRepository.save(new Like(UUID.randomUUID().toString(), user, post));
+        Like like = new Like();
+        like.setUser(user);
+        like.setPost(post);
+
+        return likeRepository.save(like);
     }
 
     @Override
     @Transactional
-    public void removeLike(String postId, User user) {
+    public void removeLike(User user, UUID postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
-        likeRepository.delete(
-                likeRepository.findByPostAndUser(post, user)
-                        .orElseThrow(() -> new ResourceNotFoundException("you haven't liked this post"))
-        );
+        Like like = likeRepository.findByPostAndUser(post, user)
+                .orElseThrow(() -> new ResourceNotFoundException("you haven't liked this post"));
+
+        likeRepository.delete(like);
     }
 
     @Override
-    public PageDto<Post, PostDto> getUserLikedPosts(User user, Pageable pageable) {
-        return new PageDto<>(
-                postRepository.findByLikesUser(user, pageable),
-                postConverter
-        );
+    public Page<Post> getUserLikedPosts(User user, Pageable pageable) {
+        return postRepository.findByLikesUser(user, pageable);
     }
 
     @Override
-    public PageDto<Comment, CommentDto> getComments(User user, String postId, Pageable pageable) {
+    public Page<Comment> getComments(User user, UUID postId, Pageable pageable) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
@@ -177,8 +161,6 @@ public class PostServiceImpl implements PostService {
             throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
-        return new PageDto<>(
-                commentRepository.findByPostId(postId, pageable), commentConverter
-        );
+        return commentRepository.findByPostId(postId, pageable);
     }
 }

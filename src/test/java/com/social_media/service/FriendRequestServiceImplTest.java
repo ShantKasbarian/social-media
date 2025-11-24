@@ -80,7 +80,7 @@ class FriendRequestServiceImplTest {
         when(friendRequestRepository.existsByUserIdFriendId(friendRequest.getUser().getId(), friendRequest.getFriend().getId())).thenReturn(false);
         when(friendRequestRepository.save(any(FriendRequest.class))).thenReturn(friendRequest);
 
-        FriendRequest response = friendRequestService.addFriend(user2.getId(), user1);
+        FriendRequest response = friendRequestService.addFriend(user1, user2.getId());
 
         assertEquals(friendRequest.getUser().getId(), response.getUser().getId());
         assertEquals(FriendshipStatus.PENDING, response.getStatus());
@@ -93,7 +93,7 @@ class FriendRequestServiceImplTest {
         when(userRepository.findById(user2.getId()))
                 .thenThrow(ResourceNotFoundException.class);
 
-        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.addFriend(user2.getId(), user1));
+        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.addFriend(user1, user2.getId()));
     }
 
     @Test
@@ -102,7 +102,7 @@ class FriendRequestServiceImplTest {
                 .thenReturn(Optional.ofNullable(user2));
         when(friendRequestRepository.existsByUserIdFriendId(anyString(), anyString())).thenReturn(true);
 
-        assertThrows(ResourceAlreadyExistsException.class, () -> friendRequestService.addFriend(user2.getId(), user1));
+        assertThrows(ResourceAlreadyExistsException.class, () -> friendRequestService.addFriend(user1, user2.getId()));
     }
 
     @Test
@@ -110,7 +110,7 @@ class FriendRequestServiceImplTest {
         when(friendRequestRepository.findById(friendRequest.getId())).thenReturn(Optional.ofNullable(friendRequest));
         when(friendRequestRepository.save(friendRequest)).thenReturn(friendRequest);
 
-        FriendRequest response = friendRequestService.acceptFriend(friendRequest.getId(), user2);
+        FriendRequest response = friendRequestService.acceptFriend(user2, friendRequest.getId());
 
         assertEquals(FriendshipStatus.ACCEPTED, response.getStatus());
         verify(friendRequestRepository, times(1)).save(friendRequest);
@@ -121,7 +121,7 @@ class FriendRequestServiceImplTest {
         when(friendRequestRepository.findById(friendRequest.getId()))
                 .thenThrow(ResourceNotFoundException.class);
 
-        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.acceptFriend(friendRequest.getId(), user2));
+        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.acceptFriend(user2, friendRequest.getId()));
     }
 
     @Test

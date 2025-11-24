@@ -34,7 +34,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public Comment comment(String content, String postId, User user) {
+    public Comment comment(User user, UUID postId, String content) {
         if (content == null || content.isEmpty()) {
             throw new InvalidProvidedInfoException("comment is empty");
         }
@@ -45,24 +45,22 @@ public class CommentServiceImpl implements CommentService {
         FriendRequest friendRequest = friendRequestRepository.findByUserIdFriendId(user.getId(), post.getUser().getId())
                 .orElse(null);
 
-        if (friendRequest != null && friendRequest.getStatus().equals(FriendshipStatus.BLOCKED)) {
+        if (friendRequest != null && friendRequest.getStatus().equals(FriendRequest.Status.BLOCKED)) {
             throw new RequestNotAllowedException(BLOCKED_MESSAGE);
         }
 
-        return commentRepository.save(
-                new Comment(
-                        UUID.randomUUID().toString(),
-                        content,
-                        LocalDateTime.now(),
-                        post,
-                        user
-                )
-        );
+        Comment comment = new Comment();
+        comment.setContent(content);
+        comment.setCommentedTime(LocalDateTime.now());
+        comment.setPost(post);
+        comment.setUser(user);
+
+        return commentRepository.save(comment);
     }
 
     @Override
     @Transactional
-    public Comment editComment(String id, String content, User user) {
+    public Comment editComment(User user, UUID id, String content) {
         if (content == null || content.isEmpty()) {
             throw new InvalidProvidedInfoException("content must be specified");
         }
@@ -80,7 +78,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public void deleteComment(String id, User user) {
+    public void deleteComment(User user, UUID id) {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(COMMENT_NOT_FOUND_MESSAGE));
 

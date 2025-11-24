@@ -96,18 +96,18 @@ class CommentControllerTest {
 
     @Test
     void deleteComment() {
-        doNothing().when(commentService).deleteComment(commentDto.id(), user);
+        doNothing().when(commentService).deleteComment(user, commentDto.id());
         when(authentication.getPrincipal()).thenReturn(user);
 
         commentController.deleteComment(comment.getId(), authentication);
 
-        verify(commentService, times(1)).deleteComment(commentDto.id(), user);
+        verify(commentService, times(1)).deleteComment(user, commentDto.id());
     }
 
     @Test
     void updateComment() {
         when(commentConverter.convertToModel(any(Comment.class))).thenReturn(commentDto);
-        when(commentService.editComment(anyString(), anyString(), any(User.class)))
+        when(commentService.editComment(any(User.class), anyString(), anyString()))
                 .thenReturn(comment);
         when(authentication.getPrincipal()).thenReturn(user);
 

@@ -10,16 +10,8 @@ import com.social_media.repository.UserRepository;
 import com.social_media.service.AuthenticationService;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.social_media.utils.PasswordValidator.INVALID_PASSWORD_MESSAGE;
 import static com.social_media.utils.PasswordValidator.isPasswordValid;
@@ -31,7 +23,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private static final String EMAIL_ALREADY_TAKEN_MESSAGE = "email is already taken";
 
     private static final String USERNAME_ALREADY_TAKEN_MESSAGE = "username is already taken";
-
 
     private final UserRepository userRepository;
 
@@ -91,7 +82,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new InvalidProvidedInfoException("username shouldn't contain spaces");
         }
 
-        user.setId(UUID.randomUUID().toString());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
 

@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,8 +17,10 @@ import lombok.Setter;
 @Table(name = "likes")
 public class Like {
     @Id
+    @GeneratedValue
+    @UuidGenerator
     @Column(name = "id")
-    private String id;
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

@@ -23,7 +23,6 @@ public class PostConverter implements
     @Override
     public PostDto convertToModel(Post entity) {
         User user = entity.getUser();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
         int likes = 0;
 
@@ -37,7 +36,7 @@ public class PostConverter implements
                 user.getUsername(),
                 entity.getTitle(),
                 (long) likes,
-                entity.getPostedTime().format(dateTimeFormatter)
+                entity.getPostedTime()
         );
     }
 }

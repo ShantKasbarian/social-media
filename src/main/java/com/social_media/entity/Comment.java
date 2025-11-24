@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,8 +18,10 @@ import java.time.LocalDateTime;
 @Table(name = "comments")
 public class Comment {
     @Id
+    @GeneratedValue
+    @UuidGenerator
     @Column(name = "id")
-    private String id;
+    private UUID id;
 
     @Column(name = "content", nullable = false)
     private String content;

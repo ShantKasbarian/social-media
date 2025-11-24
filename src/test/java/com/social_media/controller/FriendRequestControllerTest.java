@@ -84,7 +84,7 @@ class FriendRequestControllerTest {
     @Test
     void addFriend() {
         when(friendRequestConverter.convertToModel(any(FriendRequest.class))).thenReturn(friendRequestDto);
-        when(friendRequestService.addFriend(anyString(), any(User.class))).thenReturn(friendRequest);
+        when(friendRequestService.addFriend(any(User.class), anyString())).thenReturn(friendRequest);
         when(authentication.getPrincipal()).thenReturn(user1);
 
         ResponseEntity<FriendRequestDto> response = friendRequestController.addFriend(authentication, user2.getId());
@@ -98,7 +98,7 @@ class FriendRequestControllerTest {
     @Test
     void acceptFriend() {
         when(friendRequestConverter.convertToModel(any(FriendRequest.class))).thenReturn(friendRequestDto);
-        when(friendRequestService.acceptFriend(friendRequest.getId(), user2)).thenReturn(friendRequest);
+        when(friendRequestService.acceptFriend(user2, friendRequest.getId())).thenReturn(friendRequest);
         when(authentication.getPrincipal()).thenReturn(user2);
 
         ResponseEntity<FriendRequestDto> response = friendRequestController.acceptFriend(authentication, friendRequest.getId());

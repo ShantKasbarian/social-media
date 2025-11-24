@@ -10,10 +10,11 @@ import com.social_media.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @AllArgsConstructor
 @RestController
@@ -54,19 +55,21 @@ public class UserController {
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(
-                userService.searchByUsername(
-                        username,
-                        PageRequest.of(
-                                page,
-                                size,
-                                Sort.by(Sort.Order.asc("username"))
-                        )
+                new PageDto<>(
+                    userService.searchByUsername(
+                            username,
+                            PageRequest.of(
+                                    page,
+                                    size,
+                                    Sort.by(Sort.Order.asc("username"))
+                            )
+                    ), userConverter
                 )
         );
     }
 
     @PostMapping("/{userId}/block")
-    public ResponseEntity<FriendRequestDto> blockUser(Authentication authentication, @PathVariable String userId) {
+    public ResponseEntity<FriendRequestDto> blockUser(Authentication authentication, @PathVariable UUID userId) {
         return ResponseEntity.ok(
                 friendRequestConverter.convertToModel(
                         userService.blockUser(userId, (User) authentication.getPrincipal())
@@ -75,7 +78,7 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}/unblock")
-    public ResponseEntity<FriendRequestDto> unblockUser(Authentication authentication, @PathVariable String userId) {
+    public ResponseEntity<FriendRequestDto> unblockUser(Authentication authentication, @PathVariable UUID userId) {
         return ResponseEntity.ok(
                 friendRequestConverter.convertToModel(
                         userService.unblockUser(userId, (User) authentication.getPrincipal())
@@ -90,9 +93,11 @@ public class UserController {
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(
-                userService.getBlockedUsers(
-                        (User) authentication.getPrincipal(),
-                        PageRequest.of(page, size)
+                new PageDto<>(
+                    userService.getBlockedUsers(
+                            (User) authentication.getPrincipal(),
+                            PageRequest.of(page, size)
+                    ), userConverter
                 )
         );
     }

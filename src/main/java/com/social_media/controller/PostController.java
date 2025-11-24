@@ -1,5 +1,6 @@
 package com.social_media.controller;
 
+import com.social_media.converter.CommentConverter;
 import com.social_media.converter.PostConverter;
 import com.social_media.entity.Comment;
 import com.social_media.entity.Like;
@@ -18,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/posts")
@@ -26,6 +29,8 @@ public class PostController {
 
     private final PostConverter postConverter;
 
+    private final CommentConverter commentConverter;
+
     @GetMapping
     public ResponseEntity<PageDto<Post, PostDto>> getPosts(
             @RequestParam(required = false, defaultValue = "0") int page,
@@ -33,9 +38,11 @@ public class PostController {
             Authentication authentication
     ) {
         return ResponseEntity.ok(
-                postService.getFriendsPosts(
-                        (User) authentication.getPrincipal(),
-                        PageRequest.of(page, size)
+                new PageDto<>(
+                    postService.getFriendsPosts(
+                            (User) authentication.getPrincipal(),
+                            PageRequest.of(page, size)
+                    ), postConverter
                 )
         );
     }
@@ -44,15 +51,16 @@ public class PostController {
     @GetMapping("/users/{userId}")
     public ResponseEntity<PageDto<Post, PostDto>> getUserPosts(
             Authentication authentication,
-            @PathVariable String userId,
+            @PathVariable UUID userId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(
-                postService.getUserPosts(
-                    userId,
-                    PageRequest.of(page, size, Sort.by(Sort.Order.desc("postedTime"))),
-                    (User) authentication.getPrincipal()
+                new PageDto<>(
+                    postService.getUserPosts(
+                            (User) authentication.getPrincipal(), userId,
+                        PageRequest.of(page, size, Sort.by(Sort.Order.desc("postedTime")))
+                    ), postConverter
                 )
         );
     }
@@ -62,8 +70,8 @@ public class PostController {
         return new ResponseEntity<>(
                 postConverter.convertToModel(
                     postService.createPost(
-                            postConverter.convertToEntity(postDto),
-                            (User) authentication.getPrincipal()
+                            (User) authentication.getPrincipal(),
+                            postConverter.convertToEntity(postDto)
                     )
                 ), HttpStatus.CREATED
         );
@@ -74,9 +82,8 @@ public class PostController {
         return ResponseEntity.ok(
                 postConverter.convertToModel(
                     postService.updatePost(
-                            postDto.id(),
-                            postDto.title(),
-                            (User) authentication.getPrincipal()
+                            (User) authentication.getPrincipal(), postDto.id(),
+                            postDto.title()
                     )
                 )
         );
@@ -84,22 +91,26 @@ public class PostController {
 
     @DeleteMapping("/{postId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePost(Authentication authentication, @PathVariable String postId) {
+    public void deletePost(Authentication authentication, @PathVariable UUID postId) {
         postService.deletePost((User) authentication.getPrincipal(), postId);
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<PostDto> getPostById(@PathVariable String postId, Authentication authentication) {
+    public ResponseEntity<PostDto> getPostById(
+            Authentication authentication, @PathVariable UUID postId
+    ) {
         return ResponseEntity.ok(
                 postConverter.convertToModel(
-                    postService.getPostById(postId, (User) authentication.getPrincipal())
+                    postService.getPostById((User) authentication.getPrincipal(), postId)
                 )
         );
     }
 
     @PostMapping("/{postId}/like")
-    public ResponseEntity<LikeDto> likePost(@PathVariable String postId, Authentication authentication) {
-        Like like = postService.likePost(postId, (User) authentication.getPrincipal());
+    public ResponseEntity<LikeDto> likePost(
+            Authentication authentication, @PathVariable UUID postId
+    ) {
+        Like like = postService.likePost((User) authentication.getPrincipal(), postId);
 
         return new ResponseEntity<>(
                 new LikeDto(
@@ -113,8 +124,10 @@ public class PostController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{postId}/dislike")
-    public void removeLike(@PathVariable String postId, Authentication authentication) {
-        postService.removeLike(postId, (User) authentication.getPrincipal());
+    public void removeLike(
+            Authentication authentication, @PathVariable UUID postId
+    ) {
+        postService.removeLike((User) authentication.getPrincipal(), postId);
     }
 
     @GetMapping("/liked")
@@ -124,9 +137,11 @@ public class PostController {
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(
-                postService.getUserLikedPosts(
-                        (User) authentication.getPrincipal(),
-                        PageRequest.of(page, size, Sort.by(Sort.Order.desc("postedTime")))
+                new PageDto<>(
+                    postService.getUserLikedPosts(
+                            (User) authentication.getPrincipal(),
+                            PageRequest.of(page, size, Sort.by(Sort.Order.desc("postedTime")))
+                    ), postConverter
                 )
         );
     }
@@ -134,15 +149,17 @@ public class PostController {
     @GetMapping("/{postId}/comments")
     public ResponseEntity<PageDto<Comment, CommentDto>> getComments(
             Authentication authentication,
-            @PathVariable String postId,
+            @PathVariable UUID postId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(
-                postService.getComments(
-                        (User) authentication.getPrincipal(),
-                        postId,
-                        PageRequest.of(page, size, Sort.by(Sort.Order.desc("commentedTime")))
+                new PageDto<>(
+                    postService.getComments(
+                            (User) authentication.getPrincipal(),
+                            postId,
+                            PageRequest.of(page, size, Sort.by(Sort.Order.desc("commentedTime")))
+                    ), commentConverter
                 )
         );
     }

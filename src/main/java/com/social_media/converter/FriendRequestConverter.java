@@ -1,7 +1,6 @@
 package com.social_media.converter;
 
 import com.social_media.entity.FriendRequest;
-import com.social_media.entity.FriendshipStatus;
 import com.social_media.entity.User;
 import com.social_media.model.FriendRequestDto;
 import org.springframework.stereotype.Component;
@@ -15,7 +14,7 @@ public class FriendRequestConverter implements
     public FriendRequest convertToEntity(FriendRequestDto model) {
         FriendRequest friendRequest = new FriendRequest();
         friendRequest.setId(model.id());
-        friendRequest.setStatus(FriendshipStatus.valueOf(model.status()));
+        friendRequest.setStatus(FriendRequest.Status.valueOf(model.status()));
         return friendRequest;
     }
 
