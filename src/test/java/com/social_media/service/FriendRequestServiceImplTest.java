@@ -75,12 +75,12 @@ class FriendRequestServiceImplTest {
     }
 
     @Test
-    void addFriend() {
+    void createFriendRequest() {
         when(userRepository.findById(user2.getId())).thenReturn(Optional.ofNullable(user2));
-        when(friendRequestRepository.existsByUserIdFriendId(friendRequest.getUser().getId(), friendRequest.getFriend().getId())).thenReturn(false);
+        when(friendRequestRepository.existsByUserIdTargetUserId(friendRequest.getUser().getId(), friendRequest.getFriend().getId())).thenReturn(false);
         when(friendRequestRepository.save(any(FriendRequest.class))).thenReturn(friendRequest);
 
-        FriendRequest response = friendRequestService.addFriend(user1, user2.getId());
+        FriendRequest response = friendRequestService.createFriendRequest(user1, user2.getId());
 
         assertEquals(friendRequest.getUser().getId(), response.getUser().getId());
         assertEquals(FriendshipStatus.PENDING, response.getStatus());
@@ -89,39 +89,39 @@ class FriendRequestServiceImplTest {
     }
 
     @Test
-    void addFriendShouldThrowResourceNotFoundException() {
+    void createFriendRequestShouldThrowResourceNotFoundException() {
         when(userRepository.findById(user2.getId()))
                 .thenThrow(ResourceNotFoundException.class);
 
-        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.addFriend(user1, user2.getId()));
+        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.createFriendRequest(user1, user2.getId()));
     }
 
     @Test
-    void addFriendShouldThrowResourceAlreadyExistsException() {
+    void createFriendRequestShouldThrowResourceAlreadyExistsException() {
         when(userRepository.findById(user2.getId()))
                 .thenReturn(Optional.ofNullable(user2));
-        when(friendRequestRepository.existsByUserIdFriendId(anyString(), anyString())).thenReturn(true);
+        when(friendRequestRepository.existsByUserIdTargetUserId(anyString(), anyString())).thenReturn(true);
 
-        assertThrows(ResourceAlreadyExistsException.class, () -> friendRequestService.addFriend(user1, user2.getId()));
+        assertThrows(ResourceAlreadyExistsException.class, () -> friendRequestService.createFriendRequest(user1, user2.getId()));
     }
 
     @Test
-    void acceptFriend() {
+    void updateFriendRequestStatus() {
         when(friendRequestRepository.findById(friendRequest.getId())).thenReturn(Optional.ofNullable(friendRequest));
         when(friendRequestRepository.save(friendRequest)).thenReturn(friendRequest);
 
-        FriendRequest response = friendRequestService.acceptFriend(user2, friendRequest.getId());
+        FriendRequest response = friendRequestService.updateFriendRequestStatus(user2, friendRequest.getId());
 
         assertEquals(FriendshipStatus.ACCEPTED, response.getStatus());
         verify(friendRequestRepository, times(1)).save(friendRequest);
     }
 
     @Test
-    void acceptFriendShouldThrowResourceNotFoundException() {
+    void updateFriendRequestStatusShouldThrowResourceNotFoundException() {
         when(friendRequestRepository.findById(friendRequest.getId()))
                 .thenThrow(ResourceNotFoundException.class);
 
-        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.acceptFriend(user2, friendRequest.getId()));
+        assertThrows(ResourceNotFoundException.class, () -> friendRequestService.updateFriendRequestStatus(user2, friendRequest.getId()));
     }
 
     @Test
@@ -134,15 +134,15 @@ class FriendRequestServiceImplTest {
 
         Page<FriendRequest> page = new PageImpl<>(friendRequests, pageable, friendRequests.size());
 
-        when(friendRequestRepository.findByUserFriend_FriendAndStatus(user1, FriendshipStatus.ACCEPTED, pageable))
+        when(friendRequestRepository.findByUserStatus(user1, FriendshipStatus.ACCEPTED, pageable))
                 .thenReturn(page);
 
-        PageDto<FriendRequest, FriendRequestDto> response = friendRequestService.getFriends(user1, pageable);
+        PageDto<FriendRequest, FriendRequestDto> response = friendRequestService.getFriendRequestsByStatus(user1, , pageable);
 
         assertEquals(page.getContent().size(), response.getContent().size());
         assertEquals(page.getTotalPages(), response.getTotalPages());
         assertEquals(page.getNumber(), response.getPageNo());
-        verify(friendRequestRepository, times(1)).findByUserFriend_FriendAndStatus(user1, FriendshipStatus.ACCEPTED,pageable);
+        verify(friendRequestRepository, times(1)).findByUserStatus(user1, FriendshipStatus.ACCEPTED,pageable);
     }
 
     @Test

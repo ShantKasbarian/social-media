@@ -59,12 +59,12 @@ class CommentControllerTest {
         post = new Post();
         post.setId(UUID.randomUUID().toString());
         post.setPostedTime(LocalDateTime.now());
-        post.setTitle("some title");
+        post.setTitle("some text");
         post.setUser(user);
 
         comment = new Comment(
                 UUID.randomUUID().toString(),
-                "some comment",
+                "some text",
                 LocalDateTime.now(),
                 post,
                 user
@@ -83,7 +83,7 @@ class CommentControllerTest {
     @Test
     void comment() {
         when(commentConverter.convertToModel(any(Comment.class))).thenReturn(commentDto);
-        when(commentService.comment(anyString(), anyString(), any(User.class))).thenReturn(comment);
+        when(commentService.createComment(anyString(), , anyString())).thenReturn(comment);
         when(authentication.getPrincipal()).thenReturn(user);
 
         ResponseEntity<CommentDto> response = commentController.comment(commentDto, authentication);
@@ -91,7 +91,7 @@ class CommentControllerTest {
         assertNotNull(response);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(commentDto.comment(), response.getBody().comment());
+        assertEquals(commentDto.text(), response.getBody().text());
     }
 
     @Test
@@ -107,7 +107,7 @@ class CommentControllerTest {
     @Test
     void updateComment() {
         when(commentConverter.convertToModel(any(Comment.class))).thenReturn(commentDto);
-        when(commentService.editComment(any(User.class), anyString(), anyString()))
+        when(commentService.updateComment(any(User.class), anyString()))
                 .thenReturn(comment);
         when(authentication.getPrincipal()).thenReturn(user);
 
@@ -115,7 +115,7 @@ class CommentControllerTest {
 
         assertNotNull(response);
         assertNotNull(response.getBody());
-        assertEquals(comment.getContent(), response.getBody().comment());
+        assertEquals(comment.getContent(), response.getBody().text());
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 }

@@ -8,9 +8,8 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface FriendRequestService {
-    FriendRequest addFriend(User user, UUID targetUserId);
-    FriendRequest acceptFriend(User user, UUID requestId);
-    Page<FriendRequest> getFriends(User user, Pageable pageable);
-    Page<FriendRequest> getPendingUsers(User user, Pageable pageable);
-    FriendRequest declineFriendRequest(User user, UUID requestId);
+    FriendRequest createFriendRequest(User user, UUID targetUserId);
+    FriendRequest updateFriendRequestStatus(User user, UUID requestId, FriendRequest.Status status);
+    void deleteFriendRequest(User user, UUID requestId);
+    Page<FriendRequest> getFriendRequestsByStatus(User user, FriendRequest.Status status,Pageable pageable);
 }

@@ -27,22 +27,21 @@ public class FriendRequest {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "friend_id")
-    private User friend;
+    @JoinColumn(name = "target_user_id")
+    private User targetUser;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    public FriendRequest(User user, User friend, Status status) {
+    public FriendRequest(User user, User targetUser, Status status) {
         this.user = user;
-        this.friend = friend;
+        this.targetUser = targetUser;
         this.status = status;
     }
 
     public enum Status {
         ACCEPTED,
-        DECLINED,
         BLOCKED,
         PENDING
     }

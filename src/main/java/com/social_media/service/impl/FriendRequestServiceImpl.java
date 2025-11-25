@@ -27,7 +27,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     private static final String FRIEND_REQUEST_NOT_FOUND_MESSAGE = "friend request not found";
 
-    private static final String UNABLE_TO_DECLINE_FRIEND_REQUEST = "cannot decline friend request";
+    private static final String UNABLE_TO_DELETE_FRIEND_REQUEST = "cannot delete friend request";
 
     private final FriendRequestRepository friendRequestRepository;
 
@@ -35,23 +35,23 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     @Override
     @Transactional
-    public FriendRequest addFriend(User user, UUID targetUserId) {
+    public FriendRequest createFriendRequest(User user, UUID targetUserId) {
         User targetUser = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
 
         UUID currentUserId = user.getId();
 
-        if (friendRequestRepository.isFriendRequestBlockedByUserIdFriendId(currentUserId, targetUserId)) {
+        if (friendRequestRepository.existsByUserIdTargetUserIdStatus(currentUserId, targetUserId, FriendRequest.Status.BLOCKED)) {
             throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
-        if (friendRequestRepository.existsByUserIdFriendId(currentUserId, targetUserId)) {
+        if (friendRequestRepository.existsByUserIdTargetUserId(currentUserId, targetUserId)) {
             throw new ResourceAlreadyExistsException(FRIEND_REQUEST_ALREADY_SENT_MESSAGE);
         }
 
         FriendRequest friendRequest = new FriendRequest();
         friendRequest.setUser(user);
-        friendRequest.setFriend(targetUser);
+        friendRequest.setTargetUser(targetUser);
         friendRequest.setStatus(FriendRequest.Status.PENDING);
 
         return friendRequestRepository.save(friendRequest);
@@ -59,11 +59,11 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     @Override
     @Transactional
-    public FriendRequest acceptFriend(User user, UUID requestId) {
+    public FriendRequest updateFriendRequestStatus(User user, UUID requestId, FriendRequest.Status status) {
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
-        if (!user.getId().equals(friendRequest.getFriend().getId())) {
+        if (!user.getId().equals(friendRequest.getTargetUser().getId())) {
             throw new RequestNotAllowedException(FRIEND_REQUEST_NOT_FOUND_MESSAGE);
         }
 
@@ -71,41 +71,31 @@ public class FriendRequestServiceImpl implements FriendRequestService {
             throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
-        friendRequest.setStatus(FriendRequest.Status.ACCEPTED);
+        friendRequest.setStatus(status);
+
         return friendRequestRepository.save(friendRequest);
     }
 
     @Override
-    public Page<FriendRequest> getFriends(User user, Pageable pageable) {
-        return friendRequestRepository.findByUserFriend_FriendAndStatus(
-                user,
-                FriendRequest.Status.ACCEPTED,
-                pageable
-        );
-    }
-
-    @Override
-    public Page<FriendRequest> getPendingUsers(User user, Pageable pageable) {
-        return friendRequestRepository.findByFriend(user, pageable);
-    }
-
-    @Override
     @Transactional
-    public FriendRequest declineFriendRequest(User user, UUID requestId) {
+    public void deleteFriendRequest(User user, UUID requestId) {
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
         UUID userId = user.getId();
 
-        if (!friendRequest.getFriend().getId().equals(userId)) {
-            throw new RequestNotAllowedException(UNABLE_TO_DECLINE_FRIEND_REQUEST);
+        if (
+                !friendRequest.getTargetUser().getId().equals(userId) &&
+                friendRequest.getStatus().equals(FriendRequest.Status.BLOCKED)
+        ) {
+            throw new RequestNotAllowedException(UNABLE_TO_DELETE_FRIEND_REQUEST);
         }
 
-        if (friendRequestRepository.isFriendRequestBlocked(requestId)) {
-            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
-        }
+        friendRequestRepository.delete(friendRequest);
+    }
 
-        friendRequest.setStatus(FriendRequest.Status.DECLINED);
-        return friendRequestRepository.save(friendRequest);
+    @Override
+    public Page<FriendRequest> getFriendRequestsByStatus(User user, FriendRequest.Status status, Pageable pageable) {
+        return friendRequestRepository.findByUserStatus(user, status, pageable);
     }
 }

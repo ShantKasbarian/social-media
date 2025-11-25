@@ -213,7 +213,7 @@ class UserServiceImplTest {
 
         when(userRepository.findById(user2.getId())).thenReturn(Optional.of(user2));
         when(userRepository.save(user)).thenReturn(user);
-        when(friendRequestRepository.findByUserIdFriendId(user.getId(), user2.getId()))
+        when(friendRequestRepository.findByUserIdTargetUserId(user.getId(), user2.getId()))
                 .thenReturn(Optional.ofNullable(friendRequest));
 
 
@@ -268,7 +268,7 @@ class UserServiceImplTest {
 
         when(userRepository.findById(anyString())).thenReturn(Optional.ofNullable(user2));
         when(userRepository.save(user)).thenReturn(user);
-        when(friendRequestRepository.findByUserIdFriendId(user.getId(), user2.getId()))
+        when(friendRequestRepository.findByUserIdTargetUserId(user.getId(), user2.getId()))
                 .thenReturn(Optional.of(friendRequest));
         when(friendRequestRepository.save(friendRequest)).thenReturn(friendRequest);
 

@@ -16,40 +16,40 @@ import java.util.UUID;
 public interface FriendRequestRepository extends JpaRepository<FriendRequest, UUID> {
     @Query("""
         SELECT COUNT(f) = 1 FROM FriendRequest f
-        WHERE (f.user.id = :userId AND f.friend.id = :friendId) OR
-        (f.user.id = :friendId AND f.friend.id = :userId)
+        WHERE (f.user.id = :userId AND f.targetUser.id = :targetUserId) OR
+        (f.user.id = :targetUserId AND f.targetUser.id = :userId)
     """)
-    boolean existsByUserIdFriendId(@Param("userId") UUID userId, @Param("friendId") UUID friendId);
-
-    @Query("""
-        FROM FriendRequest f
-        WHERE (f.user.id = :userId AND f.friend.id = :friendId) OR
-        (f.user.id = :friendId AND f.friend.id = :userId)
-    """)
-    Optional<FriendRequest> findByUserIdFriendId(@Param("userId") UUID userId, @Param("friendId") UUID friendId);
-
-    @Query("""
-        FROM FriendRequest f
-        WHERE (f.friend = :friend OR f.user = :friend) AND
-        f.status = :status
-    """)
-    Page<FriendRequest> findByUserFriend_FriendAndStatus(User friend, FriendRequest.Status status, Pageable pageable);
-
-    @Query("""
-        FROM FriendRequest f
-        WHERE f.friend = :friend AND
-        f.status = PENDING
-    """)
-    Page<FriendRequest> findByFriend(User friend, Pageable pageable);
+    boolean existsByUserIdTargetUserId(@Param("userId") UUID userId, @Param("targetUserId") UUID targetUserId);
 
     @Query("""
         SELECT COUNT(f) > 0 FROM FriendRequest f
-        WHERE (f.user.id = :currentUserId AND f.friend.id = :targetUserId) OR
-        (f.user.id = :targetUserId AND f.friend.id = :currentUserId) AND
-        f.status = BLOCKED
+        WHERE (f.user.id = :currentUserId AND f.targetUser.id = :targetUserId) OR
+        (f.user.id = :targetUserId AND f.targetUser.id = :currentUserId) AND
+        f.status = :status
     """)
-    boolean isFriendRequestBlockedByUserIdFriendId(UUID currentUserId, UUID targetUserId);
+    boolean existsByUserIdTargetUserIdStatus(UUID currentUserId, UUID targetUserId, FriendRequest.Status status);
 
-    @Query("SELECT COUNT(f) > 0 FROM FriendRequest f WHERE f.id = :id AND f.status = BLOCKED")
-    boolean isFriendRequestBlocked(UUID id);
+    @Query("SELECT COUNT(f) > 0 FROM FriendRequest f WHERE f.id = :id AND f.status = :status")
+    boolean existsByIdStatus(UUID id, FriendRequest.Status status);
+
+    @Query("""
+        FROM FriendRequest f
+        WHERE (f.user.id = :userId AND f.targetUser.id = :targetUserId) OR
+        (f.user.id = :targetUserId AND f.targetUser.id = :userId)
+    """)
+    Optional<FriendRequest> findByUserIdTargetUserId(@Param("userId") UUID userId, @Param("targetUserId") UUID targetUserId);
+
+    @Query("""
+        FROM FriendRequest f
+        WHERE (f.targetUser = :user OR f.user = :user) AND
+        f.status = :status
+    """)
+    Page<FriendRequest> findByUserStatus(User targetUser, FriendRequest.Status status, Pageable pageable);
+
+    @Query("""
+        FROM FriendRequest f
+        WHERE f.targetUser = :targetUser AND
+        f.status = :status
+    """)
+    Page<FriendRequest> findByTargetUserStatus(User targetUser, FriendRequest.Status status, Pageable pageable);
 }

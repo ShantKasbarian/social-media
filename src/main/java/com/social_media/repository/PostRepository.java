@@ -30,5 +30,5 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
         LEFT JOIN Like l ON l.post.id = p.id
         WHERE l.user = :user
     """)
-    Page<Post> findByLikesUser(@Param("user") User user, Pageable pageable);
+    Page<Post> findByUserLikes(@Param("user") User user, Pageable pageable);
 }

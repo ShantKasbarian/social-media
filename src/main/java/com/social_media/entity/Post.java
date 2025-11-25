@@ -24,14 +24,14 @@ public class Post {
     @Column(name = "id")
     private UUID id;
 
-    @Column(name = "title", nullable = false)
-    private String title;
+    @Column(name = "text", nullable = false)
+    private String text;
 
     @OneToMany(mappedBy = "post")
     private List<Like> likes;
 
-    @Column(name = "posted_time")
-    private LocalDateTime postedTime;
+    @Column(name = "time")
+    private LocalDateTime time;
 
     @OneToMany(mappedBy = "post")
     private List<Comment> comments;

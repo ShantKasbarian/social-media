@@ -7,7 +7,7 @@ public record PostDto(
         UUID id,
         UUID userId,
         String username,
-        String title,
+        String text,
         Long likes,
         LocalDateTime postedTime
 ) {

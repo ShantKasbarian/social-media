@@ -71,7 +71,7 @@ class PostControllerTest {
         post = new Post();
         post.setId(UUID.randomUUID().toString());
         post.setPostedTime(LocalDateTime.now());
-        post.setTitle("some title");
+        post.setTitle("some text");
         post.setUser(user);
         post.setLikes(new ArrayList<>());
 
@@ -142,7 +142,7 @@ class PostControllerTest {
     @Test
     void updatePost() {
         when(postConverter.convertToModel(post)).thenReturn(postDto);
-        when(postService.updatePost(user, postDto.id(), postDto.title())).thenReturn(post);
+        when(postService.updatePost(user, postDto.id(), postDto.text())).thenReturn(post);
         when(authentication.getPrincipal()).thenReturn(user);
 
         ResponseEntity<PostDto> response = postController.updatePost(postDto, authentication);
@@ -166,7 +166,7 @@ class PostControllerTest {
     @Test
     void getPostById() {
         when(postConverter.convertToModel(post)).thenReturn(postDto);
-        when(postService.getPostById(user, post.getId())).thenReturn(post);
+        when(postService.getPostById(post.getId())).thenReturn(post);
         when(authentication.getPrincipal()).thenReturn(user);
 
         ResponseEntity<PostDto> response = postController.getPostById(post.getId(), authentication);
@@ -224,7 +224,7 @@ class PostControllerTest {
     void getComments() {
         Comment comment = new Comment(
                 UUID.randomUUID().toString(),
-                "some comment",
+                "some text",
                 LocalDateTime.now(),
                 post,
                 user

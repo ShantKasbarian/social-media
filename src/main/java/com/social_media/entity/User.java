@@ -56,16 +56,9 @@ public class User implements UserDetails {
     @JoinTable(
             name = "friend_requests",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "friend_id")
+            inverseJoinColumns = @JoinColumn(name = "target_user_id")
     )
     private List<FriendRequest> friendRequests;
-
-    @JoinTable(
-            name = "blocked_users",
-            joinColumns = @JoinColumn(name = "blocker_id"),
-            inverseJoinColumns = @JoinColumn(name = "target_id")
-    )
-    private List<User> blockedUsers;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

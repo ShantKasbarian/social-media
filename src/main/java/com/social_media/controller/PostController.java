@@ -1,18 +1,16 @@
 package com.social_media.controller;
 
 import com.social_media.converter.CommentConverter;
-import com.social_media.converter.PostConverter;
-import com.social_media.entity.Comment;
-import com.social_media.entity.Like;
+import com.social_media.converter.ToEntityConverter;
+import com.social_media.converter.ToModelConverter;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
-import com.social_media.model.CommentDto;
-import com.social_media.model.LikeDto;
 import com.social_media.model.PageDto;
 import com.social_media.model.PostDto;
 import com.social_media.service.PostService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,30 +19,74 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@AllArgsConstructor
 @RestController
 @RequestMapping("/posts")
+@AllArgsConstructor
 public class PostController {
+    private static final String TIME_PROPERTY = "time";
+
     private final PostService postService;
 
-    private final PostConverter postConverter;
+    private final ToModelConverter<Post, PostDto> postToModelConverter;
+
+    private final ToEntityConverter<Post, PostDto> postToEntityConverter;
 
     private final CommentConverter commentConverter;
 
+    @PostMapping
+    public ResponseEntity<PostDto> createPost(
+            Authentication authentication, @RequestBody PostDto postDto
+    ) {
+        User user = (User) authentication.getPrincipal();
+
+        var post = postToModelConverter.convertToModel(
+                postService.createPost(user, postToEntityConverter.convertToEntity(postDto))
+        );
+
+        return new ResponseEntity<>(post, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostDto> getPostById(@PathVariable UUID postId) {
+        var post = postToModelConverter.convertToModel(postService.getPostById(postId));
+
+        return ResponseEntity.ok(post);
+    }
+
+    @PutMapping
+    public ResponseEntity<PostDto> updatePost(
+            Authentication authentication, @RequestBody PostDto postDto
+    ) {
+        User user = (User) authentication.getPrincipal();
+
+        var post = postToModelConverter.convertToModel(
+                postService.updatePost(user, postDto.id(), postDto.text())
+        );
+
+        return ResponseEntity.ok(post);
+    }
+
+    @DeleteMapping("/{postId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePost(Authentication authentication, @PathVariable UUID postId) {
+        User user = (User) authentication.getPrincipal();
+        postService.deletePost(user, postId);
+    }
+
     @GetMapping
     public ResponseEntity<PageDto<Post, PostDto>> getPosts(
+            Authentication authentication,
             @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size,
-            Authentication authentication
+            @RequestParam(required = false, defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(
-                new PageDto<>(
-                    postService.getFriendsPosts(
-                            (User) authentication.getPrincipal(),
-                            PageRequest.of(page, size)
-                    ), postConverter
-                )
+        User user = (User) authentication.getPrincipal();
+
+        var posts = new PageDto<>(
+                postService.getFriendsPosts(user, PageRequest.of(page, size)),
+                postToModelConverter
         );
+
+        return ResponseEntity.ok(posts);
     }
 
 
@@ -55,112 +97,30 @@ public class PostController {
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(
-                new PageDto<>(
-                    postService.getUserPosts(
-                            (User) authentication.getPrincipal(), userId,
-                        PageRequest.of(page, size, Sort.by(Sort.Order.desc("postedTime")))
-                    ), postConverter
-                )
+        User user = (User) authentication.getPrincipal();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("time")));
+
+        var posts = new PageDto<>(
+                postService.getUserPosts(user, userId, pageable),
+                postToModelConverter
         );
+
+        return ResponseEntity.ok(posts);
     }
 
-    @PostMapping
-    public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto, Authentication authentication) {
-        return new ResponseEntity<>(
-                postConverter.convertToModel(
-                    postService.createPost(
-                            (User) authentication.getPrincipal(),
-                            postConverter.convertToEntity(postDto)
-                    )
-                ), HttpStatus.CREATED
-        );
-    }
-
-    @PutMapping
-    public ResponseEntity<PostDto> updatePost(@RequestBody PostDto postDto, Authentication authentication) {
-        return ResponseEntity.ok(
-                postConverter.convertToModel(
-                    postService.updatePost(
-                            (User) authentication.getPrincipal(), postDto.id(),
-                            postDto.title()
-                    )
-                )
-        );
-    }
-
-    @DeleteMapping("/{postId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePost(Authentication authentication, @PathVariable UUID postId) {
-        postService.deletePost((User) authentication.getPrincipal(), postId);
-    }
-
-    @GetMapping("/{postId}")
-    public ResponseEntity<PostDto> getPostById(
-            Authentication authentication, @PathVariable UUID postId
-    ) {
-        return ResponseEntity.ok(
-                postConverter.convertToModel(
-                    postService.getPostById((User) authentication.getPrincipal(), postId)
-                )
-        );
-    }
-
-    @PostMapping("/{postId}/like")
-    public ResponseEntity<LikeDto> likePost(
-            Authentication authentication, @PathVariable UUID postId
-    ) {
-        Like like = postService.likePost((User) authentication.getPrincipal(), postId);
-
-        return new ResponseEntity<>(
-                new LikeDto(
-                        like.getId(),
-                        like.getUser().getId(),
-                        like.getUser().getUsername(),
-                        like.getPost().getId()
-                ), HttpStatus.CREATED
-        );
-    }
-
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{postId}/dislike")
-    public void removeLike(
-            Authentication authentication, @PathVariable UUID postId
-    ) {
-        postService.removeLike((User) authentication.getPrincipal(), postId);
-    }
-
-    @GetMapping("/liked")
+    @GetMapping("/likes")
     public ResponseEntity<PageDto<Post, PostDto>> getUserLikedPosts(
             Authentication authentication,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(
-                new PageDto<>(
-                    postService.getUserLikedPosts(
-                            (User) authentication.getPrincipal(),
-                            PageRequest.of(page, size, Sort.by(Sort.Order.desc("postedTime")))
-                    ), postConverter
-                )
-        );
-    }
+        User user = (User) authentication.getPrincipal();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc(TIME_PROPERTY)));
 
-    @GetMapping("/{postId}/comments")
-    public ResponseEntity<PageDto<Comment, CommentDto>> getComments(
-            Authentication authentication,
-            @PathVariable UUID postId,
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size
-    ) {
-        return ResponseEntity.ok(
-                new PageDto<>(
-                    postService.getComments(
-                            (User) authentication.getPrincipal(),
-                            postId,
-                            PageRequest.of(page, size, Sort.by(Sort.Order.desc("commentedTime")))
-                    ), commentConverter
-                )
+        var posts = new PageDto<>(
+                postService.getUserLikedPosts(user, pageable), postToModelConverter
         );
+
+        return ResponseEntity.ok(posts);
     }
 }

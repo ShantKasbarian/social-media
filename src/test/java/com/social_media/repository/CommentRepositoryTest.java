@@ -47,11 +47,11 @@ class CommentRepositoryTest {
         post.setId(UUID.randomUUID().toString());
         post.setUser(user);
         post.setPostedTime(LocalDateTime.now());
-        post.setTitle("some title");
+        post.setTitle("some text");
 
         comment = new Comment(
                 UUID.randomUUID().toString(),
-                "some comment",
+                "some text",
                 LocalDateTime.now(),
                 post,
                 user

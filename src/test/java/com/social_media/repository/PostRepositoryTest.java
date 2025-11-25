@@ -50,7 +50,7 @@ class PostRepositoryTest {
         post.setId(UUID.randomUUID().toString());
         post.setUser(user);
         post.setPostedTime(LocalDateTime.now());
-        post.setTitle("some title");
+        post.setTitle("some text");
 
         user2 = new User();
         user2.setId(UUID.randomUUID().toString());
@@ -117,12 +117,12 @@ class PostRepositoryTest {
     }
 
     @Test
-    void findByLikesUser() {
+    void findByUserLikes() {
         postRepository.save(post);
 
         likeRepository.save(new Like(UUID.randomUUID().toString(), user2, post));
 
-        Page<Post> response = postRepository.findByLikesUser(user2, PageRequest.of(0, 10));
+        Page<Post> response = postRepository.findByUserLikes(user2, PageRequest.of(0, 10));
 
         assertFalse(response.getContent().isEmpty());
         assertEquals(post.getId(), response.getContent().getFirst().getId());

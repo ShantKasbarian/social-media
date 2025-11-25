@@ -23,11 +23,11 @@ public class Comment {
     @Column(name = "id")
     private UUID id;
 
-    @Column(name = "content", nullable = false)
-    private String content;
+    @Column(name = "text", nullable = false)
+    private String text;
 
-    @Column(name = "commented_time")
-    private LocalDateTime commentedTime;
+    @Column(name = "time")
+    private LocalDateTime time;
 
     @ManyToOne
     private Post post;

@@ -10,6 +10,8 @@ import com.social_media.repository.PostRepository;
 import com.social_media.service.CommentService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,9 +24,11 @@ public class CommentServiceImpl implements CommentService {
 
     private static final String BLOCKED_MESSAGE = "you have been blocked by this user";
 
-    private static final String COMMENT_NOT_FOUND_MESSAGE = "comment not found";
+    private static final String COMMENT_NOT_FOUND_MESSAGE = "text not found";
 
-    private static final String UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE = "cannot modify or delete the comment of another user";
+    private static final String UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE = "cannot modify or delete the text of another user";
+
+    private static final String BLOCKED_USER_MESSAGE = "you have blocked or have been blocked by this user";
 
     private final CommentRepository commentRepository;
 
@@ -34,25 +38,15 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public Comment comment(User user, UUID postId, String content) {
-        if (content == null || content.isEmpty()) {
-            throw new InvalidProvidedInfoException("comment is empty");
-        }
-
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
-
-        FriendRequest friendRequest = friendRequestRepository.findByUserIdFriendId(user.getId(), post.getUser().getId())
-                .orElse(null);
+    public Comment createComment(User user, Comment comment) {
+        FriendRequest friendRequest = friendRequestRepository.findByUserIdTargetUserId(
+                user.getId(), comment.getPost().getUser().getId()).orElse(null);
 
         if (friendRequest != null && friendRequest.getStatus().equals(FriendRequest.Status.BLOCKED)) {
             throw new RequestNotAllowedException(BLOCKED_MESSAGE);
         }
 
-        Comment comment = new Comment();
-        comment.setContent(content);
-        comment.setCommentedTime(LocalDateTime.now());
-        comment.setPost(post);
+        comment.setTime(LocalDateTime.now());
         comment.setUser(user);
 
         return commentRepository.save(comment);
@@ -60,20 +54,17 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public Comment editComment(User user, UUID id, String content) {
-        if (content == null || content.isEmpty()) {
-            throw new InvalidProvidedInfoException("content must be specified");
-        }
-
-        Comment comment = commentRepository.findById(id)
+    public Comment updateComment(User user, Comment comment) {
+        Comment targetComment = commentRepository.findById(comment.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(COMMENT_NOT_FOUND_MESSAGE));
 
-        if (!comment.getUser().getId().equals(user.getId())) {
+        if (!targetComment.getUser().getId().equals(user.getId())) {
             throw new RequestNotAllowedException(UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE);
         }
 
-        comment.setContent(content);
-        return commentRepository.save(comment);
+        comment.setText(comment.getText());
+
+        return commentRepository.save(targetComment);
     }
 
     @Override
@@ -87,5 +78,17 @@ public class CommentServiceImpl implements CommentService {
         }
 
         commentRepository.delete(comment);
+    }
+
+    @Override
+    public Page<Comment> getCommentsByPostId(User user, UUID postId, Pageable pageable) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
+
+        if (friendRequestRepository.existsByUserIdTargetUserIdStatus(user.getId(), post.getUser().getId(), FriendRequest.Status.BLOCKED)) {
+            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
+        }
+
+        return commentRepository.findByPostId(postId, pageable);
     }
 }

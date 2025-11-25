@@ -1,6 +1,6 @@
 package com.social_media.controller;
 
-import com.social_media.converter.FriendRequestConverter;
+import com.social_media.converter.ToModelConverter;
 import com.social_media.entity.FriendRequest;
 import com.social_media.entity.User;
 import com.social_media.model.FriendRequestDto;
@@ -15,82 +15,67 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@AllArgsConstructor
 @RestController
-@RequestMapping("/friends")
+@RequestMapping("/friend-requests")
+@AllArgsConstructor
 public class FriendRequestController {
     private final FriendRequestService friendRequestService;
 
-    private final FriendRequestConverter friendRequestConverter;
+    private final ToModelConverter<FriendRequest, FriendRequestDto> friendRequestToModelConverter;
 
-    @PostMapping("/{friendId}")
-    public ResponseEntity<FriendRequestDto> addFriend(Authentication authentication, @PathVariable UUID friendId) {
-        return new ResponseEntity<>(
-                friendRequestConverter.convertToModel(
-                    friendRequestService.addFriend(
-                            (User) authentication.getPrincipal(), friendId
-                    )
-                ), HttpStatus.CREATED
+    @PostMapping("/users/{targetUserId}")
+    public ResponseEntity<FriendRequestDto> createFriendRequest(
+            Authentication authentication, @PathVariable UUID targetUserId
+    ) {
+        User user = (User) authentication.getPrincipal();
+
+        var friendRequest = friendRequestToModelConverter.convertToModel(
+                friendRequestService.createFriendRequest(user, targetUserId)
         );
+
+        return new ResponseEntity<>(friendRequest, HttpStatus.CREATED);
     }
 
-    @PutMapping("/request/{requestId}/accept")
-    public ResponseEntity<FriendRequestDto> acceptFriend(Authentication authentication, @PathVariable UUID requestId) {
-        return ResponseEntity.ok(
-                friendRequestConverter.convertToModel(
-                    friendRequestService.acceptFriend(
-                            (User) authentication.getPrincipal(), requestId
-                    )
+    @PatchMapping
+    public ResponseEntity<FriendRequestDto> updateFriendRequestStatus(
+            Authentication authentication, @RequestBody FriendRequestDto friendRequestDto
+    ) {
+        User user = (User) authentication.getPrincipal();
+
+        var friendRequest = friendRequestToModelConverter.convertToModel(
+                friendRequestService.updateFriendRequestStatus(
+                        user, friendRequestDto.id(), friendRequestDto.status()
                 )
         );
+
+        return ResponseEntity.ok(friendRequest);
     }
 
-    @GetMapping
-    public ResponseEntity<PageDto<FriendRequest, FriendRequestDto>> getFriends(
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteFriendRequest(
+            Authentication authentication, @PathVariable UUID requestId
+    ) {
+        User user = (User) authentication.getPrincipal();
+        friendRequestService.deleteFriendRequest(user, requestId);
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<PageDto<FriendRequest, FriendRequestDto>> getFriendRequestsByStatus(
             Authentication authentication,
+            @PathVariable FriendRequest.Status status,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(
-                new PageDto<>(
-                    friendRequestService.getFriends(
-                        (User) authentication.getPrincipal(),
-                        PageRequest.of(page, size)
-                    ), friendRequestConverter
-                )
+        User user = (User) authentication.getPrincipal();
+
+        var friendRequests = new PageDto<>(
+                friendRequestService.getFriendRequestsByStatus(
+                        user, status, PageRequest.of(page, size)
+                ),
+                friendRequestToModelConverter
         );
+
+        return ResponseEntity.ok(friendRequests);
     }
-
-
-    @GetMapping("/pending")
-    public ResponseEntity<PageDto<FriendRequest, FriendRequestDto>> getPendingUsers(
-            Authentication authentication,
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size
-    ) {
-        return ResponseEntity.ok(
-
-                new PageDto<>(
-                    friendRequestService.getPendingUsers(
-                        (User) authentication.getPrincipal(),
-                        PageRequest.of(page, size)
-                    ), friendRequestConverter
-                )
-        );
-    }
-
-    @PutMapping("/request/{requestId}/decline")
-    public ResponseEntity<FriendRequestDto> declineFriendRequest(
-            @PathVariable UUID requestId, Authentication authentication
-    ) {
-        return ResponseEntity.ok(
-                friendRequestConverter.convertToModel(
-                        friendRequestService.declineFriendRequest(
-                            (User) authentication.getPrincipal(),
-                            requestId
-                        )
-                )
-        );
-    }
-
 }

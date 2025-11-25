@@ -82,12 +82,12 @@ class FriendRequestControllerTest {
     }
 
     @Test
-    void addFriend() {
+    void createFriendRequest() {
         when(friendRequestConverter.convertToModel(any(FriendRequest.class))).thenReturn(friendRequestDto);
-        when(friendRequestService.addFriend(any(User.class), anyString())).thenReturn(friendRequest);
+        when(friendRequestService.createFriendRequest(any(User.class), anyString())).thenReturn(friendRequest);
         when(authentication.getPrincipal()).thenReturn(user1);
 
-        ResponseEntity<FriendRequestDto> response = friendRequestController.addFriend(authentication, user2.getId());
+        ResponseEntity<FriendRequestDto> response = friendRequestController.createFriendRequest(authentication, user2.getId());
 
         assertNotNull(response);
         assertNotNull(response.getBody());
@@ -98,7 +98,7 @@ class FriendRequestControllerTest {
     @Test
     void acceptFriend() {
         when(friendRequestConverter.convertToModel(any(FriendRequest.class))).thenReturn(friendRequestDto);
-        when(friendRequestService.acceptFriend(user2, friendRequest.getId())).thenReturn(friendRequest);
+        when(friendRequestService.updateFriendRequestStatus(user2, friendRequest.getId())).thenReturn(friendRequest);
         when(authentication.getPrincipal()).thenReturn(user2);
 
         ResponseEntity<FriendRequestDto> response = friendRequestController.acceptFriend(authentication, friendRequest.getId());
@@ -118,7 +118,7 @@ class FriendRequestControllerTest {
         Page<FriendRequest> page = new PageImpl<>(content);
         PageDto<FriendRequest, FriendRequestDto> pageDto = new PageDto<>(page, friendRequestConverter);
 
-        when(friendRequestService.getFriends(user1, PageRequest.of(0, 10)))
+        when(friendRequestService.getFriendRequestsByStatus(user1, , PageRequest.of(0, 10)))
                 .thenReturn(pageDto);
         when(authentication.getPrincipal()).thenReturn(user1);
 

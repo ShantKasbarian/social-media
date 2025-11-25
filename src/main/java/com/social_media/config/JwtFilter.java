@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,14 +18,10 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 @Component
+@AllArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final ApplicationContext context;
-
-    public JwtFilter(JwtService jwtService, ApplicationContext context) {
-        this.jwtService = jwtService;
-        this.context = context;
-    }
 
     @Override
     protected void doFilterInternal (

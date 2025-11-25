@@ -9,7 +9,7 @@ import com.social_media.model.TokenDto;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.AuthenticationService;
 import jakarta.transaction.Transactional;
-import org.springframework.context.annotation.Lazy;
+import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +17,7 @@ import static com.social_media.utils.PasswordValidator.INVALID_PASSWORD_MESSAGE;
 import static com.social_media.utils.PasswordValidator.isPasswordValid;
 
 @Service
+@AllArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
     private static final String WRONG_USERNAME_OR_PASSWORD_MESSAGE = "wrong username or password";
 
@@ -30,16 +31,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final PasswordEncoder passwordEncoder;
 
-    public AuthenticationServiceImpl(
-            UserRepository userRepository,
-            JwtService jwtService,
-            @Lazy PasswordEncoder passwordEncoder
-    ) {
-        this.userRepository = userRepository;
-        this.jwtService = jwtService;
-        this.passwordEncoder = passwordEncoder;
-    }
-
     @Override
     public TokenDto login(String username, String password) {
         User user = userRepository.findByUsername(username)
@@ -51,7 +42,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     @Transactional
-    public String signup(User user) {
+    public TokenDto signup(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new ResourceAlreadyExistsException(EMAIL_ALREADY_TAKEN_MESSAGE);
         }
@@ -85,6 +76,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
 
-        return "signup successful";
+        return new TokenDto(jwtService.generateToken(user.getUsername()), user.getUsername(), user.getId());
     }
 }

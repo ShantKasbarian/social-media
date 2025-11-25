@@ -73,7 +73,7 @@ class PostServiceImplTest {
         post.setId(UUID.randomUUID().toString());
         post.setUser(user);
         post.setPostedTime(LocalDateTime.now());
-        post.setTitle("some title");
+        post.setTitle("some text");
     }
 
     @Test
@@ -106,7 +106,7 @@ class PostServiceImplTest {
         when(postRepository.save(post)).thenReturn(post);
 
         String oldTitle = post.getTitle();
-        String expectedTitle = "some title 2";
+        String expectedTitle = "some text 2";
 
         Post response = postService.updatePost(user, post.getId(), expectedTitle);
 
@@ -122,7 +122,7 @@ class PostServiceImplTest {
         when(postRepository.findById(post.getId()))
                 .thenThrow(new ResourceNotFoundException("post not found"));
 
-        assertThrows(ResourceNotFoundException.class, () -> postService.updatePost(user, post.getId(), "some title 2"));
+        assertThrows(ResourceNotFoundException.class, () -> postService.updatePost(user, post.getId(), "some text 2"));
     }
 
     @Test
@@ -132,7 +132,7 @@ class PostServiceImplTest {
 
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
 
-        assertThrows(RequestNotAllowedException.class, () -> postService.updatePost(user2, post.getId(), "some title 2"));
+        assertThrows(RequestNotAllowedException.class, () -> postService.updatePost(user2, post.getId(), "some text 2"));
 
     }
 
@@ -191,7 +191,7 @@ class PostServiceImplTest {
         post2.setId(UUID.randomUUID().toString());
         post2.setUser(user2);
         post2.setPostedTime(LocalDateTime.now());
-        post2.setTitle("some title");
+        post2.setTitle("some text");
 
         List<Post> posts = new ArrayList<>();
         posts.add(post);
@@ -221,7 +221,7 @@ class PostServiceImplTest {
         post2.setId(UUID.randomUUID().toString());
         post2.setUser(user);
         post2.setPostedTime(LocalDateTime.now());
-        post2.setTitle("some title");
+        post2.setTitle("some text");
 
         List<Post> posts = new ArrayList<>();
         posts.add(post);
@@ -233,7 +233,7 @@ class PostServiceImplTest {
                 posts, pageable, posts.size()
         );
 
-        when(friendRequestRepository.findByUserIdFriendId(anyString(), anyString()))
+        when(friendRequestRepository.findByUserIdTargetUserId(anyString(), anyString()))
                 .thenReturn(Optional.empty());
         when(userRepository.findById(user.getId())).thenReturn(Optional.ofNullable(user));
         when(postRepository.findByUser(user, pageable))
@@ -250,7 +250,7 @@ class PostServiceImplTest {
 
     @Test
     void getUserPostsShouldThrowResourceNotFoundException() {
-        when(friendRequestRepository.findByUserIdFriendId(anyString(), anyString()))
+        when(friendRequestRepository.findByUserIdTargetUserId(anyString(), anyString()))
                 .thenReturn(Optional.empty());
         when(postRepository.findById(post.getId())).thenThrow(ResourceNotFoundException.class);
         assertThrows(ResourceNotFoundException.class, () -> postService.getUserPosts(user, user.getId(), PageRequest.of(0, 10)));
@@ -260,7 +260,7 @@ class PostServiceImplTest {
     void getPostById() {
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
 
-        Post response = postService.getPostById(user, post.getId());
+        Post response = postService.getPostById(post.getId());
 
         assertEquals(post.getId(), response.getId());
         assertEquals(post.getTitle(), response.getTitle());
@@ -271,7 +271,7 @@ class PostServiceImplTest {
     @Test
     void getPostByIdShouldThrowResourceNotFoundException() {
         when(postRepository.findById(post.getId())).thenThrow(ResourceNotFoundException.class);
-        assertThrows(ResourceNotFoundException.class, () -> postService.getPostById(user, post.getId()));
+        assertThrows(ResourceNotFoundException.class, () -> postService.getPostById(post.getId()));
     }
 
     @Test
@@ -279,7 +279,7 @@ class PostServiceImplTest {
         Like like = new Like(UUID.randomUUID().toString(), user, post);
 
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
-        when(friendRequestRepository.findByUserIdFriendId(anyString(), anyString())).thenReturn(Optional.empty());
+        when(friendRequestRepository.findByUserIdTargetUserId(anyString(), anyString())).thenReturn(Optional.empty());
         when(likeRepository.existsByPostAndUser(post, user)).thenReturn(false);
         when(likeRepository.save(any(Like.class))).thenReturn(like);
 
@@ -302,7 +302,7 @@ class PostServiceImplTest {
         friendRequest.setStatus(FriendshipStatus.BLOCKED);
 
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
-        when(friendRequestRepository.findByUserIdFriendId(anyString(), anyString())).thenReturn(Optional.of(friendRequest));
+        when(friendRequestRepository.findByUserIdTargetUserId(anyString(), anyString())).thenReturn(Optional.of(friendRequest));
 
         assertThrows(RequestNotAllowedException.class, () -> postService.likePost(user, post.getId()));
     }
@@ -310,7 +310,7 @@ class PostServiceImplTest {
     @Test
     void likePostShouldThrowResourceAlreadyExistsException() {
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
-        when(friendRequestRepository.findByUserIdFriendId(anyString(), anyString())).thenReturn(Optional.empty());
+        when(friendRequestRepository.findByUserIdTargetUserId(anyString(), anyString())).thenReturn(Optional.empty());
         when(likeRepository.existsByPostAndUser(post, user)).thenReturn(true);
         assertThrows(ResourceAlreadyExistsException.class, () -> postService.likePost(user, post.getId()));
     }
@@ -353,7 +353,7 @@ class PostServiceImplTest {
 
         Post post2 = new Post();
         post2.setId(UUID.randomUUID().toString());
-        post2.setTitle("some title 2");
+        post2.setTitle("some text 2");
         post2.setUser(user);
         post2.setPostedTime(LocalDateTime.now());
 
@@ -368,14 +368,14 @@ class PostServiceImplTest {
 
         Page<Post> page = new PageImpl<>(posts, pageable, posts.size());
 
-        when(postRepository.findByLikesUser(user, pageable)).thenReturn(page);
+        when(postRepository.findByUserLikes(user, pageable)).thenReturn(page);
 
         PageDto<Post, PostDto> response = postService.getUserLikedPosts(user, pageable);
 
         assertEquals(page.getContent().size(), response.getContent().size());
         assertEquals(page.getTotalPages(), response.getTotalPages());
         assertEquals(page.getNumber(), response.getPageNo());
-        verify(postRepository, times(1)).findByLikesUser(user, pageable);
+        verify(postRepository, times(1)).findByUserLikes(user, pageable);
     }
 
     @Test
@@ -388,7 +388,7 @@ class PostServiceImplTest {
         comment1.setId(UUID.randomUUID().toString());
         comment1.setPost(post);
         comment1.setUser(user);
-        comment1.setContent("some comment");
+        comment1.setContent("some text");
 
         comments.add(comment1);
         comments.add(comment1);
@@ -399,7 +399,7 @@ class PostServiceImplTest {
 
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
         when(commentRepository.findByPostId(post.getId(), pageable)).thenReturn(page);
-        when(friendRequestRepository.findByUserIdFriendId(user.getId(), user2.getId())).thenReturn(Optional.empty());
+        when(friendRequestRepository.findByUserIdTargetUserId(user.getId(), user2.getId())).thenReturn(Optional.empty());
 
         PageDto<Comment, CommentDto> response = postService.getComments(user2, post.getId(), pageable);
 
@@ -423,7 +423,7 @@ class PostServiceImplTest {
         FriendRequest friendRequest = new FriendRequest(UUID.randomUUID().toString(), user, user2, FriendshipStatus.BLOCKED);
 
         when(postRepository.findById(anyString())).thenReturn(Optional.ofNullable(post));
-        when(friendRequestRepository.findByUserIdFriendId(anyString(), anyString()))
+        when(friendRequestRepository.findByUserIdTargetUserId(anyString(), anyString()))
                 .thenReturn(Optional.of(friendRequest));
 
         assertThrows(RequestNotAllowedException.class, () -> postService.getComments(user, post.getId(), PageRequest.of(0, 10)));

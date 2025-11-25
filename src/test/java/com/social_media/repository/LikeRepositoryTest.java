@@ -45,7 +45,7 @@ class LikeRepositoryTest {
         post.setId(UUID.randomUUID().toString());
         post.setUser(user);
         post.setPostedTime(LocalDateTime.now());
-        post.setTitle("some title");
+        post.setTitle("some text");
 
         userRepository.save(user);
         postRepository.save(post);

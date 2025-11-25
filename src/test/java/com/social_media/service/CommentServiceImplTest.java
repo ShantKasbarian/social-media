@@ -57,11 +57,11 @@ class CommentServiceImplTest {
         post.setId(UUID.randomUUID().toString());
         post.setUser(user);
         post.setPostedTime(LocalDateTime.now());
-        post.setTitle("some title");
+        post.setTitle("some text");
 
         comment = new Comment(
                 UUID.randomUUID().toString(),
-                "some comment",
+                "some text",
                 LocalDateTime.now(),
                 post,
                 user
@@ -69,12 +69,12 @@ class CommentServiceImplTest {
     }
 
     @Test
-    void comment() {
+    void createComment() {
         when(postRepository.findById(post.getId())).thenReturn(Optional.ofNullable(post));
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
-        when(friendRequestRepository.findByUserIdFriendId(anyString(), anyString())).thenReturn(Optional.empty());
+        when(friendRequestRepository.findByUserIdTargetUserId(anyString(), anyString())).thenReturn(Optional.empty());
 
-        Comment response = commentService.comment(comment.getContent(), post.getId(), user);
+        Comment response = commentService.createComment(comment.getContent(), , post.getId());
 
         assertEquals(comment.getId(), response.getId());
         assertEquals(comment.getContent(), response.getContent());
@@ -84,62 +84,62 @@ class CommentServiceImplTest {
     }
 
     @Test
-    void commentShouldThrowInvalidProvidedInfoExceptionWhenContentIsNull() {
-        assertThrows(InvalidProvidedInfoException.class, () -> commentService.comment(null, post.getId(), user));
+    void createCommentShouldThrowInvalidProvidedInfoExceptionWhenContentIsNull() {
+        assertThrows(InvalidProvidedInfoException.class, () -> commentService.createComment(null, , post.getId()));
     }
 
     @Test
-    void commentShouldThrowInvalidProvidedInfoExceptionWhenContentIsEmpty() {
-        assertThrows(InvalidProvidedInfoException.class, () -> commentService.comment("", post.getId(), user));
+    void createCommentShouldThrowInvalidProvidedInfoExceptionWhenContentIsEmpty() {
+        assertThrows(InvalidProvidedInfoException.class, () -> commentService.createComment("", , post.getId()));
     }
 
     @Test
-    void commentShouldThrowResourceNotFoundExceptionWhenPostIsNotFound() {
+    void createCommentShouldThrowResourceNotFoundExceptionWhenPostIsNotFound() {
         when(postRepository.findById(anyString())).thenThrow(ResourceNotFoundException.class);
-        assertThrows(ResourceNotFoundException.class, () -> commentService.comment(comment.getContent(), post.getId(), user));
+        assertThrows(ResourceNotFoundException.class, () -> commentService.createComment(comment.getContent(), , post.getId()));
     }
 
     @Test
-    void commentShouldThrowRequestNotAllowedExceptionWhenUserIsBlocked() {
+    void createCommentShouldThrowRequestNotAllowedExceptionWhenUserIsBlocked() {
         FriendRequest friendRequest = new FriendRequest();
         friendRequest.setStatus(FriendshipStatus.BLOCKED);
 
         when(postRepository.findById(anyString())).thenReturn(Optional.ofNullable(post));
-        when(friendRequestRepository.findByUserIdFriendId(anyString(), anyString()))
+        when(friendRequestRepository.findByUserIdTargetUserId(anyString(), anyString()))
                 .thenReturn(Optional.of(friendRequest));
-        assertThrows(RequestNotAllowedException.class, () -> commentService.comment(comment.getContent(), post.getId(), user));
+        assertThrows(RequestNotAllowedException.class, () -> commentService.createComment(comment.getContent(), , post.getId()));
     }
 
     @Test
-    void editComment() {
+    void editCreateComment() {
         when(commentRepository.findById(comment.getId())).thenReturn(Optional.ofNullable(comment));
         when(commentRepository.save(comment)).thenReturn(comment);
 
         String oldComment = comment.getContent();
-        Comment response = commentService.editComment(user, comment.getId(), "some edited comment");
+        Comment response = commentService.updateComment(user, comment.getId());
 
         assertNotEquals(oldComment, response.getContent());
         verify(commentRepository, times(1)).save(comment);
     }
 
     @Test
-    void editCommentShouldThrowInvalidProvidedInfoExceptionWhenContentIsNull() {
-        assertThrows(InvalidProvidedInfoException.class, () -> commentService.editComment(user, comment.getId(), null));
+    void editCreateCommentShouldThrowInvalidProvidedInfoExceptionWhenContentIsNull() {
+        assertThrows(InvalidProvidedInfoException.class, () -> commentService.updateComment(user, comment.getId()));
     }
 
     @Test
-    void editCommentShouldThrowInvalidProvidedInfoExceptionWhenContentIsEmpty() {
-        assertThrows(InvalidProvidedInfoException.class, () -> commentService.editComment(user, comment.getId(), ""));
+    void editCreateCommentShouldThrowInvalidProvidedInfoExceptionWhenContentIsEmpty() {
+        assertThrows(InvalidProvidedInfoException.class, () -> commentService.updateComment(user, comment.getId()));
     }
 
     @Test
-    void editCommentShouldThrowResourceNotFoundExceptionWhenCommentIsNotFound() {
+    void updateCommentShouldThrowResourceNotFoundExceptionWhenCreateCommentIsNotFound() {
         when(commentRepository.findById(comment.getId())).thenThrow(ResourceNotFoundException.class);
-        assertThrows(ResourceNotFoundException.class, () -> commentService.editComment(user, comment.getId(), "some edited comment"));
+        assertThrows(ResourceNotFoundException.class, () -> commentService.updateComment(user, comment.getId()));
     }
 
     @Test
-    void deleteComment() {
+    void deleteCreateComment() {
         when(commentRepository.findById(comment.getId())).thenReturn(Optional.ofNullable(comment));
         doNothing().when(commentRepository).delete(comment);
 
@@ -150,14 +150,14 @@ class CommentServiceImplTest {
     }
 
     @Test
-    void deleteCommentShouldThrowResourceNotFoundException() {
+    void deleteCreateCommentShouldThrowResourceNotFoundException() {
         when(commentRepository.findById(comment.getId())).thenThrow(ResourceNotFoundException.class);
 
         assertThrows(ResourceNotFoundException.class, () -> commentService.deleteComment(user, comment.getId()));
     }
 
     @Test
-    void deleteCommentShouldThrowRequestNotAllowedException() {
+    void deleteCreateCommentShouldThrowRequestNotAllowedException() {
         User user2 = new User();
         user2.setId(UUID.randomUUID().toString());
         comment.setUser(user2);

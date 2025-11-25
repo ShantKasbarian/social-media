@@ -3,7 +3,6 @@ package com.social_media.service.impl;
 import com.social_media.entity.*;
 import com.social_media.exception.InvalidProvidedInfoException;
 import com.social_media.exception.RequestNotAllowedException;
-import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.*;
 import com.social_media.service.PostService;
@@ -31,23 +30,27 @@ public class PostServiceImpl implements PostService {
 
     private final UserRepository userRepository;
 
-    private final CommentRepository commentRepository;
-
-    private final LikeRepository likeRepository;
-
     private final FriendRequestRepository friendRequestRepository;
 
     @Override
     @Transactional
     public Post createPost(User user, Post post) {
-        if (post.getTitle() == null || post.getTitle().isEmpty()) {
-            throw new InvalidProvidedInfoException("post must have a title");
+        if (post.getText() == null || post.getText().isEmpty()) {
+            throw new InvalidProvidedInfoException("post must have a text");
         }
 
-        post.setPostedTime(LocalDateTime.now());
+        post.setTime(LocalDateTime.now());
         post.setUser(user);
 
         return postRepository.save(post);
+    }
+
+    @Override
+    public Post getPostById(UUID id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
+
+        return post;
     }
 
     @Override
@@ -61,10 +64,10 @@ public class PostServiceImpl implements PostService {
         }
 
         if (title == null || title.isEmpty()) {
-            throw new InvalidProvidedInfoException("post must have a title");
+            throw new InvalidProvidedInfoException("post must have a text");
         }
 
-        post.setTitle(title);
+        post.setText(title);
 
         return postRepository.save(post);
     }
@@ -92,7 +95,7 @@ public class PostServiceImpl implements PostService {
         User targetUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
 
-        if (friendRequestRepository.isFriendRequestBlockedByUserIdFriendId(user.getId(), userId)) {
+        if (friendRequestRepository.existsByUserIdTargetUserIdStatus(user.getId(), userId, FriendRequest.Status.BLOCKED)) {
             throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
@@ -100,67 +103,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post getPostById(User user, UUID id) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
-
-        if (friendRequestRepository.isFriendRequestBlockedByUserIdFriendId(user.getId(), post.getUser().getId())) {
-            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
-        }
-        return post;
-    }
-
-    @Override
-    @Transactional
-    public Like likePost(User user, UUID id) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
-
-        FriendRequest friendRequest = friendRequestRepository
-                .findByUserIdFriendId(user.getId(), post.getUser().getId())
-                .orElse(null);
-
-        if (friendRequest != null && friendRequest.getStatus().equals(FriendRequest.Status.BLOCKED)) {
-            throw new RequestNotAllowedException("user has blocked you");
-        }
-
-        if (likeRepository.existsByPostAndUser(post, user)) {
-            throw new ResourceAlreadyExistsException("cannot like post more than once");
-        }
-
-        Like like = new Like();
-        like.setUser(user);
-        like.setPost(post);
-
-        return likeRepository.save(like);
-    }
-
-    @Override
-    @Transactional
-    public void removeLike(User user, UUID postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
-
-        Like like = likeRepository.findByPostAndUser(post, user)
-                .orElseThrow(() -> new ResourceNotFoundException("you haven't liked this post"));
-
-        likeRepository.delete(like);
-    }
-
-    @Override
     public Page<Post> getUserLikedPosts(User user, Pageable pageable) {
-        return postRepository.findByLikesUser(user, pageable);
-    }
-
-    @Override
-    public Page<Comment> getComments(User user, UUID postId, Pageable pageable) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
-
-        if (friendRequestRepository.isFriendRequestBlockedByUserIdFriendId(user.getId(), post.getUser().getId())) {
-            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
-        }
-
-        return commentRepository.findByPostId(postId, pageable);
+        return postRepository.findByUserLikes(user, pageable);
     }
 }
