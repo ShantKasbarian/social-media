@@ -21,50 +21,35 @@ public class DefaultExceptionHandler {
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorDto> handle(InvalidCredentialsException e) {
         return new ResponseEntity<>(
-                new ErrorDto(
-                    e.getMessage()
-                ),
-                HttpStatus.UNAUTHORIZED
+                new ErrorDto(e.getMessage()), HttpStatus.UNAUTHORIZED
         );
     }
 
     @ExceptionHandler(InvalidProvidedInfoException.class)
     public ResponseEntity<ErrorDto> handle(InvalidProvidedInfoException e) {
         return new ResponseEntity<>(
-                new ErrorDto(
-                    e.getMessage()
-                ),
-                HttpStatus.BAD_REQUEST
+                new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST
         );
     }
 
     @ExceptionHandler(RequestNotAllowedException.class)
     public ResponseEntity<ErrorDto> handle(RequestNotAllowedException e) {
         return new ResponseEntity<>(
-                new ErrorDto(
-                    e.getMessage()
-                ),
-                HttpStatus.FORBIDDEN
+                new ErrorDto(e.getMessage()), HttpStatus.FORBIDDEN
         );
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorDto> handle(ResourceNotFoundException e) {
         return new ResponseEntity<>(
-                new ErrorDto(
-                    e.getMessage()
-                ),
-                HttpStatus.NOT_FOUND
+                new ErrorDto(e.getMessage()), HttpStatus.NOT_FOUND
         );
     }
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     public ResponseEntity<ErrorDto> handle(ResourceAlreadyExistsException e) {
         return new ResponseEntity<>(
-                new ErrorDto(
-                    e.getMessage()
-                ),
-                HttpStatus.CONFLICT
+                new ErrorDto(e.getMessage()), HttpStatus.CONFLICT
         );
     }
 
@@ -77,8 +62,7 @@ public class DefaultExceptionHandler {
                 .toList();
 
         return new ResponseEntity<>(
-                new ErrorDto(errorMessages.toString()),
-                HttpStatus.BAD_REQUEST
+                new ErrorDto(errorMessages.toString()), HttpStatus.BAD_REQUEST
         );
     }
 
@@ -90,8 +74,7 @@ public class DefaultExceptionHandler {
                 .toList();
 
         return new ResponseEntity<>(
-                new ErrorDto(errors.toString()),
-                HttpStatus.BAD_REQUEST
+                new ErrorDto(errors.toString()), HttpStatus.BAD_REQUEST
         );
     }
 
