@@ -1,7 +1,6 @@
 package com.social_media.service.impl;
 
 import com.social_media.entity.*;
-import com.social_media.exception.InvalidProvidedInfoException;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.CommentRepository;
@@ -54,17 +53,17 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public Comment updateComment(User user, Comment comment) {
-        Comment targetComment = commentRepository.findById(comment.getId())
+    public Comment updateComment(User user, UUID id, String text) {
+        Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(COMMENT_NOT_FOUND_MESSAGE));
 
-        if (!targetComment.getUser().getId().equals(user.getId())) {
+        if (!comment.getUser().getId().equals(user.getId())) {
             throw new RequestNotAllowedException(UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE);
         }
 
-        comment.setText(comment.getText());
+        comment.setText(text);
 
-        return commentRepository.save(targetComment);
+        return commentRepository.save(comment);
     }
 
     @Override

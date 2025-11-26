@@ -7,6 +7,7 @@ import com.social_media.entity.User;
 import com.social_media.model.CommentDto;
 import com.social_media.model.PageDto;
 import com.social_media.service.CommentService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,7 @@ import java.util.UUID;
 @RequestMapping("/comments")
 @AllArgsConstructor
 public class CommentController {
-    private static final String TIME_PROPERTY = "time";
+    public static final String TIME_PROPERTY = "time";
 
     private final CommentService commentService;
 
@@ -32,7 +33,7 @@ public class CommentController {
 
     @PostMapping
     public ResponseEntity<CommentDto> createComment(
-            Authentication authentication, @RequestBody CommentDto commentDto
+            Authentication authentication, @RequestBody @Valid CommentDto commentDto
     ) {
         User user = (User) authentication.getPrincipal();
 
@@ -47,13 +48,13 @@ public class CommentController {
 
     @PutMapping
     public ResponseEntity<CommentDto> updateComment(
-            Authentication authentication, @RequestBody CommentDto commentDto
+            Authentication authentication, @RequestBody @Valid CommentDto commentDto
     ) {
         User user = (User) authentication.getPrincipal();
 
         var comment = commentToModelConverter.convertToModel(
                 commentService.updateComment(
-                    user, commentDtoToEntityConverter.convertToEntity(commentDto)
+                    user, commentDto.id(), commentDto.text()
                 )
         );
 

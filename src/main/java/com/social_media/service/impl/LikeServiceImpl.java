@@ -12,6 +12,7 @@ import com.social_media.repository.LikeRepository;
 import com.social_media.repository.PostRepository;
 import com.social_media.service.LikeService;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

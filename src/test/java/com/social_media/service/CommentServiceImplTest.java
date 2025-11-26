@@ -116,7 +116,7 @@ class CommentServiceImplTest {
         when(commentRepository.save(comment)).thenReturn(comment);
 
         String oldComment = comment.getContent();
-        Comment response = commentService.updateComment(user, comment.getId());
+        Comment response = commentService.updateComment(user, , comment.getId(), );
 
         assertNotEquals(oldComment, response.getContent());
         verify(commentRepository, times(1)).save(comment);
@@ -124,18 +124,18 @@ class CommentServiceImplTest {
 
     @Test
     void editCreateCommentShouldThrowInvalidProvidedInfoExceptionWhenContentIsNull() {
-        assertThrows(InvalidProvidedInfoException.class, () -> commentService.updateComment(user, comment.getId()));
+        assertThrows(InvalidProvidedInfoException.class, () -> commentService.updateComment(user, , comment.getId(), ));
     }
 
     @Test
     void editCreateCommentShouldThrowInvalidProvidedInfoExceptionWhenContentIsEmpty() {
-        assertThrows(InvalidProvidedInfoException.class, () -> commentService.updateComment(user, comment.getId()));
+        assertThrows(InvalidProvidedInfoException.class, () -> commentService.updateComment(user, , comment.getId(), ));
     }
 
     @Test
     void updateCommentShouldThrowResourceNotFoundExceptionWhenCreateCommentIsNotFound() {
         when(commentRepository.findById(comment.getId())).thenThrow(ResourceNotFoundException.class);
-        assertThrows(ResourceNotFoundException.class, () -> commentService.updateComment(user, comment.getId()));
+        assertThrows(ResourceNotFoundException.class, () -> commentService.updateComment(user, , comment.getId(), ));
     }
 
     @Test

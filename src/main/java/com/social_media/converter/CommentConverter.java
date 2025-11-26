@@ -13,20 +13,11 @@ import java.util.UUID;
 @Component
 @AllArgsConstructor
 public class CommentConverter implements ToEntityConverter<Comment, CommentDto>, ToModelConverter<Comment, CommentDto> {
-    private final PostService postService;
-
     @Override
     public Comment convertToEntity(CommentDto model) {
         Comment comment = new Comment();
         comment.setId(model.id());
         comment.setText(model.text());
-
-        UUID id = model.postId();
-
-        if (id != null) {
-            comment.setPost(postService.getPostById(model.postId()));
-        }
-
         return comment;
     }
 

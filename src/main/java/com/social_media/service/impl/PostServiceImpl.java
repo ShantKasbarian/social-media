@@ -7,15 +7,18 @@ import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.*;
 import com.social_media.service.PostService;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
+@Validated
 @AllArgsConstructor
 public class PostServiceImpl implements PostService {
     private static final String POST_NOT_FOUND_MESSAGE = "post not found";
@@ -35,10 +38,6 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public Post createPost(User user, Post post) {
-        if (post.getText() == null || post.getText().isEmpty()) {
-            throw new InvalidProvidedInfoException("post must have a text");
-        }
-
         post.setTime(LocalDateTime.now());
         post.setUser(user);
 
@@ -61,10 +60,6 @@ public class PostServiceImpl implements PostService {
 
         if (!post.getUser().getId().equals(user.getId())) {
             throw new RequestNotAllowedException(UNABLE_TO_DELETE_OR_MODIFY_POST_MESSAGE);
-        }
-
-        if (title == null || title.isEmpty()) {
-            throw new InvalidProvidedInfoException("post must have a text");
         }
 
         post.setText(title);

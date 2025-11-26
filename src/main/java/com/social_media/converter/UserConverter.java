@@ -13,7 +13,7 @@ public class UserConverter implements ToEntityConverter<User, UserDto>, ToModelC
         user.setEmail(model.email());
         user.setPassword(model.password());
         user.setUsername(model.username());
-        user.setName(model.name());
+        user.setFirstname(model.firstname());
         user.setLastname(model.lastname());
         return user;
     }
@@ -25,7 +25,7 @@ public class UserConverter implements ToEntityConverter<User, UserDto>, ToModelC
                 entity.getEmail(),
                 entity.getPassword(),
                 entity.getUsername(),
-                entity.getName(),
+                entity.getFirstname(),
                 entity.getLastname()
         );
     }

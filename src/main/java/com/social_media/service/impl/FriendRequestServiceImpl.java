@@ -9,6 +9,7 @@ import com.social_media.repository.FriendRequestRepository;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.FriendRequestService;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

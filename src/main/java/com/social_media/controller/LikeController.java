@@ -5,16 +5,19 @@ import com.social_media.entity.Like;
 import com.social_media.entity.User;
 import com.social_media.model.LikeDto;
 import com.social_media.service.LikeService;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/likes")
+@Validated
 @AllArgsConstructor
 public class LikeController {
     private final LikeService likeService;

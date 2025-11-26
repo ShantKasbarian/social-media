@@ -8,12 +8,13 @@ import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.model.TokenDto;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.AuthenticationService;
+import com.social_media.utils.EmailValidator;
+import com.social_media.utils.UsernameValidator;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import static com.social_media.utils.PasswordValidator.INVALID_PASSWORD_MESSAGE;
 import static com.social_media.utils.PasswordValidator.isPasswordValid;
 
 @Service
@@ -21,13 +22,19 @@ import static com.social_media.utils.PasswordValidator.isPasswordValid;
 public class AuthenticationServiceImpl implements AuthenticationService {
     private static final String WRONG_USERNAME_OR_PASSWORD_MESSAGE = "wrong username or password";
 
-    private static final String EMAIL_ALREADY_TAKEN_MESSAGE = "email is already taken";
+    public static final String INVALID_EMAIL_MESSAGE = "email is already taken";
 
-    private static final String USERNAME_ALREADY_TAKEN_MESSAGE = "username is already taken";
+    public static final String INVALID_USERNAME_MESSAGE = "username is invalid";
+
+    public static final String INVALID_PASSWORD_MESSAGE = "password must be at least 6 characters long, contain at least 1 uppercase, 1 lowercase, 1 number and 1 special character";
 
     private final UserRepository userRepository;
 
     private final JwtService jwtService;
+
+    private final UsernameValidator usernameValidator;
+
+    private final EmailValidator emailValidator;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -43,37 +50,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     @Transactional
     public TokenDto signup(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new ResourceAlreadyExistsException(EMAIL_ALREADY_TAKEN_MESSAGE);
+        String username = user.getUsername().trim();
+
+        if (!usernameValidator.isUsernameValid(username)) {
+            throw new InvalidProvidedInfoException(INVALID_USERNAME_MESSAGE);
+        }
+
+        if (!emailValidator.isEmailValid(user.getEmail())) {
+            throw new ResourceAlreadyExistsException(INVALID_EMAIL_MESSAGE);
         }
 
         if (!isPasswordValid(user.getPassword())) {
             throw new InvalidProvidedInfoException(INVALID_PASSWORD_MESSAGE);
         }
 
-        if (user.getName() == null || user.getName().isEmpty()) {
-            throw new InvalidProvidedInfoException("name must be specified");
-        }
-
-        if (user.getLastname() == null || user.getLastname().isEmpty()) {
-            throw new InvalidProvidedInfoException("lastname must be specified");
-        }
-
-        String username = user.getUsername();
-
-        if (username == null || username.isEmpty()) {
-            throw new InvalidProvidedInfoException("username must be specified");
-        }
-
-        if (userRepository.existsByUsername(username)) {
-            throw new ResourceAlreadyExistsException(USERNAME_ALREADY_TAKEN_MESSAGE);
-        }
-
-        if (username.trim().contains(" ")) {
-            throw new InvalidProvidedInfoException("username shouldn't contain spaces");
-        }
-
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         userRepository.save(user);
 
         return new TokenDto(jwtService.generateToken(user.getUsername()), user.getUsername(), user.getId());

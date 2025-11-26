@@ -107,7 +107,7 @@ class CommentControllerTest {
     @Test
     void updateComment() {
         when(commentConverter.convertToModel(any(Comment.class))).thenReturn(commentDto);
-        when(commentService.updateComment(any(User.class), anyString()))
+        when(commentService.updateComment(any(User.class), , anyString(), ))
                 .thenReturn(comment);
         when(authentication.getPrincipal()).thenReturn(user);
 
@@ -115,7 +115,7 @@ class CommentControllerTest {
 
         assertNotNull(response);
         assertNotNull(response.getBody());
-        assertEquals(comment.getContent(), response.getBody().text());
+        assertEquals(comment.getText(), response.getBody().text());
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 }

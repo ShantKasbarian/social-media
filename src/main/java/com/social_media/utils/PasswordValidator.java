@@ -1,12 +1,10 @@
 package com.social_media.utils;
 
-import com.social_media.exception.InvalidCredentialsException;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PasswordValidator {
-    public static final String INVALID_PASSWORD_MESSAGE = "password must be at least 6 characters long";
+    private static final int MIN_REQUIRED_LENGTH = 6;
 
     private static final String UPPERCASE_REGEX = "[A-Z]";
 
@@ -18,8 +16,8 @@ public class PasswordValidator {
 
 
     public static boolean isPasswordValid(String password) {
-        if (password.length() < 6) {
-            throw new InvalidCredentialsException(INVALID_PASSWORD_MESSAGE);
+        if (password == null) {
+            return false;
         }
 
         Pattern numberPattern = Pattern.compile(NUMBER_REGEX);
@@ -32,6 +30,6 @@ public class PasswordValidator {
         Matcher lowercase = lowercasePattern.matcher(password);
         Matcher specialCharacter = specialCharacterPattern.matcher(password);
 
-        return number.find() && uppercase.find() && lowercase.find() && specialCharacter.find();
+        return password.length() > MIN_REQUIRED_LENGTH && number.find() && uppercase.find() && lowercase.find() && specialCharacter.find();
     }
 }

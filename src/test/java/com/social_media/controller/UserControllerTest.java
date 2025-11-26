@@ -3,7 +3,7 @@ package com.social_media.controller;
 import com.social_media.converter.UserConverter;
 import com.social_media.entity.User;
 import com.social_media.model.PageDto;
-import com.social_media.model.ResponseDto;
+import com.social_media.model.ErrorDto;
 import com.social_media.model.UserDto;
 import com.social_media.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -164,7 +164,7 @@ class UserControllerTest {
         when(userService.updatePassword(user, userDto2.password())).thenReturn(expected);
         when(authentication.getPrincipal()).thenReturn(user);
 
-        ResponseEntity<ResponseDto> response = userController.updatePassword(userDto2, authentication);
+        ResponseEntity<ErrorDto> response = userController.updatePassword(userDto2, authentication);
 
         assertNotNull(response);
         assertNotNull(response.getBody());
@@ -183,7 +183,7 @@ class UserControllerTest {
         user2.setEmail(userDto2.email());
         user2.setPassword(userDto2.password());
         user2.setUsername(userDto2.username());
-        user2.setName(userDto2.name());
+        user2.setName(userDto2.firstname());
         user2.setLastname(userDto2.lastname());
 
         User user3 = new User();
@@ -191,7 +191,7 @@ class UserControllerTest {
         user3.setEmail(userDto2.email());
         user3.setPassword(userDto2.password());
         user3.setUsername(userDto2.username());
-        user3.setName(userDto2.name());
+        user3.setName(userDto2.firstname());
         user3.setLastname(userDto2.lastname());
 
         List<User> users = new ArrayList<>();
@@ -228,7 +228,7 @@ class UserControllerTest {
         when(userService.blockUser(user2.getId(), user)).thenReturn(expected);
         when(authentication.getPrincipal()).thenReturn(user);
 
-        ResponseEntity<ResponseDto> response = userController.blockUser(authentication, user2.getId());
+        ResponseEntity<ErrorDto> response = userController.blockUser(authentication, user2.getId());
 
         assertNotNull(response);
         assertNotNull(response.getBody());
@@ -246,7 +246,7 @@ class UserControllerTest {
         when(userService.unblockUser(user2.getId(), user)).thenReturn(expected);
         when(authentication.getPrincipal()).thenReturn(user);
 
-        ResponseEntity<ResponseDto> response = userController.unblockUser(authentication, user2.getId());
+        ResponseEntity<ErrorDto> response = userController.unblockUser(authentication, user2.getId());
 
         assertNotNull(response);
         assertNotNull(response.getBody());

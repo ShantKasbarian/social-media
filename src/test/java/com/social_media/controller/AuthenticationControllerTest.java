@@ -1,7 +1,7 @@
 package com.social_media.controller;
 
 import com.social_media.converter.UserConverter;
-import com.social_media.model.ResponseDto;
+import com.social_media.model.ErrorDto;
 import com.social_media.model.TokenDto;
 import com.social_media.entity.User;
 import com.social_media.model.UserDto;
@@ -77,7 +77,7 @@ class AuthenticationControllerTest {
         when(loginSignupService.signup(user)).thenReturn(expected);
         when(userConverter.convertToEntity(userDto)).thenReturn(user);
 
-        ResponseEntity<ResponseDto> response = authenticationController.signup(userDto);
+        ResponseEntity<ErrorDto> response = authenticationController.signup(userDto);
 
         assertNotNull(response);
         assertNotNull(response.getBody());
