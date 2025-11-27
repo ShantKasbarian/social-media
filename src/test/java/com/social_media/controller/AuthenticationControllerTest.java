@@ -1,31 +1,34 @@
 package com.social_media.controller;
 
 import com.social_media.converter.UserConverter;
-import com.social_media.model.ErrorDto;
+import com.social_media.model.LoginDto;
 import com.social_media.model.TokenDto;
 import com.social_media.entity.User;
 import com.social_media.model.UserDto;
-import com.social_media.service.impl.AuthenticationServiceImpl;
+import com.social_media.service.AuthenticationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class AuthenticationControllerTest {
+    private static final String TEST_TOKEN = "test token";
+
     @InjectMocks
     private AuthenticationController authenticationController;
 
     @Mock
-    private AuthenticationServiceImpl loginSignupService;
+    private AuthenticationService authenticationService;
 
     @Mock
     private UserConverter userConverter;
@@ -34,16 +37,20 @@ class AuthenticationControllerTest {
 
     private UserDto userDto;
 
+    private LoginDto loginDto;
+
+    private TokenDto tokenDto;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
         user = new User();
-        user.setId(UUID.randomUUID().toString());
+        user.setId(UUID.randomUUID());
         user.setEmail("someone@example.com");
         user.setPassword("Password123+");
         user.setUsername("johnDoe");
-        user.setName("John");
+        user.setFirstname("John");
         user.setLastname("Doe");
 
         userDto = new UserDto(
@@ -51,37 +58,40 @@ class AuthenticationControllerTest {
                 user.getEmail(),
                 user.getPassword(),
                 user.getUsername(),
-                user.getName(),
+                user.getFirstname(),
                 user.getLastname()
         );
+
+        loginDto = new LoginDto(user.getUsername(), user.getPassword());
+
+        tokenDto = new TokenDto(TEST_TOKEN, user.getUsername(), user.getId());
     }
 
     @Test
     void login() {
-        String expectedToken = "some token";
+        when(authenticationService.login(anyString(), anyString())).thenReturn(tokenDto);
 
-        when(loginSignupService.login(anyString(), anyString())).thenReturn(new TokenDto(expectedToken, user.getUsername(), user.getId()));
-
-        ResponseEntity<TokenDto> response = authenticationController.login(userDto);
+        var response = authenticationController.login(loginDto);
 
         assertNotNull(response);
         assertNotNull(response.getBody());
+        assertEquals(tokenDto, response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expectedToken, response.getBody().token());
+        verify(authenticationService).login(anyString(), anyString());
     }
 
     @Test
     void signup() {
-        String expected = "signup successful";
+        when(authenticationService.signup(user)).thenReturn(tokenDto);
+        when(userConverter.convertToEntity(any(UserDto.class))).thenReturn(user);
 
-        when(loginSignupService.signup(user)).thenReturn(expected);
-        when(userConverter.convertToEntity(userDto)).thenReturn(user);
-
-        ResponseEntity<ErrorDto> response = authenticationController.signup(userDto);
+        var response = authenticationController.signup(userDto);
 
         assertNotNull(response);
         assertNotNull(response.getBody());
-        assertEquals(expected, response.getBody().message());
+        assertEquals(tokenDto, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        verify(authenticationService).signup(any(User.class));
+        verify(userConverter).convertToEntity(any(UserDto.class));
     }
 }
