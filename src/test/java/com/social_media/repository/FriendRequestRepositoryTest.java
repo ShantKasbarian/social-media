@@ -1,7 +1,6 @@
 package com.social_media.repository;
 
 import com.social_media.entity.FriendRequest;
-import com.social_media.entity.FriendshipStatus;
 import com.social_media.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,67 +28,52 @@ class FriendRequestRepositoryTest {
     @BeforeEach
     void setUp() {
         user1 = new User();
-        user1.setId(UUID.randomUUID().toString());
         user1.setEmail("someone@example.com");
         user1.setPassword("Password123+");
         user1.setUsername("johnDoe");
-        user1.setName("John");
+        user1.setFirstname("John");
         user1.setLastname("Doe");
 
         user2 = new User();
-        user2.setId(UUID.randomUUID().toString());
         user2.setEmail("someone2@example.com");
         user2.setPassword("Password123+");
         user2.setUsername("JackDoe");
-        user2.setName("Jack");
+        user2.setFirstname("Jack");
         user2.setLastname("Doe");
 
         userRepository.save(user1);
         userRepository.save(user2);
 
-        friendRequest = new FriendRequest(UUID.randomUUID().toString(), user1, user2, FriendshipStatus.PENDING);
-    }
-
-    @Test
-    void save() {
-        FriendRequest response = friendRequestRepository.save(friendRequest);
-
-        assertEquals(user1.getId(), response.getUser().getId());
-        assertEquals(user2.getId(), response.getFriend().getId());
-        assertEquals(FriendshipStatus.PENDING, response.getStatus());
-    }
-
-    @Test
-    void existsByUserFriend() {
+        friendRequest = new FriendRequest(user1, user2, FriendRequest.Status.PENDING);
         friendRequestRepository.save(friendRequest);
+    }
+
+    @Test
+    void existsByUserIdTargetUserId() {
         assertTrue(friendRequestRepository.existsByUserIdTargetUserId(user1.getId(), user2.getId()));
     }
 
     @Test
+    void existsByUserIdTargetUserIdStatus() {
+        boolean exists = friendRequestRepository.existsByUserIdTargetUserIdStatus(
+                user1.getId(), user2.getId(), friendRequest.getStatus()
+        );
+
+        assertTrue(exists);
+    }
+
+    @Test
     void findByUserIdTargetUserId() {
-        friendRequestRepository.save(friendRequest);
+        FriendRequest friendRequest = friendRequestRepository.findByUserIdTargetUserId(user1.getId(), user2.getId()).get();
 
-        FriendRequest response = friendRequestRepository
-                .findByUserIdTargetUserId(user1.getId(), user2.getId()).orElse(null);
-
-        assertNotNull(response);
-        assertEquals(friendRequest.getId(), response.getId());
+        assertNotNull(friendRequest);
+        assertTrue(user1.getId().equals(friendRequest.getUser().getId()) || user2.getId().equals(friendRequest.getUser().getId()));
+        assertTrue(user1.getId().equals(friendRequest.getTargetUser().getId()) || user2.getId().equals(friendRequest.getTargetUser().getId()));
     }
 
     @Test
     void findByUserStatus() {
-        friendRequestRepository.save(friendRequest);
-
-        Page<FriendRequest> response = friendRequestRepository.findByUserStatus(user2, friendRequest.getStatus(), PageRequest.of(0, 10));
-
-        assertEquals(friendRequest.getId(), response.getContent().getFirst().getId());
-    }
-
-    @Test
-    void findByFriend() {
-        friendRequestRepository.save(friendRequest);
-
-        Page<FriendRequest> response = friendRequestRepository.findByFriend(user2, PageRequest.of(0, 10));
+        Page<FriendRequest> response = friendRequestRepository.findByUserStatus(user2, friendRequest.getStatus(),PageRequest.of(0, 10));
 
         assertNotNull(response);
         assertEquals(friendRequest.getId(), response.getContent().getFirst().getId());

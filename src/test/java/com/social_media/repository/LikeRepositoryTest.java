@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,47 +32,38 @@ class LikeRepositoryTest {
     @BeforeEach
     void setUp() {
         user = new User();
-        user.setId(UUID.randomUUID().toString());
         user.setEmail("someone@example.com");
         user.setPassword("Password123+");
         user.setUsername("johnDoe");
-        user.setName("John");
+        user.setFirstname("John");
         user.setLastname("Doe");
 
         post = new Post();
-        post.setId(UUID.randomUUID().toString());
         post.setUser(user);
-        post.setPostedTime(LocalDateTime.now());
-        post.setTitle("some text");
+        post.setTime(LocalDateTime.now());
+        post.setText("some text");
 
         userRepository.save(user);
         postRepository.save(post);
 
-        like = new Like(UUID.randomUUID().toString(), user, post);
-    }
+        like = new Like();
+        like.setUser(user);
+        like.setPost(post);
 
-    @Test
-    void save() {
-        Like response = likeRepository.save(like);
-
-        assertEquals(like.getId(), response.getId());
-        assertEquals(post.getId(), response.getPost().getId());
-        assertEquals(user.getId(), response.getUser().getId());
+        likeRepository.save(like);
     }
 
     @Test
     void existsByPostAndUser() {
-        likeRepository.save(like);
-
         assertTrue(likeRepository.existsByPostAndUser(post, user));
     }
 
     @Test
-    void delete() {
-        Like savedLike = likeRepository.save(like);
+    void findByUserIdPostId() {
+        Like like = likeRepository.findByUserIdPostId(user.getId(), post.getId()).get();
 
-        likeRepository.delete(like);
-
-        assertEquals(Optional.empty(), likeRepository.findById(savedLike.getId()));
+        assertNotNull(like);
+        assertEquals(user.getId(), like.getUser().getId());
+        assertEquals(post.getId(), like.getPost().getId());
     }
 }

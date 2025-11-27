@@ -21,7 +21,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
         LEFT JOIN friend_requests f ON f.user_id = u.id OR f.target_user_id = u.id
         WHERE (f.user_id = :userId OR f.target_user_id = :userId) AND
         p.user_id != :userId AND f.status = 'ACCEPTED'
-        ORDER BY p.posted_time DESC
+        ORDER BY p.time DESC
     """, nativeQuery = true)
     Page<Post> findByUserAcceptedFriendRequests(@Param("userId") UUID userId, Pageable pageable);
 

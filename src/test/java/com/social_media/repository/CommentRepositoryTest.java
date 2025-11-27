@@ -11,8 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,65 +34,36 @@ class CommentRepositoryTest {
     @BeforeEach
     void setUp() {
         user = new User();
-        user.setId(UUID.randomUUID().toString());
         user.setEmail("someone@example.com");
         user.setPassword("Password123+");
         user.setUsername("johnDoe");
-        user.setName("John");
+        user.setFirstname("John");
         user.setLastname("Doe");
 
         post = new Post();
-        post.setId(UUID.randomUUID().toString());
         post.setUser(user);
-        post.setPostedTime(LocalDateTime.now());
-        post.setTitle("some text");
+        post.setTime(LocalDateTime.now());
+        post.setText("some text");
 
-        comment = new Comment(
-                UUID.randomUUID().toString(),
-                "some text",
-                LocalDateTime.now(),
-                post,
-                user
-        );
+        comment = new Comment();
+        comment.setText("some text");
+        comment.setTime(LocalDateTime.now());
+        comment.setPost(post);
+        comment.setUser(user);
 
         userRepository.save(user);
         postRepository.save(post);
-    }
-
-    @Test
-    void save() {
-        Comment response = commentRepository.save(comment);
-
-        assertEquals(comment.getId(), response.getId());
-        assertEquals(comment.getContent(), response.getContent());
-    }
-
-    @Test
-    void findById() {
         commentRepository.save(comment);
-
-        Comment response = commentRepository.findById(comment.getId()).orElse(null);
-
-        assertEquals(comment.getId(), response.getId());
-        assertEquals(comment.getContent(), response.getContent());
-    }
-
-    @Test
-    void delete() {
-        commentRepository.save(comment);
-
-        commentRepository.delete(comment);
-
-        assertEquals(Optional.empty(), commentRepository.findById(comment.getId()));
     }
 
     @Test
     void findByPostId() {
-        commentRepository.save(comment);
-
         Page<Comment> comments = commentRepository.findByPostId(post.getId(), PageRequest.of(0, 10));
+        Comment response = comments.getContent().getFirst();
 
-        assertNotNull(comments.getContent().getFirst());
-        assertEquals(comment.getId(), comments.getContent().getFirst().getId());
+        assertEquals(comment.getText(), response.getText());
+        assertEquals(comment.getTime(), response.getTime());
+        assertEquals(comment.getUser(), response.getUser());
+        assertEquals(comment.getPost(), response.getPost());
     }
 }

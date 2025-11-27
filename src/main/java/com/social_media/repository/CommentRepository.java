@@ -11,7 +11,5 @@ import java.util.UUID;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, UUID> {
-    @Query("SELECT COUNT(c) > 0 FROM Comment c WHERE c.id = :id AND c.user.id = :userId")
-    boolean existsByIdUserId(UUID id, UUID userId);
     Page<Comment> findByPostId(UUID id, Pageable pageable);
 }
