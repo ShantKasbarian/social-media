@@ -9,7 +9,6 @@ import com.social_media.repository.FriendRequestRepository;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.FriendRequestService;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +25,8 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     private static final String FRIEND_REQUEST_ALREADY_SENT_MESSAGE = "you have already sent a friend request";
 
+    private static final String FRIEND_REQUEST_PENDING_MESSAGE = "cannot accept friend request of the target user";
+
     private static final String FRIEND_REQUEST_NOT_FOUND_MESSAGE = "friend request not found";
 
     private static final String UNABLE_TO_DELETE_FRIEND_REQUEST = "cannot delete friend request";
@@ -41,10 +42,6 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
 
         UUID currentUserId = user.getId();
-
-        if (friendRequestRepository.existsByUserIdTargetUserIdStatus(currentUserId, targetUserId, FriendRequest.Status.BLOCKED)) {
-            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
-        }
 
         if (friendRequestRepository.existsByUserIdTargetUserId(currentUserId, targetUserId)) {
             throw new ResourceAlreadyExistsException(FRIEND_REQUEST_ALREADY_SENT_MESSAGE);
@@ -64,8 +61,11 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
-        if (!user.getId().equals(friendRequest.getTargetUser().getId())) {
-            throw new RequestNotAllowedException(FRIEND_REQUEST_NOT_FOUND_MESSAGE);
+        if (
+                !user.getId().equals(friendRequest.getTargetUser().getId()) &&
+                FriendRequest.Status.ACCEPTED.equals(status)
+        ) {
+            throw new RequestNotAllowedException(FRIEND_REQUEST_PENDING_MESSAGE);
         }
 
         if (friendRequest.getStatus().equals(FriendRequest.Status.BLOCKED)) {
@@ -84,10 +84,14 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
         UUID userId = user.getId();
+        UUID targetUserId = friendRequest.getTargetUser().getId();
 
         if (
-                !friendRequest.getTargetUser().getId().equals(userId) &&
-                friendRequest.getStatus().equals(FriendRequest.Status.BLOCKED)
+            (
+                !friendRequest.getUser().getId().equals(userId) &&
+                !targetUserId.equals(userId)
+            ) ||
+            friendRequest.getStatus().equals(FriendRequest.Status.BLOCKED)
         ) {
             throw new RequestNotAllowedException(UNABLE_TO_DELETE_FRIEND_REQUEST);
         }

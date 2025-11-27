@@ -12,7 +12,6 @@ import com.social_media.repository.LikeRepository;
 import com.social_media.repository.PostRepository;
 import com.social_media.service.LikeService;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -41,11 +40,7 @@ public class LikeServiceImpl implements LikeService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
-        FriendRequest friendRequest = friendRequestRepository
-                .findByUserIdTargetUserId(user.getId(), post.getUser().getId())
-                .orElse(null);
-
-        if (friendRequest != null && friendRequest.getStatus().equals(FriendRequest.Status.BLOCKED)) {
+        if (friendRequestRepository.existsByUserIdTargetUserIdStatus(user.getId(), post.getUser().getId(),FriendRequest.Status.BLOCKED)) {
             throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
         }
 
@@ -62,11 +57,8 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     @Transactional
-    public void removeLike(User user, UUID postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
-
-        Like like = likeRepository.findByPostAndUser(post, user)
+    public void removeLike(UUID userId, UUID postId) {
+        Like like = likeRepository.findByUserIdPostId(userId, postId)
                 .orElseThrow(() -> new ResourceNotFoundException(LIKE_NOT_FOUND_MESSAGE));
 
         likeRepository.delete(like);

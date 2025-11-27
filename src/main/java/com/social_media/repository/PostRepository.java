@@ -18,12 +18,12 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @Query(value = """
         SELECT p.* FROM posts p
         LEFT JOIN users u ON u.id = p.user_id
-        LEFT JOIN friend_requests f ON f.user_id = u.id OR f.friend_id = u.id
-        WHERE (f.user_id = :userId OR f.friend_id = :userId) AND
+        LEFT JOIN friend_requests f ON f.user_id = u.id OR f.target_user_id = u.id
+        WHERE (f.user_id = :userId OR f.target_user_id = :userId) AND
         p.user_id != :userId AND f.status = 'ACCEPTED'
         ORDER BY p.posted_time DESC
     """, nativeQuery = true)
-    Page<Post> findByUser_Friends(@Param("userId") UUID userId, Pageable pageable);
+    Page<Post> findByUserAcceptedFriendRequests(@Param("userId") UUID userId, Pageable pageable);
 
     @Query("""
         FROM Post p

@@ -10,5 +10,5 @@ import java.util.UUID;
 @Validated
 public interface LikeService {
     Like createLike(User user, @NotNull(message = "postId must be specified") UUID id);
-    void removeLike(User user, @NotNull(message = "postId must be specified") UUID postId);
+    void removeLike(UUID userId, @NotNull(message = "postId must be specified") UUID postId);
 }

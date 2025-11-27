@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class DefaultExceptionHandler {
@@ -25,8 +23,8 @@ public class DefaultExceptionHandler {
         );
     }
 
-    @ExceptionHandler(InvalidProvidedInfoException.class)
-    public ResponseEntity<ErrorDto> handle(InvalidProvidedInfoException e) {
+    @ExceptionHandler(InvalidInputException.class)
+    public ResponseEntity<ErrorDto> handle(InvalidInputException e) {
         return new ResponseEntity<>(
                 new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST
         );

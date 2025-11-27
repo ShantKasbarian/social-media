@@ -3,8 +3,7 @@ package com.social_media.service.impl;
 import com.social_media.config.JwtService;
 import com.social_media.entity.User;
 import com.social_media.exception.InvalidCredentialsException;
-import com.social_media.exception.InvalidProvidedInfoException;
-import com.social_media.exception.ResourceAlreadyExistsException;
+import com.social_media.exception.InvalidInputException;
 import com.social_media.model.TokenDto;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.AuthenticationService;
@@ -53,15 +52,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String username = user.getUsername().trim();
 
         if (!usernameValidator.isUsernameValid(username)) {
-            throw new InvalidProvidedInfoException(INVALID_USERNAME_MESSAGE);
+            throw new InvalidInputException(INVALID_USERNAME_MESSAGE);
         }
 
         if (!emailValidator.isEmailValid(user.getEmail())) {
-            throw new ResourceAlreadyExistsException(INVALID_EMAIL_MESSAGE);
+            throw new InvalidInputException(INVALID_EMAIL_MESSAGE);
         }
 
         if (!isPasswordValid(user.getPassword())) {
-            throw new InvalidProvidedInfoException(INVALID_PASSWORD_MESSAGE);
+            throw new InvalidInputException(INVALID_PASSWORD_MESSAGE);
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));

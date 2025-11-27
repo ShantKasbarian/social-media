@@ -41,6 +41,6 @@ public class LikeController {
             Authentication authentication, @PathVariable UUID postId
     ) {
         User user = (User) authentication.getPrincipal();
-        likeService.removeLike(user, postId);
+        likeService.removeLike(user.getId(), postId);
     }
 }

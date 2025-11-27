@@ -1,6 +1,7 @@
 package com.social_media.converter;
 
 import com.social_media.entity.Comment;
+import com.social_media.entity.Post;
 import com.social_media.entity.User;
 import com.social_media.model.CommentDto;
 import com.social_media.service.PostService;
@@ -13,11 +14,21 @@ import java.util.UUID;
 @Component
 @AllArgsConstructor
 public class CommentConverter implements ToEntityConverter<Comment, CommentDto>, ToModelConverter<Comment, CommentDto> {
+    private final PostService postService;
+
     @Override
     public Comment convertToEntity(CommentDto model) {
+        UUID postId = model.id();
+        Post post = null;
+
+        if (postId != null) {
+            post = postService.getPostById(postId);
+        }
+
         Comment comment = new Comment();
         comment.setId(model.id());
         comment.setText(model.text());
+        comment.setPost(post);
         return comment;
     }
 

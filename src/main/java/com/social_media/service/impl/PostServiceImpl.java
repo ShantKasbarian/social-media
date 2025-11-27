@@ -1,13 +1,11 @@
 package com.social_media.service.impl;
 
 import com.social_media.entity.*;
-import com.social_media.exception.InvalidProvidedInfoException;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.*;
 import com.social_media.service.PostService;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -82,7 +80,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<Post> getFriendsPosts(User user, Pageable pageable) {
-        return postRepository.findByUser_Friends(user.getId(), pageable);
+        return postRepository.findByUserAcceptedFriendRequests(user.getId(), pageable);
     }
 
     @Override

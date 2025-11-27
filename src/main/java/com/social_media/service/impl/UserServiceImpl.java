@@ -1,7 +1,7 @@
 package com.social_media.service.impl;
 
 import com.social_media.entity.User;
-import com.social_media.exception.InvalidProvidedInfoException;
+import com.social_media.exception.InvalidInputException;
 import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.UserService;
@@ -28,26 +28,21 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public Page<User> searchByUsername(String username, Pageable pageable) {
-        return userRepository.findByUsernameContainingIgnoreCase(username, pageable);
-    }
-
-    @Override
     public void updateUser(User user, User target) {
         String username = target.getUsername().trim();
         String email = target.getEmail().trim();
         String password = target.getPassword().trim();
 
         if (!usernameValidator.isUsernameValid(username)) {
-            throw new InvalidProvidedInfoException(INVALID_USERNAME_MESSAGE);
+            throw new InvalidInputException(INVALID_USERNAME_MESSAGE);
         }
 
         if (!emailValidator.isEmailValid(email)) {
-            throw new ResourceAlreadyExistsException(INVALID_EMAIL_MESSAGE);
+            throw new InvalidInputException(INVALID_EMAIL_MESSAGE);
         }
 
         if (!isPasswordValid(password)) {
-            throw new InvalidProvidedInfoException(INVALID_PASSWORD_MESSAGE);
+            throw new InvalidInputException(INVALID_PASSWORD_MESSAGE);
         }
 
         user.setFirstname(target.getFirstname());
@@ -57,5 +52,10 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(password));
 
         userRepository.save(user);
+    }
+
+    @Override
+    public Page<User> searchByUsername(String username, Pageable pageable) {
+        return userRepository.findByUsernameContainingIgnoreCase(username, pageable);
     }
 }
