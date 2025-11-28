@@ -14,15 +14,15 @@ import java.util.UUID;
 @Repository
 public interface PostRepository extends JpaRepository<Post, UUID> {
     Page<Post> findByUser(@Param("user") User user, Pageable pageable);
-    
-    @Query(value = """
-        SELECT p.* FROM posts p
-        LEFT JOIN users u ON u.id = p.user_id
-        LEFT JOIN friend_requests f ON f.user_id = u.id OR f.target_user_id = u.id
-        WHERE (f.user_id = :userId OR f.target_user_id = :userId) AND
-        p.user_id != :userId AND f.status = 'ACCEPTED'
+
+    @Query("""
+        FROM Post p
+        LEFT JOIN User u ON u.id = p.user.id
+        LEFT JOIN FriendRequest f ON f.user.id = u.id OR f.targetUser.id = u.id
+        WHERE (f.user.id = :userId OR f.targetUser.id = :userId) AND
+        p.user.id != :userId AND f.status = 'ACCEPTED'
         ORDER BY p.time DESC
-    """, nativeQuery = true)
+    """)
     Page<Post> findByUserAcceptedFriendRequests(@Param("userId") UUID userId, Pageable pageable);
 
     @Query("""
