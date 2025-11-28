@@ -132,16 +132,6 @@ class FriendRequestServiceImplTest {
     }
 
     @Test
-    void updateFriendRequestStatusShouldThrowRequestNotAllowedExceptionWhenFriendRequestIsBlocked() {
-        friendRequest.setStatus(FriendRequest.Status.BLOCKED);
-
-        when(friendRequestRepository.findById(friendRequest.getId()))
-                .thenReturn(Optional.ofNullable(friendRequest));
-
-        assertThrows(RequestNotAllowedException.class, () -> friendRequestService.updateFriendRequestStatus(friendRequest.getTargetUser(), friendRequest.getId(), FriendRequest.Status.ACCEPTED));
-    }
-
-    @Test
     void deleteFriendRequest() {
         friendRequest.setUser(user1);
         friendRequest.setTargetUser(user2);
@@ -174,16 +164,6 @@ class FriendRequestServiceImplTest {
                 .thenReturn(Optional.ofNullable(friendRequest));
 
         assertThrows(RequestNotAllowedException.class, () -> friendRequestService.deleteFriendRequest(user, friendRequest.getId()));
-    }
-
-    @Test
-    void deleteFriendRequestShouldThrowRequestNotAllowedExceptionWhenStatusIsBlocked() {
-        friendRequest.setStatus(FriendRequest.Status.BLOCKED);
-
-        when(friendRequestRepository.findById(any(UUID.class)))
-                .thenReturn(Optional.ofNullable(friendRequest));
-
-        assertThrows(RequestNotAllowedException.class, () -> friendRequestService.deleteFriendRequest(user1, friendRequest.getId()));
     }
 
     @Test

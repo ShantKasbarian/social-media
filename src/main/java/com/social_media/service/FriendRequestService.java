@@ -12,7 +12,7 @@ import java.util.UUID;
 @Validated
 public interface FriendRequestService {
     FriendRequest createFriendRequest(User user, @NotNull(message = "id must be specified") UUID targetUserId);
-    FriendRequest updateFriendRequestStatus(User user, UUID requestId, FriendRequest.Status status);
+    FriendRequest updateFriendRequestStatus(User user, @NotNull(message = "id must be specified") UUID requestId, @NotNull(message = "status must be specified") FriendRequest.Status status);
     void deleteFriendRequest(User user, @NotNull(message = "id must be specified") UUID requestId);
     Page<FriendRequest> getFriendRequestsByStatus(User user, @NotNull(message = "status must be specified") FriendRequest.Status status, Pageable pageable);
 }

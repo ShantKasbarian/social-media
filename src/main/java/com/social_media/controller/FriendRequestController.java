@@ -7,7 +7,6 @@ import com.social_media.model.FriendRequestDto;
 import com.social_media.model.PageDto;
 import com.social_media.service.FriendRequestService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -38,16 +37,14 @@ public class FriendRequestController {
         return new ResponseEntity<>(friendRequest, HttpStatus.CREATED);
     }
 
-    @PatchMapping
+    @PatchMapping("/{id}/status/{status}")
     public ResponseEntity<FriendRequestDto> updateFriendRequestStatus(
-            Authentication authentication, @RequestBody @Valid FriendRequestDto friendRequestDto
+            Authentication authentication, @PathVariable UUID id, @PathVariable FriendRequest.Status status
     ) {
         User user = (User) authentication.getPrincipal();
 
         var friendRequest = friendRequestToModelConverter.convertToModel(
-                friendRequestService.updateFriendRequestStatus(
-                        user, friendRequestDto.id(), friendRequestDto.status()
-                )
+                friendRequestService.updateFriendRequestStatus(user, id, status)
         );
 
         return ResponseEntity.ok(friendRequest);

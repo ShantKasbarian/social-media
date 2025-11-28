@@ -14,6 +14,9 @@ import java.util.UUID;
 
 @Repository
 public interface FriendRequestRepository extends JpaRepository<FriendRequest, UUID> {
+    @Query("SELECT COUNT(f) > 0 FROM FriendRequest f WHERE f.id = :id AND f.status = :status")
+    boolean existsByIdStatus(UUID id, FriendRequest.Status status);
+
     @Query("""
         SELECT COUNT(f) = 1 FROM FriendRequest f
         WHERE (f.user.id = :userId AND f.targetUser.id = :targetUserId) OR

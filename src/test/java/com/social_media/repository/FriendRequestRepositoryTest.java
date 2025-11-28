@@ -49,6 +49,11 @@ class FriendRequestRepositoryTest {
     }
 
     @Test
+    void existsByIdStatus() {
+        assertTrue(friendRequestRepository.existsByIdStatus(friendRequest.getId(), friendRequest.getStatus()));
+    }
+
+    @Test
     void existsByUserIdTargetUserId() {
         assertTrue(friendRequestRepository.existsByUserIdTargetUserId(user1.getId(), user2.getId()));
     }

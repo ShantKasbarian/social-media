@@ -5,7 +5,6 @@ import com.social_media.entity.Like;
 import com.social_media.entity.User;
 import com.social_media.model.LikeDto;
 import com.social_media.service.LikeService;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,5 +1,6 @@
 package com.social_media.service.impl;
 
+import com.social_media.annotation.CheckFriendRequestStatus;
 import com.social_media.entity.FriendRequest;
 import com.social_media.entity.Like;
 import com.social_media.entity.Post;
@@ -17,13 +18,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+import static com.social_media.service.impl.PostServiceImpl.POST_NOT_FOUND_MESSAGE;
+
 @Service
 @AllArgsConstructor
 public class LikeServiceImpl implements LikeService {
-    private static final String POST_NOT_FOUND_MESSAGE = "post not found";
-
-    private static final String BLOCKED_USER_MESSAGE = "you have blocked or have been blocked by this user";
-
     private static final String TOO_MANY_LIKES_MESSAGE = "cannot like post more than once";
 
     private static final String LIKE_NOT_FOUND_MESSAGE = "liked not found";
@@ -32,17 +31,12 @@ public class LikeServiceImpl implements LikeService {
 
     private final PostRepository postRepository;
 
-    private final FriendRequestRepository friendRequestRepository;
-
     @Override
     @Transactional
+    @CheckFriendRequestStatus
     public Like createLike(User user, UUID id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
-
-        if (friendRequestRepository.existsByUserIdTargetUserIdStatus(user.getId(), post.getUser().getId(),FriendRequest.Status.BLOCKED)) {
-            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
-        }
 
         if (likeRepository.existsByPostAndUser(post, user)) {
             throw new ResourceAlreadyExistsException(TOO_MANY_LIKES_MESSAGE);

@@ -67,8 +67,6 @@ class LikeServiceImplTest {
     @Test
     void createLike() {
         when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
-        when(friendRequestRepository.existsByUserIdTargetUserIdStatus(any(UUID.class), any(UUID.class), any(FriendRequest.Status.class)))
-                .thenReturn(false);
         when(likeRepository.existsByPostAndUser(any(Post.class), any(User.class))).thenReturn(false);
         when(likeRepository.save(any(Like.class))).thenReturn(like);
 
@@ -77,7 +75,6 @@ class LikeServiceImplTest {
         assertNotNull(response);
         assertEquals(like, response);
         verify(postRepository).findById(any(UUID.class));
-        verify(friendRequestRepository).existsByUserIdTargetUserIdStatus(any(UUID.class), any(UUID.class), any(FriendRequest.Status.class));
         verify(likeRepository).existsByPostAndUser(any(Post.class), any(User.class));
         verify(likeRepository).save(any(Like.class));
     }
@@ -86,14 +83,6 @@ class LikeServiceImplTest {
     void createLikeShouldThrowResourceNotFoundExceptionWhenPostNotFound() {
         when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> likeService.createLike(user, post.getId()));
-    }
-
-    @Test
-    void createLikeShouldThrowRequestNotAllowedExceptionWhenFriendRequestStatusIsBlocked() {
-        when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
-        when(friendRequestRepository.existsByUserIdTargetUserIdStatus(any(UUID.class), any(UUID.class), any(FriendRequest.Status.class)))
-                .thenReturn(true);
-        assertThrows(RequestNotAllowedException.class, () -> likeService.createLike(user, post.getId()));
     }
 
     @Test

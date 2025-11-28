@@ -1,5 +1,6 @@
 package com.social_media.service.impl;
 
+import com.social_media.annotation.CheckFriendRequestStatus;
 import com.social_media.entity.FriendRequest;
 import com.social_media.entity.User;
 import com.social_media.exception.RequestNotAllowedException;
@@ -20,8 +21,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class FriendRequestServiceImpl implements FriendRequestService {
     private static final String USER_NOT_FOUND_MESSAGE = "user not found";
-
-    private static final String BLOCKED_USER_MESSAGE = "user has blocked you";
 
     private static final String FRIEND_REQUEST_ALREADY_SENT_MESSAGE = "you have already sent a friend request";
 
@@ -57,6 +56,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     @Override
     @Transactional
+    @CheckFriendRequestStatus
     public FriendRequest updateFriendRequestStatus(User user, UUID requestId, FriendRequest.Status status) {
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
@@ -68,10 +68,6 @@ public class FriendRequestServiceImpl implements FriendRequestService {
             throw new RequestNotAllowedException(FRIEND_REQUEST_PENDING_MESSAGE);
         }
 
-        if (friendRequest.getStatus().equals(FriendRequest.Status.BLOCKED)) {
-            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
-        }
-
         friendRequest.setStatus(status);
 
         return friendRequestRepository.save(friendRequest);
@@ -79,6 +75,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     @Override
     @Transactional
+    @CheckFriendRequestStatus
     public void deleteFriendRequest(User user, UUID requestId) {
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
@@ -87,11 +84,8 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         UUID targetUserId = friendRequest.getTargetUser().getId();
 
         if (
-            (
                 !friendRequest.getUser().getId().equals(userId) &&
                 !targetUserId.equals(userId)
-            ) ||
-            friendRequest.getStatus().equals(FriendRequest.Status.BLOCKED)
         ) {
             throw new RequestNotAllowedException(UNABLE_TO_DELETE_FRIEND_REQUEST);
         }

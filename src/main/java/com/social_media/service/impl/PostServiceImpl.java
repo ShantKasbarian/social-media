@@ -1,5 +1,6 @@
 package com.social_media.service.impl;
 
+import com.social_media.annotation.CheckFriendRequestStatus;
 import com.social_media.entity.*;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
@@ -19,19 +20,15 @@ import java.util.UUID;
 @Validated
 @AllArgsConstructor
 public class PostServiceImpl implements PostService {
-    private static final String POST_NOT_FOUND_MESSAGE = "post not found";
+    public static final String POST_NOT_FOUND_MESSAGE = "post not found";
 
     private static final String UNABLE_TO_DELETE_OR_MODIFY_POST_MESSAGE = "unable to delete or modify post";
 
     private static final String USER_NOT_FOUND_MESSAGE = "user not found";
 
-    private static final String BLOCKED_USER_MESSAGE = "you have blocked or have been blocked by this user";
-
     private final PostRepository postRepository;
 
     private final UserRepository userRepository;
-
-    private final FriendRequestRepository friendRequestRepository;
 
     @Override
     @Transactional
@@ -84,13 +81,10 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @CheckFriendRequestStatus
     public Page<Post> getUserPosts(User user, UUID userId, Pageable pageable) {
         User targetUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
-
-        if (friendRequestRepository.existsByUserIdTargetUserIdStatus(user.getId(), userId, FriendRequest.Status.BLOCKED)) {
-            throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
-        }
 
         return postRepository.findByUser(targetUser, pageable);
     }

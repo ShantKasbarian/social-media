@@ -21,7 +21,7 @@ import static com.social_media.utils.PasswordValidator.isPasswordValid;
 public class AuthenticationServiceImpl implements AuthenticationService {
     private static final String WRONG_USERNAME_OR_PASSWORD_MESSAGE = "wrong username or password";
 
-    public static final String INVALID_EMAIL_MESSAGE = "email is already taken";
+    public static final String INVALID_EMAIL_MESSAGE = "email is invalid";
 
     public static final String INVALID_USERNAME_MESSAGE = "username is invalid";
 

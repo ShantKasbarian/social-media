@@ -1,5 +1,6 @@
 package com.social_media.service.impl;
 
+import com.social_media.annotation.CheckFriendRequestStatus;
 import com.social_media.entity.*;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
@@ -16,11 +17,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import static com.social_media.service.impl.PostServiceImpl.POST_NOT_FOUND_MESSAGE;
+
 @Service
 @AllArgsConstructor
 public class CommentServiceImpl implements CommentService {
-    private static final String POST_NOT_FOUND_MESSAGE = "post not found";
-
     private static final String BLOCKED_MESSAGE = "you have been blocked by this user";
 
     private static final String COMMENT_NOT_FOUND_MESSAGE = "text not found";
@@ -37,14 +38,8 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
+    @CheckFriendRequestStatus
     public Comment createComment(User user, Comment comment) {
-        FriendRequest friendRequest = friendRequestRepository.findByUserIdTargetUserId(
-                user.getId(), comment.getPost().getUser().getId()).orElse(null);
-
-        if (friendRequest != null && friendRequest.getStatus().equals(FriendRequest.Status.BLOCKED)) {
-            throw new RequestNotAllowedException(BLOCKED_MESSAGE);
-        }
-
         comment.setTime(LocalDateTime.now());
         comment.setUser(user);
 

@@ -16,6 +16,6 @@ public class UsernameValidatorImpl implements UsernameValidator {
             return false;
         }
 
-        return username.contains(" ") && userRepository.existsByUsername(username);
+        return !username.contains(" ") && !userRepository.existsByUsername(username);
     }
 }

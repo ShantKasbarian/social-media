@@ -104,7 +104,7 @@ class FriendRequestControllerTest {
         when(friendRequestService.updateFriendRequestStatus(any(User.class), any(UUID.class), any(FriendRequest.Status.class)))
                 .thenReturn(friendRequest);
 
-        var response = friendRequestController.updateFriendRequestStatus(authentication, friendRequestDto);
+        var response = friendRequestController.updateFriendRequestStatus(authentication, friendRequest.getId(), FriendRequest.Status.ACCEPTED);
 
         assertNotNull(response);
         assertNotNull(response.getBody());

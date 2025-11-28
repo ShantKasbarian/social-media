@@ -77,8 +77,6 @@ class CommentServiceImplTest {
 
     @Test
     void createComment() {
-        when(friendRequestRepository.findByUserIdTargetUserId(any(UUID.class), any(UUID.class)))
-                .thenReturn(Optional.ofNullable(friendRequest));
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
         var response = commentService.createComment(user, comment);
@@ -87,18 +85,7 @@ class CommentServiceImplTest {
         assertEquals(comment.getText(), response.getText());
         assertEquals(comment.getUser().getId(), response.getUser().getId());
         assertEquals(comment.getPost().getId(), response.getPost().getId());
-        verify(friendRequestRepository).findByUserIdTargetUserId(any(UUID.class), any(UUID.class));
         verify(commentRepository).save(any(Comment.class));
-    }
-
-    @Test
-    void createCommentShouldThrowRequestNotAllowedExceptionWhenFriendRequestStatusIsBlocked() {
-        friendRequest.setStatus(FriendRequest.Status.BLOCKED);
-
-        when(friendRequestRepository.findByUserIdTargetUserId(any(UUID.class), any(UUID.class)))
-                .thenReturn(Optional.ofNullable(friendRequest));
-
-        assertThrows(RequestNotAllowedException.class, () -> commentService.createComment(user, comment));
     }
 
     @Test

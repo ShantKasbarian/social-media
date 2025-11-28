@@ -69,10 +69,10 @@ public class CommentController {
         commentService.deleteComment((User) authentication.getPrincipal(), commentId);
     }
 
-    @GetMapping("/posts/{id}")
+    @GetMapping("/posts/{postId}")
     public ResponseEntity<PageDto<Comment, CommentDto>>  getCommentsByPostId(
             Authentication authentication,
-            @PathVariable UUID id,
+            @PathVariable UUID postId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
@@ -80,7 +80,7 @@ public class CommentController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc(TIME_PROPERTY)));
 
         var comments = new PageDto<>(
-                commentService.getCommentsByPostId(user, id, pageable),
+                commentService.getCommentsByPostId(user, postId, pageable),
                 commentToModelConverter
         );
 

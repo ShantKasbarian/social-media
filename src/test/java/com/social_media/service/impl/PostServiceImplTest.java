@@ -178,8 +178,6 @@ class PostServiceImplTest {
         );
 
         when(userRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(user));
-        when(friendRequestRepository.existsByUserIdTargetUserIdStatus(any(UUID.class), any(UUID.class), any(FriendRequest.Status.class)))
-                .thenReturn(false);
         when(postRepository.findByUser(user, pageable)).thenReturn(page);
 
         var response = postService.getUserPosts(user, user.getId(), pageable);
@@ -188,7 +186,6 @@ class PostServiceImplTest {
         assertFalse(response.isEmpty());
         assertEquals(page, response);
         verify(userRepository).findById(any(UUID.class));
-        verify(friendRequestRepository).existsByUserIdTargetUserIdStatus(any(UUID.class), any(UUID.class), any(FriendRequest.Status.class));
         verify(postRepository).findByUser(any(User.class), any(Pageable.class));
     }
 
@@ -196,14 +193,6 @@ class PostServiceImplTest {
     void getUserPostsShouldThrowResourceNotFoundExceptionWhenTargetUserNotFound() {
         when(userRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> postService.getUserPosts(user, user.getId(), PageRequest.of(0, 10)));
-    }
-
-    @Test
-    void getUserPostsShouldThrowRequestNotAllowedExceptionWhenFriendRequestStatusIsBlocked() {
-        when(userRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(user));
-        when(friendRequestRepository.existsByUserIdTargetUserIdStatus(any(UUID.class), any(UUID.class), any(FriendRequest.Status.class)))
-                .thenReturn(true);
-        assertThrows(RequestNotAllowedException.class, () -> postService.getUserPosts(user, user.getId(), PageRequest.of(0, 10)));
     }
 
     @Test
