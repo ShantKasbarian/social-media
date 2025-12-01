@@ -27,12 +27,6 @@ class PostServiceImplTest {
     @Mock
     private PostRepository postRepository;
 
-    @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private FriendRequestRepository friendRequestRepository;
-
     private User user;
 
     private Post post;

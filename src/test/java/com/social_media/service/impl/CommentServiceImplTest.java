@@ -1,7 +1,6 @@
 package com.social_media.service.impl;
 
 import com.social_media.entity.*;
-import com.social_media.exception.InvalidInputException;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.CommentRepository;
