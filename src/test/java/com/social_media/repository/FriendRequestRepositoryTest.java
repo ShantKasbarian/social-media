@@ -68,15 +68,6 @@ class FriendRequestRepositoryTest {
     }
 
     @Test
-    void findByUserIdTargetUserId() {
-        FriendRequest friendRequest = friendRequestRepository.findByUserIdTargetUserId(user1.getId(), user2.getId()).get();
-
-        assertNotNull(friendRequest);
-        assertTrue(user1.getId().equals(friendRequest.getUser().getId()) || user2.getId().equals(friendRequest.getUser().getId()));
-        assertTrue(user1.getId().equals(friendRequest.getTargetUser().getId()) || user2.getId().equals(friendRequest.getTargetUser().getId()));
-    }
-
-    @Test
     void findByUserStatus() {
         Page<FriendRequest> response = friendRequestRepository.findByUserStatus(user2, friendRequest.getStatus(),PageRequest.of(0, 10));
 

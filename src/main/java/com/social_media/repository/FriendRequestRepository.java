@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -31,13 +30,6 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, UU
         f.status = :status
     """)
     boolean existsByUserIdTargetUserIdStatus(UUID currentUserId, UUID targetUserId, FriendRequest.Status status);
-
-    @Query("""
-        FROM FriendRequest f
-        WHERE (f.user.id = :userId AND f.targetUser.id = :targetUserId) OR
-        (f.user.id = :targetUserId AND f.targetUser.id = :userId)
-    """)
-    Optional<FriendRequest> findByUserIdTargetUserId(@Param("userId") UUID userId, @Param("targetUserId") UUID targetUserId);
 
     @Query("""
         FROM FriendRequest f

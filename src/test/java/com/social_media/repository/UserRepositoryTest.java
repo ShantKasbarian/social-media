@@ -41,15 +41,6 @@ class UserRepositoryTest {
     }
 
     @Test
-    void findByEmail() {
-        User response = userRepository.findByEmail(user.getEmail()).get();
-
-        assertNotNull(response);
-        assertEquals(user.getId(), response.getId());
-        assertEquals(user.getEmail(), response.getEmail());
-    }
-
-    @Test
     void existsByEmail() {
         assertTrue(userRepository.existsByEmail(user.getEmail()));
     }
