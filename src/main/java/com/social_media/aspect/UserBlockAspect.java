@@ -23,7 +23,7 @@ import static com.social_media.service.impl.PostServiceImpl.POST_NOT_FOUND_MESSA
 @Aspect
 @Component
 @AllArgsConstructor
-public class FriendRequestStatusFilter {
+public class UserBlockAspect {
     private static final String CREATE_COMMENT_METHOD_NAME = "createComment";
 
     private static final String UPDATE_FRIEND_REQUEST_STATUS_METHOD_NAME = "updateFriendRequestStatus";
@@ -34,14 +34,16 @@ public class FriendRequestStatusFilter {
 
     private static final String GET_USER_POSTS_METHOD_NAME = "getUserPosts";
 
-    private static final String BLOCKED_USER_MESSAGE = "cannot interact with user because user is blocked";
+    static final String BLOCKED_USER_MESSAGE = "cannot interact with user because user is blocked";
+
+    private static final String GET_COMMENTS_BY_POST_ID_METHOD_NAME = "getCommentsByPostId";
 
     private final FriendRequestRepository friendRequestRepository;
 
     private final PostRepository postRepository;
 
-    @Before("@annotation(com.social_media.annotation.CheckFriendRequestStatus)")
-    public void friendRequestStatus(JoinPoint joinPoint) {
+    @Before("@annotation(com.social_media.annotation.ValidateUserNotBlocked)")
+    public void validate(JoinPoint joinPoint) {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Method method = methodSignature.getMethod();
         Object[] args = joinPoint.getArgs();
@@ -61,6 +63,8 @@ public class FriendRequestStatusFilter {
             case CREATE_LIKE_METHOD_NAME -> checkCreateLike(args);
 
             case GET_USER_POSTS_METHOD_NAME -> checkGetUserPosts(args);
+
+            case GET_COMMENTS_BY_POST_ID_METHOD_NAME -> checkGetCommentsByPostId(args);
 
             default -> false;
         };
@@ -118,7 +122,7 @@ public class FriendRequestStatusFilter {
 
     private boolean checkGetUserPosts(Object[] args) {
         User user = null;
-        UUID userId = null;
+        UUID targetUserId = null;
 
         for (Object object: args) {
             if (object instanceof User) {
@@ -126,10 +130,30 @@ public class FriendRequestStatusFilter {
             }
 
             if (object instanceof UUID) {
-                userId = (UUID) object;
+                targetUserId = (UUID) object;
             }
         }
 
-        return friendRequestRepository.existsByUserIdTargetUserIdStatus(user.getId(), userId, FriendRequest.Status.BLOCKED);
+        return friendRequestRepository.existsByUserIdTargetUserIdStatus(user.getId(), targetUserId, FriendRequest.Status.BLOCKED);
+    }
+
+    private boolean checkGetCommentsByPostId(Object[] args) {
+        User user = null;
+        UUID postId = null;
+
+        for (Object object: args) {
+            if (object instanceof User) {
+                user = (User) object;
+            }
+
+            if (object instanceof UUID) {
+                postId = (UUID) object;
+            }
+        }
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
+
+        return friendRequestRepository.existsByUserIdTargetUserIdStatus(user.getId(), post.getUser().getId(), FriendRequest.Status.BLOCKED);
     }
 }

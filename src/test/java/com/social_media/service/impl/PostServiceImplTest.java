@@ -177,22 +177,15 @@ class PostServiceImplTest {
                 posts, pageable, posts.size()
         );
 
-        when(userRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(user));
-        when(postRepository.findByUser(user, pageable)).thenReturn(page);
+        when(postRepository.findByUserId(any(UUID.class), any(Pageable.class)))
+                .thenReturn(page);
 
         var response = postService.getUserPosts(user, user.getId(), pageable);
 
         assertNotNull(response);
         assertFalse(response.isEmpty());
         assertEquals(page, response);
-        verify(userRepository).findById(any(UUID.class));
-        verify(postRepository).findByUser(any(User.class), any(Pageable.class));
-    }
-
-    @Test
-    void getUserPostsShouldThrowResourceNotFoundExceptionWhenTargetUserNotFound() {
-        when(userRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> postService.getUserPosts(user, user.getId(), PageRequest.of(0, 10)));
+        verify(postRepository).findByUserId(any(UUID.class), any(Pageable.class));
     }
 
     @Test

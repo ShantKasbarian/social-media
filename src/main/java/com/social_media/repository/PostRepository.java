@@ -13,7 +13,8 @@ import java.util.UUID;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, UUID> {
-    Page<Post> findByUser(@Param("user") User user, Pageable pageable);
+    @Query("FROM Post p WHERE p.user.id = :userId")
+    Page<Post> findByUserId(@Param("userId") UUID userId, Pageable pageable);
 
     @Query("""
         FROM Post p

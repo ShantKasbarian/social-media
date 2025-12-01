@@ -20,12 +20,6 @@ import java.security.NoSuchAlgorithmException;
 @Component
 @AllArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
-    static final String AUTHORIZATION = "Authorization";
-
-    static final String BEARER = "Bearer ";
-
-    private static final int BEGIN_INDEX = 7;
-
     private final JwtService jwtService;
 
     private final UserDetailsService userDetailsService;
@@ -36,20 +30,16 @@ public class JwtFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-
-        String authHeader = request.getHeader(AUTHORIZATION);
-        String token = null;
+        String token = jwtService.fetchToken(request);
         String username = null;
 
-        if (authHeader != null && authHeader.startsWith(BEARER)) {
-            token = authHeader.substring(BEGIN_INDEX);
-
-            try {
+        try {
+            if (token != null) {
                 username = jwtService.extractUsername(token);
             }
-            catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            }
+        }
+        catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

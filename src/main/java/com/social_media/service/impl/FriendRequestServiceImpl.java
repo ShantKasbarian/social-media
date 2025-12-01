@@ -1,6 +1,6 @@
 package com.social_media.service.impl;
 
-import com.social_media.annotation.CheckFriendRequestStatus;
+import com.social_media.annotation.ValidateUserNotBlocked;
 import com.social_media.entity.FriendRequest;
 import com.social_media.entity.User;
 import com.social_media.exception.RequestNotAllowedException;
@@ -56,7 +56,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     @Override
     @Transactional
-    @CheckFriendRequestStatus
+    @ValidateUserNotBlocked
     public FriendRequest updateFriendRequestStatus(User user, UUID requestId, FriendRequest.Status status) {
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
@@ -75,7 +75,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     @Override
     @Transactional
-    @CheckFriendRequestStatus
+    @ValidateUserNotBlocked
     public void deleteFriendRequest(User user, UUID requestId) {
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));

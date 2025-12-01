@@ -61,9 +61,20 @@ class PostRepositoryTest {
     }
 
     @Test
+    void findByUserId() {
+        Page<Post> response = postRepository.findByUserId(post.getUser().getId(), PageRequest.of(0, 10));
+
+        assertNotNull(response);
+        assertFalse(response.getContent().isEmpty());
+        assertEquals(post.getId(), response.getContent().getFirst().getId());
+        assertNotEquals(user.getId(), response.getContent().getFirst().getUser().getId());
+    }
+
+    @Test
     void findByUserAcceptedFriendRequests() {
         Page<Post> response = postRepository.findByUserAcceptedFriendRequests(user.getId(), PageRequest.of(0, 10));
 
+        assertNotNull(response);
         assertFalse(response.getContent().isEmpty());
         assertEquals(post.getId(), response.getContent().getFirst().getId());
         assertNotEquals(user.getId(), response.getContent().getFirst().getUser().getId());

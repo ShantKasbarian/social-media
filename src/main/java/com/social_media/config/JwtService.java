@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import javax.crypto.KeyGenerator;
@@ -17,6 +18,12 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
+    private static final String AUTHORIZATION = "Authorization";
+
+    private static final String BEARER = "Bearer ";
+
+    private static final int BEGIN_INDEX = 7;
+
     private static final String KEY_ALGORITHM_NAME = "HmacSHA256";
 
     private String key = "";
@@ -48,6 +55,17 @@ public class JwtService {
 
     public String extractUsername(String token) throws NoSuchAlgorithmException {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public String fetchToken(HttpServletRequest request) {
+        String authHeader = request.getHeader(AUTHORIZATION);
+        String token = null;
+
+        if (authHeader != null && authHeader.startsWith(BEARER)) {
+            token = authHeader.substring(BEGIN_INDEX);
+        }
+
+        return token;
     }
 
     private SecretKey getKey() {

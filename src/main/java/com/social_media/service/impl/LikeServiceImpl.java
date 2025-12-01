@@ -1,14 +1,11 @@
 package com.social_media.service.impl;
 
-import com.social_media.annotation.CheckFriendRequestStatus;
-import com.social_media.entity.FriendRequest;
+import com.social_media.annotation.ValidateUserNotBlocked;
 import com.social_media.entity.Like;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
-import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.exception.ResourceNotFoundException;
-import com.social_media.repository.FriendRequestRepository;
 import com.social_media.repository.LikeRepository;
 import com.social_media.repository.PostRepository;
 import com.social_media.service.LikeService;
@@ -33,7 +30,7 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     @Transactional
-    @CheckFriendRequestStatus
+    @ValidateUserNotBlocked
     public Like createLike(User user, UUID id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));

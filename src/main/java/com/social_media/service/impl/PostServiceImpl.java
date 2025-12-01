@@ -1,6 +1,6 @@
 package com.social_media.service.impl;
 
-import com.social_media.annotation.CheckFriendRequestStatus;
+import com.social_media.annotation.ValidateUserNotBlocked;
 import com.social_media.entity.*;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
@@ -24,11 +24,7 @@ public class PostServiceImpl implements PostService {
 
     private static final String UNABLE_TO_DELETE_OR_MODIFY_POST_MESSAGE = "unable to delete or modify post";
 
-    private static final String USER_NOT_FOUND_MESSAGE = "user not found";
-
     private final PostRepository postRepository;
-
-    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -41,10 +37,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Post getPostById(UUID id) {
-        Post post = postRepository.findById(id)
+        return postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
-
-        return post;
     }
 
     @Override
@@ -81,12 +75,9 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    @CheckFriendRequestStatus
+    @ValidateUserNotBlocked
     public Page<Post> getUserPosts(User user, UUID userId, Pageable pageable) {
-        User targetUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
-
-        return postRepository.findByUser(targetUser, pageable);
+        return postRepository.findByUserId(userId, pageable);
     }
 
     @Override
