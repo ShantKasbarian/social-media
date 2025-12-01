@@ -59,7 +59,7 @@ public class FriendRequestController {
         friendRequestService.deleteFriendRequest(user, requestId);
     }
 
-    @GetMapping("/status/{status}")
+    @GetMapping("/{status}")
     public ResponseEntity<PageDto<FriendRequest, FriendRequestDto>> getFriendRequestsByStatus(
             Authentication authentication,
             @PathVariable FriendRequest.Status status,
