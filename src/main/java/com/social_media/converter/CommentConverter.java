@@ -18,7 +18,7 @@ public class CommentConverter implements ToEntityConverter<Comment, CommentDto>,
 
     @Override
     public Comment convertToEntity(CommentDto model) {
-        UUID postId = model.id();
+        UUID postId = model.postId();
         Post post = null;
 
         if (postId != null) {

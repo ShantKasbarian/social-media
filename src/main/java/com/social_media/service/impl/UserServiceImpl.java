@@ -45,8 +45,6 @@ public class UserServiceImpl implements UserService {
             throw new InvalidInputException(INVALID_PASSWORD_MESSAGE);
         }
 
-        user.setFirstname(target.getFirstname());
-        user.setLastname(target.getLastname());
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));

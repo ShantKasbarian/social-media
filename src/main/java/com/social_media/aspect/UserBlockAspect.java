@@ -34,9 +34,9 @@ public class UserBlockAspect {
 
     private static final String GET_USER_POSTS_METHOD_NAME = "getUserPosts";
 
-    static final String BLOCKED_USER_MESSAGE = "cannot interact with user because user is blocked";
-
     private static final String GET_COMMENTS_BY_POST_ID_METHOD_NAME = "getCommentsByPostId";
+
+    static final String BLOCKED_USER_MESSAGE = "user is blocked";
 
     private final FriendRequestRepository friendRequestRepository;
 

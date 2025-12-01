@@ -25,8 +25,8 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, UU
 
     @Query("""
         SELECT COUNT(f) > 0 FROM FriendRequest f
-        WHERE (f.user.id = :currentUserId AND f.targetUser.id = :targetUserId) OR
-        (f.user.id = :targetUserId AND f.targetUser.id = :currentUserId) AND
+        WHERE ((f.user.id = :currentUserId AND f.targetUser.id = :targetUserId) OR
+        (f.user.id = :targetUserId AND f.targetUser.id = :currentUserId)) AND
         f.status = :status
     """)
     boolean existsByUserIdTargetUserIdStatus(UUID currentUserId, UUID targetUserId, FriendRequest.Status status);
