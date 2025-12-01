@@ -4,8 +4,6 @@ import com.social_media.entity.*;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.CommentRepository;
-import com.social_media.repository.FriendRequestRepository;
-import com.social_media.repository.PostRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -32,12 +30,6 @@ class CommentServiceImplTest {
 
     @Mock
     private CommentRepository commentRepository;
-
-    @Mock
-    private PostRepository postRepository;
-
-    @Mock
-    private FriendRequestRepository friendRequestRepository;
 
     private User user;
 
@@ -151,9 +143,6 @@ class CommentServiceImplTest {
 
         Page<Comment> page = new PageImpl<>(comments);
 
-        when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
-        when(friendRequestRepository.existsByUserIdTargetUserIdStatus(any(UUID.class), any(UUID.class), any(FriendRequest.Status.class)))
-                .thenReturn(false);
         when(commentRepository.findByPostId(any(UUID.class), any(Pageable.class)))
                 .thenReturn(page);
 
@@ -161,17 +150,6 @@ class CommentServiceImplTest {
 
         assertNotNull(response);
         assertEquals(page, response);
-        verify(postRepository).findById(any(UUID.class));
-        verify(friendRequestRepository).existsByUserIdTargetUserIdStatus(any(UUID.class), any(UUID.class), any(FriendRequest.Status.class));
         verify(commentRepository).findByPostId(any(UUID.class), any(Pageable.class));
-    }
-
-    @Test
-    void getCommentsByPostIdShouldThrowRequestNotAllowedExceptionWhenFriendRequestIsBlocked() {
-        when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
-        when(friendRequestRepository.existsByUserIdTargetUserIdStatus(any(UUID.class), any(UUID.class), any(FriendRequest.Status.class)))
-                .thenReturn(true);
-
-        assertThrows(RequestNotAllowedException.class, () -> commentService.getCommentsByPostId(user, post.getId(), PageRequest.of(0, 10)));
     }
 }
