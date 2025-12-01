@@ -1,46 +1,3 @@
-# Java.Capstone-project-stage-1
-Social-Media-Application
-    App should do:
-        Login/signup form
-        Check profile
-        Create posts
-        Add other users as friendRequests
-        Check their friendRequests posts on their feed
-        Like posts
-        Comment under posts
-        Get post by id
-        Delete a post
-        Block a user
-        Search for friendRequests based on username
-        Delete comment
-        View all comments
-	Nice to have:
-	  Dislikes
-	  Decide real name visibility
-	  Decide post visibility
-	  Check who liked
-	  Replies under comments
-	  Forgot password feature
-
-
-Movie-Tickets-Store
-    App should do:
-        Login/signup form
-        Roles based privileges
-        Payment system
-        Book seats
-        Have a selection of movies
-        Have a filter for movie types
-        Have a snacks menu
-        Search for movies based on names
-        Limited numbers of seats
-	Nice to have:
-	  Replies to comments
-	  Movie ratings with comment
-	  Promotions
-	  Coupons
-
-
 ```application.propertis
 In the application.properties file change the following:
 
@@ -49,7 +6,7 @@ In the application.properties file change the following:
     spring.datasource.password=your-dasource-password
     spring.datasource.url=your-dasource-url
     spring.datasource.driver-class-name=your-dasource-driver-class-name
-    spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.your-dasource-dialect
+    spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.your-rdbms-dialect
 
 ```endpoints:
     http://localhost:8080/signup
@@ -64,18 +21,20 @@ In the application.properties file change the following:
             "lastname": "your-last-name"
         }
     Response: {
-        "message": "signup successful"
+        "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0ODAwMC",
+        "username": "your-username",
+        "userId": "your-id"
     }
         
-    note: username must be unique and password must include
+    note: username and email must be unique and password must include
     at least 1 uppercase, 1 lowercase, 1 number, 1 special character
 
-    http://localhost:8080/auth/login
+    http://localhost:8080/login
     Method: POST
     Description: Allows user to login
     Payload:
         {
-            "email": "your-email",
+            "username": "your-username",
             "password": "your-password"
         }
     Response: {
@@ -84,7 +43,7 @@ In the application.properties file change the following:
         "userId": "your-id"
     }
     
-    http://localhost:8080/user/profile
+    http://localhost:8080/users
     Method: GET
     Description: Allows user to check profile
     Response: {
@@ -95,49 +54,16 @@ In the application.properties file change the following:
         "lastname": "your-lastname"
     }
 
-    http://localhost:8080/user/update/username
+    http://localhost:8080/users
     Method: PUT
-    Description: Allows user to update username
+    Description: Allows user to update credentials
     Payload: {
-        "username": "new-username"
-    }
-    Response: {
-        "id": "your-id",
-        "email": "your-email",
-        "username": "your-new-username",
-        "name": "your-name",
-        "lastname": "your-lastname"
+        "username": "new-username",
+        "email": "new-email",
+        "password": "password"
     }
     
-    http://localhost:8080/user/update/email
-    Method: PUT
-    Description: Allows user to update email
-    Payload: {
-        "email": "new-email"
-    }
-    Response: {
-        "id": "your-id",
-        "email": "your-new-email",
-        "username": "your-username",
-        "name": "your-name",
-        "lastname": "your-lastname"
-    }
-    
-    http://localhost:8080/user/password
-    Method: PUT
-    Description: Allows user to update password
-    Payload: {
-        "password": "new-password"
-    }
-    Response: {
-        "id": "your-id",
-        "email": "your-email",
-        "username": "your-username",
-        "name": "your-name",
-        "lastname": "your-lastname"
-    }
-    
-    http://localhost:8080/user/{username}/search
+    http://localhost:8080/users/{username}
     Method: GET
     Description: Allows user to search other users by username
     Payload: {
@@ -164,22 +90,22 @@ In the application.properties file change the following:
         "empty": false
     }
 
-    http://localhost:8080/post
+    http://localhost:8080/posts
     Method: POST
     Description: Allows user to create a post
     Payload: {
-        "title": "some-title"
+        "text": "some-text"
     }
     Response: {
         "id": "post-id",
         "userId": "your-id",
         "username": "your-username",
-        "title": "post-title",
+        "text": "post-text",
         "likes": like-count,
         "postedTime": "posted-time"
     }
     
-    http://localhost:8080/post/{postId}
+    http://localhost:8080/posts/{postId}
     Method: GET
     Description: Allows user to get a post by id
     Payload: String postId: "postId"
@@ -187,12 +113,62 @@ In the application.properties file change the following:
         "id": "post-id",
         "userId": "user-id",
         "username": "user-username",
-        "title": "post-title",
+        "text": "post-text",
         "likes": like-count,
         "postedTime": "posted-time"
     }
     
-    http://localhost:8080/post/user/{userId}
+    http://localhost:8080/posts
+    Method: PUT
+    Description: Allows user to update post
+    Payload: {
+        "id": "post-id",
+        "text": "new-post-text"
+    }
+    Response: {
+        "id": "post-id",
+        "userId": "user-id",
+        "username": "user-username",
+        "text": "post-text",
+        "likes": like-count,
+        "postedTime": "posted-time"
+    }
+    
+    http://localhost:8080/posts/{postId}
+    Method: DELETE
+    Description: Allows user to delete post
+    Payload: String postId: "post-id"
+    Response: status-code-204
+    
+    http://localhost:8080/posts
+    Description: Allows user to check friends posts
+    Response: {
+        "content": [
+            {
+                "id": "post-id",
+                "userId": "user-id",
+                "username": "user-username",
+                "text": "post-text",
+                "likes": like-count,
+                "postedTime": "posted-time"
+            },
+            {
+                "id": "post-id",
+                "userId": "user-id",
+                "username": "user-username",
+                "text": "post-text",
+                "likes": like-count,
+                "postedTime": "posted-time"
+            }
+        ],
+        "pageNo": 0,
+        "pageSize": 10,
+        "totalElements": 2,
+        "totalPages": 1,
+        "empty": false
+    }
+    
+    http://localhost:8080/posts/users/{userId}
     Method: GET
     Description: Allows user to get a user's posts by user id
     Payload: String userId: "userIdId"
@@ -202,7 +178,7 @@ In the application.properties file change the following:
                 "id": "post-id",
                 "userId": "user-id",
                 "username": "user-username",
-                "title": "post-title",
+                "text": "post-text",
                 "likes": like-count,
                 "postedTime": "posted-time"
             },
@@ -210,7 +186,7 @@ In the application.properties file change the following:
                 "id": "post-id",
                 "userId": "user-id",
                 "username": "user-username",
-                "title": "post-title",
+                "text": "post-text",
                 "likes": like-count,
                 "postedTime": "posted-time"
             }
@@ -222,29 +198,36 @@ In the application.properties file change the following:
         "empty": false
     }
     
-    http://localhost:8080/post/update
-    Method: PUT
-    Description: Allows user to update post
-    Payload: {
-        "id": "post-id",
-        "title": "new-post-title"
-    }
+    http://localhost:8080/posts/likes
+    Method: GET
+    Description: Allows user to get their liked posts
     Response: {
-        "id": "post-id",
-        "userId": "user-id",
-        "username": "user-username",
-        "title": "post-title",
-        "likes": like-count,
-        "postedTime": "posted-time"
+        "content": [
+            {
+                "id": "post-id",
+                "userId": "user-id",
+                "username": "user-username",
+                "text": "post-text",
+                "likes": like-count,
+                "postedTime": "posted-time"
+            },
+            {
+                "id": "post-id",
+                "userId": "user-id",
+                "username": "user-username",
+                "text": "post-text",
+                "likes": like-count,
+                "postedTime": "posted-time"
+            }
+        ],
+        "pageNo": 0,
+        "pageSize": 10,
+        "totalElements": 2,
+        "totalPages": 1,
+        "empty": false
     }
-    
-    http://localhost:8080/post/{postId}/delete
-    Method: DELETE
-    Description: Allows user to delete post
-    Payload: String postId: "post-id"
-    Response: status-code-204
 
-    http://localhost:8080/post/{postId}/like
+    http://localhost:8080/likes/posts/{postId}
     Method: POST
     Description: Allows user to like post
     Payload: String postId: "post-id"
@@ -254,8 +237,52 @@ In the application.properties file change the following:
         "username": "your-username",
         "postId": "post-id"
     }
+    
+    http://localhost:8080/likes/posts/{postId}
+    Method: DELETE
+    Description: Allows user to remove like
+    Payload: String postId: "post-id"
+    Response: status-code-204
 
-    http://localhost:8080/post/{postId}/comments
+    http://localhost:8080/comments
+        Method: POST
+        Description: Allows user to create comment
+        Payload: {
+            "postId": "243fd4b0-f8e3-4ed9-a0ae-46fbb8c048e6",
+            "text": "some comment"
+        }
+        Response: {            
+            "id": "comment-id",
+            "postId": "post-id",
+            "text": "some comment",
+            "userId": "user-id",
+            "username": "user-username",
+            "commentedTime": "commented-time"
+        }
+        
+    http://localhost:8080/comments
+    Method: PUT
+    Description: Allows user to update comment
+    Payload: {
+        "id": "comment-id",
+        "text": "some updated comment"
+    }
+    Response: {
+        "id": "comment-id",
+        "postId": "post-id",
+        "text": "some updated comment",
+        "userId": "user-id",
+        "username": "user-username",
+        "commentedTime": "commented-time"
+    }
+    
+    http://localhost:8080/comments/{commentId}
+    Method: DELETE
+    Description: Allows user to delete comment
+    Payload: String commentId: "comment-id"
+    Response: status-code-204
+
+    http://localhost:8080/comments/posts/{postId}
     Method: GET
     Description: Allows to check post comments
     Payload: String postId: "post-id"
@@ -264,7 +291,7 @@ In the application.properties file change the following:
             {
                 "id": "comment-id",
                 "postId": "post-id",
-                "comment": "some comment",
+                "text": "some comment",
                 "userId": "user-id",
                 "username": "user-username",
                 "commentedTime": "commented-time"
@@ -272,7 +299,7 @@ In the application.properties file change the following:
             {
                 "id": "comment-id",
                 "postId": "post-id",
-                "comment": "some comment",
+                "text": "some comment",
                 "userId": "user-id",
                 "username": "user-username",
                 "commentedTime": "commented-time"
@@ -285,108 +312,7 @@ In the application.properties file change the following:
         "empty": false
     }
 
-    http://localhost:8080/post
-    Description: Allows user to check feed
-    Response: {
-        "content": [
-            {
-                "id": "post-id",
-                "userId": "user-id",
-                "username": "user-username",
-                "title": "post-title",
-                "likes": like-count,
-                "postedTime": "posted-time"
-            },
-            {
-                "id": "post-id",
-                "userId": "user-id",
-                "username": "user-username",
-                "title": "post-title",
-                "likes": like-count,
-                "postedTime": "posted-time"
-            }
-        ],
-        "pageNo": 0,
-        "pageSize": 10,
-        "totalElements": 2,
-        "totalPages": 1,
-        "empty": false
-    }
-    
-    http://localhost:8080/post/liked
-    Method: GET
-    Description: Allows user to get their liked posts
-    Response: {
-        "content": [
-            {
-                "id": "post-id",
-                "userId": "user-id",
-                "username": "user-username",
-                "title": "post-title",
-                "likes": like-count,
-                "postedTime": "posted-time"
-            },
-            {
-                "id": "post-id",
-                "userId": "user-id",
-                "username": "user-username",
-                "title": "post-title",
-                "likes": like-count,
-                "postedTime": "posted-time"
-            }
-        ],
-        "pageNo": 0,
-        "pageSize": 10,
-        "totalElements": 2,
-        "totalPages": 1,
-        "empty": false
-    }
-
-    http://localhost:8080/post/{postId}/dislike
-    Method: DELETE
-    Description: Allows user to remove like
-    Payload: String postId: "post-id"
-    Response: status-code-204
-
-    http://localhost:8080/comment/{commentId}
-    Method: DELETE
-    Description: Allows user to delete comment
-    Payload: String commentId: "comment-id"
-    Response: status-code-204
-
-    http://localhost:8080/comment
-    Method: POST
-    Description: Allows user to comment under a post
-    Payload: {
-        "postId": "243fd4b0-f8e3-4ed9-a0ae-46fbb8c048e6",
-        "content": "some comment"
-    }
-    Response: {            
-        "id": "comment-id",
-        "postId": "post-id",
-        "comment": "some comment",
-        "userId": "user-id",
-        "username": "user-username",
-        "commentedTime": "commented-time"
-    }
-
-    http://localhost:8080/comment
-    Method: PUT
-    Description: Allows user to update comment
-    Payload: {
-        "id": "comment-id",
-        "comment": "some updated comment"
-    }
-    Response: {
-        "id": "comment-id",
-        "postId": "post-id",
-        "comment": "some updated comment",
-        "userId": "user-id",
-        "username": "user-username",
-        "commentedTime": "commented-time"
-    }
-
-    http://localhost:8080/friend/{userId}
+    http://localhost:8080/friend-requests/users/{userId}
     Method: POST
     Description: Allows user to send user a friend request
     Payload: String userId: "user-id"
@@ -394,134 +320,56 @@ In the application.properties file change the following:
         "id": "friend-request-id",
         "userId": "user-id",
         "username": "user-username",
-        "friendId": "recipient-id",
-        "friendName": "recipient-name",
+        "targetUserId": "target-user-id",
+        "targetUsername": "target-username",
         "status": "PENDING"
     }
     
-    http://localhost:8080/friend/request/{requestId}/accept
-    Method: PUT
-    Description: Allows user to accept a friend request
-    Payload: String requestId: "request-id"
+    http://localhost:8080/friend-requests/{id}/status/{status}
+    Method: PATCH
+    Description: Allows user to update friend request status
+    Payload: String requestId: "request-id", FriendRequest.Status status: "target-status"
     Response: {
         "id": "friend-request-id",
         "userId": "user-id",
         "username": "user-username",
-        "friendId": "recipient-id",
-        "friendName": "recipient-name",
-        "status": "ACCEPTED"
+        "targetUserId": "target-user-id",
+        "targetUsername": "target-username",
+        "status": "target-status"
     }
     
-    http://localhost:8080/friend/pending
-    Method: GET
-    Description: Allows user to check for pending friend requests
-    Response: {
-        "content": [
-            {
-                "id": "friend-request-id",
-                "userId": "user-id",
-                "username": "user-username",
-                "friendId": "recipient-id",
-                "friendName": "recipient-name",
-                "status": "PENDING"
-            },
-            {
-                "id": "friend-request-id",
-                "userId": "user-id",
-                "username": "user-username",
-                "friendId": "recipient-id",
-                "friendName": "recipient-name",
-                "status": "PENDING"
-            }
-        ],
-        "pageNo": 0,
-        "pageSize": 10,
-        "totalElements": 2,
-        "totalPages": 1,
-        "empty": false
-    }
-    
-    http://localhost:8080/user/blocked
-    Method: GET
-    Description: Allows user to check for blocked users
-    Response: {
-        "content": [
-            {
-                "id": "friend-request-id",
-                "userId": "user-id",
-                "username": "user-username",
-                "friendId": "recipient-id",
-                "friendName": "recipient-name",
-                "status": "BLOCKED"
-            },
-            {
-                "id": "friend-request-id",
-                "userId": "user-id",
-                "username": "user-username",
-                "friendId": "recipient-id",
-                "friendName": "recipient-name",
-                "status": "BLOCKED"
-            }
-        ],
-        "pageNo": 0,
-        "pageSize": 10,
-        "totalElements": 2,
-        "totalPages": 1,
-        "empty": false
-    }
-
-    http://localhost:8080/friend
-    Method: GET
-    Description: Allows user to check for friend requests with "ACCEPTED" status
-    Response: {
-        "content": [
-            {
-                "id": "friend-request-id",
-                "userId": "user-id",
-                "username": "user-username",
-                "friendId": "recipient-id",
-                "friendName": "recipient-name",
-                "status": "ACCEPTED"
-            },
-            {
-                "id": "friend-request-id",
-                "userId": "user-id",
-                "username": "user-username",
-                "friendId": "recipient-id",
-                "friendName": "recipient-name",
-                "status": "ACCEPTED"
-            }
-        ],
-        "pageNo": 0,
-        "pageSize": 10,
-        "totalElements": 2,
-        "totalPages": 1,
-        "empty": false
-    }
-
-    http://localhost:8080/user/{userId}/block
-    Method: POST
-    Description: Allows user to block other user
-    Payload: String userId: "user-id"
-    Response: "user has been blocked"
-
-    http://localhost:8080/user/{userId}/unblock
+    http://localhost:8080/friend-requests/{id}
     Method: DELETE
-    Description: Allows user to unblock a blocked user
-    Payload: String userId: "user-id"
-    Response: "user has been unblocked"
-
-    http://localhost:8080/friend/request/{requestId}/decline
-    Method: PUT
-    Description: Allows user to decline friend request
-    Payload: String requestId: "request-id"
+    Description: Allows user to delete a friend request
+    Payload: id: "friend-request-id"
+    Response: status-code-204
+    
+    http://localhost:8080/friend-requests/{status}
+    Method: GET
+    Description: Allows user to check for friend requests with target status
+    Payload: FriendRequest.Status status: "target-status"
     Response: {
-        {
-            "id": "friend-request-id",
-            "userId": "user-id",
-            "username": "user-username",
-            "friendId": "recipient-id",
-            "friendName": "recipient-name",
-            "status": "DECLINED"
-        }
+        "content": [
+            {
+                "id": "friend-request-id",
+                "userId": "user-id",
+                "username": "user-username",
+                "targetUserId": "target-user-id",
+                "targetUsername": "target-username",
+                "status": "target-status"
+            },
+            {
+                "id": "friend-request-id",
+                "userId": "user-id",
+                "username": "user-username",
+                "targetUserId": "target-user-id",
+                "targetUsername": "target-username",
+                "status": "target-status"
+            }
+        ],
+        "pageNo": 0,
+        "pageSize": 10,
+        "totalElements": 2,
+        "totalPages": 1,
+        "empty": false
     }
