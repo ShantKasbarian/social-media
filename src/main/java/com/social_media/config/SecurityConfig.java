@@ -1,5 +1,7 @@
 package com.social_media.config;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,42 +25,46 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private final UserDetailsService service;
+    private static final String SPLIT_BY_CHARACTER = ",";
+
+    private static final int PASSWORD_ENCODER_STRENGTH = 12;
+
+    private final UserDetailsService userDetailsService;
 
     private final JwtFilter filter;
 
-    public SecurityConfig(UserDetailsService service, JwtFilter filter) {
-        this.service = service;
+    @Value("${app.cors}")
+    private String corsAllowedPort;
+
+    @Value("${app.cors.allowed.pattern}")
+    private String corsAllowedPattern;
+
+    @Value("${app.cors.allowed.methods}")
+    private String methods;
+
+    @Value("${app.cors.allowed.headers}")
+    private String headers;
+
+    @Value("${app.public.endpoints}")
+    private String endpoints;
+
+    public SecurityConfig(UserDetailsService userDetailsService, JwtFilter filter) {
+        this.userDetailsService = userDetailsService;
         this.filter = filter;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .cors(Customizer.withDefaults())
+        return http.cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers(
-                                "login",
-                                "signup",
-                                "/",
-                                "/login.html",
-                                "/signup.html",
-                                "/feed.html",
-                                "/currentUserProfile.html",
-                                "/likedPosts.html",
-                                "/searchResults.html",
-                                "/userProfile.html",
-                                "/css/**",
-                                "/javascript/**",
-                                "/images/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers(endpoints.split(SPLIT_BY_CHARACTER))
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
@@ -66,10 +72,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider() {
+    public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(new BCryptPasswordEncoder(12));
-        provider.setUserDetailsService(service);
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setUserDetailsService(userDetailsService);
         return provider;
     }
 
@@ -80,17 +86,17 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12);
+        return new BCryptPasswordEncoder(PASSWORD_ENCODER_STRENGTH);
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
-        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization"));
+        configuration.setAllowedOrigins(List.of(corsAllowedPort));
+        configuration.setAllowedMethods(Arrays.asList(methods.split(SPLIT_BY_CHARACTER)));
+        configuration.setAllowedHeaders(Arrays.asList(headers.split(SPLIT_BY_CHARACTER)));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration(corsAllowedPattern, configuration);
         return source;
     }
 }

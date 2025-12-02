@@ -1,5 +1,6 @@
-package com.social_media.config;
+package com.social_media.service.impl;
 
+import com.social_media.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
-public class JwtService {
+public class JwtServiceImpl implements JwtService {
     private static final String AUTHORIZATION = "Authorization";
 
     private static final String BEARER = "Bearer ";
@@ -28,12 +29,13 @@ public class JwtService {
 
     private String key = "";
 
-    public JwtService() throws NoSuchAlgorithmException {
+    public JwtServiceImpl() throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM_NAME);
         SecretKey secretKey = keyGenerator.generateKey();
         key = Base64.getEncoder().encodeToString(secretKey.getEncoded());
     }
 
+    @Override
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
 
@@ -48,15 +50,18 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean validateToken(String token, UserDetails userDetails) throws NoSuchAlgorithmException {
+    @Override
+    public boolean validateToken(String token, UserDetails userDetails) {
         final String name = extractUsername(token);
         return (name.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    public String extractUsername(String token) throws NoSuchAlgorithmException {
+    @Override
+    public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
+    @Override
     public String fetchToken(HttpServletRequest request) {
         String authHeader = request.getHeader(AUTHORIZATION);
         String token = null;

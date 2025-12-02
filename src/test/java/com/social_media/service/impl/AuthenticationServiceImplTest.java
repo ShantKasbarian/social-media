@@ -1,6 +1,5 @@
 package com.social_media.service.impl;
 
-import com.social_media.config.JwtService;
 import com.social_media.entity.User;
 import com.social_media.exception.InvalidCredentialsException;
 import com.social_media.exception.InvalidInputException;
@@ -32,7 +31,7 @@ class AuthenticationServiceImplTest {
     private UserRepository userRepository;
 
     @Mock
-    private JwtService jwtService;
+    private JwtServiceImpl jwtService;
 
     @Mock
     private UsernameValidator usernameValidator;
