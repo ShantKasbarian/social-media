@@ -33,7 +33,7 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
 
-    private final JwtFilter filter;
+    private final JwtFilter jwtFilter;
 
     @Value("${app.cors}")
     private String corsAllowedPort;
@@ -50,9 +50,9 @@ public class SecurityConfig {
     @Value("${app.public.endpoints}")
     private String endpoints;
 
-    public SecurityConfig(UserDetailsService userDetailsService, JwtFilter filter) {
+    public SecurityConfig(JwtFilter jwtFilter, UserDetailsService userDetailsService) {
+        this.jwtFilter = jwtFilter;
         this.userDetailsService = userDetailsService;
-        this.filter = filter;
     }
 
     @Bean
@@ -66,7 +66,7 @@ public class SecurityConfig {
                         .authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
