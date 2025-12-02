@@ -1,5 +1,6 @@
 package com.social_media.config;
 
+import com.social_media.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +16,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 
 @Component
 @AllArgsConstructor
@@ -25,7 +25,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal (
+    protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
@@ -33,13 +33,8 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = jwtService.fetchToken(request);
         String username = null;
 
-        try {
-            if (token != null) {
-                username = jwtService.extractUsername(token);
-            }
-        }
-        catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+        if (token != null) {
+            username = jwtService.extractUsername(token);
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -52,19 +47,14 @@ public class JwtFilter extends OncePerRequestFilter {
     private void createAuthenticationToken(HttpServletRequest request, String username, String token) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        try {
-            if (jwtService.validateToken(token, userDetails)) {
-                var authToken = new UsernamePasswordAuthenticationToken (
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                WebAuthenticationDetails webAuthenticationDetails = new WebAuthenticationDetailsSource().buildDetails(request);
-                authToken.setDetails(webAuthenticationDetails);
+        if (jwtService.validateToken(token, userDetails)) {
+            var authToken = new UsernamePasswordAuthenticationToken (
+                    userDetails, null, userDetails.getAuthorities()
+            );
+            WebAuthenticationDetails webAuthenticationDetails = new WebAuthenticationDetailsSource().buildDetails(request);
+            authToken.setDetails(webAuthenticationDetails);
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
-        }
-        catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            SecurityContextHolder.getContext().setAuthentication(authToken);
         }
     }
 }

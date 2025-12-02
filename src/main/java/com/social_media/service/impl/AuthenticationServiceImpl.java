@@ -1,12 +1,12 @@
 package com.social_media.service.impl;
 
-import com.social_media.config.JwtService;
 import com.social_media.entity.User;
 import com.social_media.exception.InvalidCredentialsException;
 import com.social_media.exception.InvalidInputException;
 import com.social_media.model.TokenDto;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.AuthenticationService;
+import com.social_media.service.JwtService;
 import com.social_media.utils.EmailValidator;
 import com.social_media.utils.UsernameValidator;
 import jakarta.transaction.Transactional;
