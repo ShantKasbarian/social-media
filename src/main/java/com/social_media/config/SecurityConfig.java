@@ -1,5 +1,6 @@
 package com.social_media.config;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@AllArgsConstructor
 public class SecurityConfig {
     private static final String SPLIT_BY_CHARACTER = ",";
 
@@ -33,7 +35,7 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
 
-    private final JwtFilter filter;
+    private final JwtFilter jwtFilter;
 
     @Value("${app.cors}")
     private String corsAllowedPort;
@@ -50,11 +52,6 @@ public class SecurityConfig {
     @Value("${app.public.endpoints}")
     private String endpoints;
 
-    public SecurityConfig(UserDetailsService userDetailsService, JwtFilter filter) {
-        this.userDetailsService = userDetailsService;
-        this.filter = filter;
-    }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.cors(Customizer.withDefaults())
@@ -66,7 +63,7 @@ public class SecurityConfig {
                         .authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
