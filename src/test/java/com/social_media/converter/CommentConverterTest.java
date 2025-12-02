@@ -32,7 +32,6 @@ class CommentConverterTest {
 
     private CommentDto commentDto;
 
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
