@@ -3,6 +3,7 @@ package com.social_media.exception;
 import com.social_media.model.ErrorDto;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import java.util.List;
 
 @ControllerAdvice
+@Slf4j
 public class DefaultExceptionHandler {
     static final String INVALID_CREDENTIALS_MESSAGE = "invalid credentials";
 
@@ -89,8 +91,7 @@ public class DefaultExceptionHandler {
 
     @ExceptionHandler(Throwable.class)
     public ResponseEntity<ErrorDto> handle(Throwable e) {
-        System.err.println(e.getMessage());
-        e.printStackTrace();
+        log.debug(e.getLocalizedMessage());
 
         return new ResponseEntity<>(
                 new ErrorDto(INTERNAL_SERVER_ERROR_MESSAGE),
