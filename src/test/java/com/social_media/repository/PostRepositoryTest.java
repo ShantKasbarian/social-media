@@ -71,8 +71,8 @@ class PostRepositoryTest {
     }
 
     @Test
-    void findByUserAcceptedFriendRequests() {
-        Page<Post> response = postRepository.findByUserAcceptedFriendRequests(user.getId(), PageRequest.of(0, 10));
+    void findByUserIdAcceptedFriendRequests() {
+        Page<Post> response = postRepository.findByUserIdAcceptedFriendRequests(user.getId(), PageRequest.of(0, 10));
 
         assertNotNull(response);
         assertFalse(response.getContent().isEmpty());
@@ -81,14 +81,14 @@ class PostRepositoryTest {
     }
 
     @Test
-    void findByUserLikes() {
+    void findByUserIdLikes() {
         Like like = new Like();
         like.setUser(user);
         like.setPost(post);
 
         likeRepository.save(like);
 
-        Page<Post> response = postRepository.findByUserLikes(user, PageRequest.of(0, 10));
+        Page<Post> response = postRepository.findByUserIdLikes(user.getId(), PageRequest.of(0, 10));
 
         assertNotNull(response);
         assertFalse(response.getContent().isEmpty());

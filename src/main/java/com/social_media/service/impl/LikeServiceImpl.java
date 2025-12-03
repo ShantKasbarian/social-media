@@ -56,7 +56,7 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     @Transactional
-    public void removeLike(UUID userId, UUID postId) {
+    public void deleteLikeByPostId(UUID userId, UUID postId) {
         log.info("removing like for user with id {} and post with id {}", userId, postId);
 
         Like like = likeRepository.findByUserIdPostId(userId, postId)

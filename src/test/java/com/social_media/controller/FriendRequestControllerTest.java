@@ -134,7 +134,7 @@ class FriendRequestControllerTest {
         Page<FriendRequest> page = new PageImpl<>(friendRequests);
 
         when(authentication.getPrincipal()).thenReturn(user1);
-        when(friendRequestService.getFriendRequestsByStatus(any(User.class), any(FriendRequest.Status.class), any(Pageable.class)))
+        when(friendRequestService.getFriendRequestsByUserStatus(any(User.class), any(FriendRequest.Status.class), any(Pageable.class)))
                 .thenReturn(page);
 
         var response = friendRequestController.getFriendRequestsByStatus(authentication, FriendRequest.Status.PENDING, 0, 10);
@@ -143,6 +143,6 @@ class FriendRequestControllerTest {
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(authentication).getPrincipal();
-        verify(friendRequestService).getFriendRequestsByStatus(any(User.class), any(FriendRequest.Status.class), any(Pageable.class));
+        verify(friendRequestService).getFriendRequestsByUserStatus(any(User.class), any(FriendRequest.Status.class), any(Pageable.class));
     }
 }

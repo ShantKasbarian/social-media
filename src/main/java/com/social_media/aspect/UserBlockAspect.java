@@ -26,10 +26,6 @@ import static com.social_media.service.impl.PostServiceImpl.POST_NOT_FOUND_MESSA
 public class UserBlockAspect {
     private static final String CREATE_COMMENT_METHOD_NAME = "createComment";
 
-    private static final String UPDATE_FRIEND_REQUEST_STATUS_METHOD_NAME = "updateFriendRequestStatus";
-
-    private static final String DELETE_FRIEND_REQUEST_METHOD_NAME = "deleteFriendRequest";
-
     private static final String CREATE_LIKE_METHOD_NAME = "createLike";
 
     private static final String GET_USER_POSTS_METHOD_NAME = "getUserPosts";
@@ -57,9 +53,6 @@ public class UserBlockAspect {
         return switch (method.getName()) {
             case CREATE_COMMENT_METHOD_NAME -> checkCreateComment(args);
 
-            case UPDATE_FRIEND_REQUEST_STATUS_METHOD_NAME,
-                 DELETE_FRIEND_REQUEST_METHOD_NAME -> checkFriendRequestOperations(args);
-
             case CREATE_LIKE_METHOD_NAME -> checkCreateLike(args);
 
             case GET_USER_POSTS_METHOD_NAME -> checkGetUserPosts(args);
@@ -85,18 +78,6 @@ public class UserBlockAspect {
         }
 
         return friendRequestRepository.existsByUserIdTargetUserId(user.getId(), comment.getPost().getUser().getId());
-    }
-
-    private boolean checkFriendRequestOperations(Object[] args) {
-        UUID friendRequestId = null;
-
-        for (Object object: args) {
-            if (object instanceof UUID) {
-                friendRequestId = (UUID) object;
-            }
-        }
-
-        return friendRequestRepository.existsByIdStatus(friendRequestId, FriendRequest.Status.BLOCKED);
     }
 
     private boolean checkCreateLike(Object[] args) {

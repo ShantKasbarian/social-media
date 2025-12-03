@@ -2,7 +2,6 @@ package com.social_media.service.impl;
 
 import com.social_media.entity.User;
 import com.social_media.exception.InvalidInputException;
-import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.UserService;
 import com.social_media.utils.EmailValidator;

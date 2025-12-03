@@ -132,6 +132,16 @@ class FriendRequestServiceImplTest {
     }
 
     @Test
+    void updateFriendRequestStatusShouldThrowRequestNotAllowedExceptionWhenFriendRequestIsBlocked() {
+        friendRequest.setStatus(FriendRequest.Status.BLOCKED);
+
+        when(friendRequestRepository.findById(friendRequest.getId()))
+                .thenReturn(Optional.ofNullable(friendRequest));
+
+        assertThrows(RequestNotAllowedException.class, () -> friendRequestService.updateFriendRequestStatus(friendRequest.getUser(), friendRequest.getId(), FriendRequest.Status.ACCEPTED));
+    }
+
+    @Test
     void deleteFriendRequest() {
         friendRequest.setUser(user1);
         friendRequest.setTargetUser(user2);
@@ -167,7 +177,17 @@ class FriendRequestServiceImplTest {
     }
 
     @Test
-    void getFriendRequestsByStatus() {
+    void deleteFriendRequestShouldThrowRequestNotAllowedExceptionWhenFriendRequestIsBlocked() {
+        friendRequest.setStatus(FriendRequest.Status.BLOCKED);
+
+        when(friendRequestRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.ofNullable(friendRequest));
+
+        assertThrows(RequestNotAllowedException.class, () -> friendRequestService.deleteFriendRequest(user1, friendRequest.getId()));
+    }
+
+    @Test
+    void getFriendRequestsByUserStatus() {
         List<FriendRequest> friendRequests = new ArrayList<>();
         friendRequests.add(friendRequest);
         Page<FriendRequest> page = new PageImpl<>(friendRequests);
@@ -176,7 +196,7 @@ class FriendRequestServiceImplTest {
         when(friendRequestRepository.findByUserStatus(any(User.class), any(FriendRequest.Status.class), any(Pageable.class)))
                 .thenReturn(page);
 
-        var response = friendRequestService.getFriendRequestsByStatus(user1, FriendRequest.Status.PENDING, pageable);
+        var response = friendRequestService.getFriendRequestsByUserStatus(user1, FriendRequest.Status.PENDING, pageable);
 
         assertNotNull(response);
         assertEquals(page, response);

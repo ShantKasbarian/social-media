@@ -96,12 +96,10 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<Post> getFriendsPosts(User user, Pageable pageable) {
-        UUID id = user.getId();
-
+    public Page<Post> getPostsByUserIdAcceptedFriendRequests(UUID id, Pageable pageable) {
         log.info("fetching friends posts of user with id {}", id);
 
-        Page<Post> posts = postRepository.findByUserAcceptedFriendRequests(id, pageable);
+        Page<Post> posts = postRepository.findByUserIdAcceptedFriendRequests(id, pageable);
 
         log.info("fetched friends posts of user with id {}", id);
 
@@ -121,12 +119,10 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<Post> getUserLikedPosts(User user, Pageable pageable) {
-        UUID id = user.getId();
-
+    public Page<Post> getUserLikedPosts(UUID id, Pageable pageable) {
         log.info("fetching liked posts of user with id {}", id);
 
-        Page<Post> posts = postRepository.findByUserLikes(user, pageable);
+        Page<Post> posts = postRepository.findByUserIdLikes(id, pageable);
 
         log.info("fetched liked posts of user with id {}", id);
 

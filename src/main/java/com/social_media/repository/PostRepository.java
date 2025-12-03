@@ -1,7 +1,6 @@
 package com.social_media.repository;
 
 import com.social_media.entity.Post;
-import com.social_media.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,12 +23,12 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
         p.user.id != :userId AND f.status = 'ACCEPTED'
         ORDER BY p.time DESC
     """)
-    Page<Post> findByUserAcceptedFriendRequests(@Param("userId") UUID userId, Pageable pageable);
+    Page<Post> findByUserIdAcceptedFriendRequests(@Param("userId") UUID userId, Pageable pageable);
 
     @Query("""
         FROM Post p
         LEFT JOIN Like l ON l.post.id = p.id
-        WHERE l.user = :user
+        WHERE l.user.id = :userId
     """)
-    Page<Post> findByUserLikes(@Param("user") User user, Pageable pageable);
+    Page<Post> findByUserIdLikes(@Param("userId") UUID userId, Pageable pageable);
 }
