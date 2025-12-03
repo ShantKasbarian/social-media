@@ -1,8 +1,11 @@
 package com.social_media.utils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 public class PasswordValidator {
     private static final int MIN_REQUIRED_LENGTH = 6;
 
@@ -16,6 +19,8 @@ public class PasswordValidator {
 
 
     public static boolean isPasswordValid(String password) {
+        log.info("validating password");
+
         if (password == null) {
             return false;
         }
@@ -30,6 +35,10 @@ public class PasswordValidator {
         Matcher lowercase = lowercasePattern.matcher(password);
         Matcher specialCharacter = specialCharacterPattern.matcher(password);
 
-        return password.length() > MIN_REQUIRED_LENGTH && number.find() && uppercase.find() && lowercase.find() && specialCharacter.find();
+        boolean isValid = password.length() > MIN_REQUIRED_LENGTH && number.find() && uppercase.find() && lowercase.find() && specialCharacter.find();
+
+        log.info("validated password");
+
+        return isValid;
     }
 }
