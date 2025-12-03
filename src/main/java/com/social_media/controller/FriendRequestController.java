@@ -8,7 +8,6 @@ import com.social_media.model.PageDto;
 import com.social_media.service.FriendRequestService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -88,12 +87,13 @@ public class FriendRequestController {
 
         log.info("/friend-requests/{} with GET called, fetching friend-requests of user with id {} and specified status", status,id);
 
-        Page<FriendRequest> friendRequests = friendRequestService.getFriendRequestsByUserStatus(user, status, pageable);
-
-        var pageDto = new PageDto<>(friendRequests, friendRequestToModelConverter);
+        var friendRequests = new PageDto<>(
+                friendRequestService.getFriendRequestsByUserStatus(user, status, pageable),
+                friendRequestToModelConverter
+        );
 
         log.info("fetched friend-requests of user with id {} and status {}", id, status);
 
-        return ResponseEntity.ok(pageDto);
+        return ResponseEntity.ok(friendRequests);
     }
 }

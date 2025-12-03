@@ -2,11 +2,8 @@ package com.social_media.controller;
 
 import com.social_media.converter.UserConverter;
 import com.social_media.entity.User;
-import com.social_media.model.PageDto;
-import com.social_media.model.ErrorDto;
 import com.social_media.model.UserDto;
 import com.social_media.service.UserService;
-import com.social_media.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
