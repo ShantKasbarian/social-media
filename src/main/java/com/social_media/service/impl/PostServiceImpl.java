@@ -8,6 +8,7 @@ import com.social_media.repository.*;
 import com.social_media.service.PostService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 @Service
 @Validated
+@Slf4j
 @AllArgsConstructor
 public class PostServiceImpl implements PostService {
     public static final String POST_NOT_FOUND_MESSAGE = "post not found";
@@ -29,21 +31,37 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public Post createPost(User user, Post post) {
+        UUID id = user.getId();
+
+        log.info("creating post for user with id {}", id);
+
         post.setTime(LocalDateTime.now());
         post.setUser(user);
 
-        return postRepository.save(post);
+        postRepository.save(post);
+
+        log.info("created post for user with id {}", id);
+
+        return post;
     }
 
     @Override
     public Post getPostById(UUID id) {
-        return postRepository.findById(id)
+        log.info("fetching post with id {}", id);
+
+        Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
+
+        log.info("fetched post with id {}", id);
+
+        return post;
     }
 
     @Override
     @Transactional
     public Post updatePost(User user, UUID id, String title) {
+        log.info("updating post with id {}", id);
+
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
@@ -53,12 +71,18 @@ public class PostServiceImpl implements PostService {
 
         post.setText(title);
 
-        return postRepository.save(post);
+        postRepository.save(post);
+
+        log.info("updated post with id {}", id);
+
+        return post;
     }
 
     @Override
     @Transactional
     public void deletePost(User user, UUID id) {
+        log.info("deleting post with id {}", id);
+
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
@@ -67,21 +91,45 @@ public class PostServiceImpl implements PostService {
         }
 
         postRepository.delete(post);
+
+        log.info("deleted post with id {}", id);
     }
 
     @Override
     public Page<Post> getFriendsPosts(User user, Pageable pageable) {
-        return postRepository.findByUserAcceptedFriendRequests(user.getId(), pageable);
+        UUID id = user.getId();
+
+        log.info("fetching friends posts of user with id {}", id);
+
+        Page<Post> posts = postRepository.findByUserAcceptedFriendRequests(id, pageable);
+
+        log.info("fetched friends posts of user with id {}", id);
+
+        return posts;
     }
 
     @Override
     @ValidateUserNotBlocked
     public Page<Post> getUserPosts(User user, UUID userId, Pageable pageable) {
-        return postRepository.findByUserId(userId, pageable);
+        log.info("fetching posts of user with id {}", userId);
+
+        Page<Post> posts = postRepository.findByUserId(userId, pageable);
+
+        log.info("fetching posts of user with id {}", userId);
+
+        return posts;
     }
 
     @Override
     public Page<Post> getUserLikedPosts(User user, Pageable pageable) {
-        return postRepository.findByUserLikes(user, pageable);
+        UUID id = user.getId();
+
+        log.info("fetching liked posts of user with id {}", id);
+
+        Page<Post> posts = postRepository.findByUserLikes(user, pageable);
+
+        log.info("fetched liked posts of user with id {}", id);
+
+        return posts;
     }
 }

@@ -11,6 +11,7 @@ import com.social_media.repository.UserRepository;
 import com.social_media.service.FriendRequestService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class FriendRequestServiceImpl implements FriendRequestService {
     private static final String USER_NOT_FOUND_MESSAGE = "user not found";
@@ -37,10 +39,13 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     @Override
     @Transactional
     public FriendRequest createFriendRequest(User user, UUID targetUserId) {
+        UUID currentUserId = user.getId();
+
+        log.info("creating friend request with userId {} and targetUserId {}", currentUserId, targetUserId);
+
         User targetUser = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
 
-        UUID currentUserId = user.getId();
 
         if (friendRequestRepository.existsByUserIdTargetUserId(currentUserId, targetUserId)) {
             throw new ResourceAlreadyExistsException(FRIEND_REQUEST_ALREADY_SENT_MESSAGE);
@@ -51,13 +56,19 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         friendRequest.setTargetUser(targetUser);
         friendRequest.setStatus(FriendRequest.Status.PENDING);
 
-        return friendRequestRepository.save(friendRequest);
+        friendRequestRepository.save(friendRequest);
+
+        log.info("created friend request with userId {} and targetUserId {}", currentUserId, targetUserId);
+
+        return friendRequest;
     }
 
     @Override
     @Transactional
     @ValidateUserNotBlocked
     public FriendRequest updateFriendRequestStatus(User user, UUID requestId, FriendRequest.Status status) {
+        log.info("updating friendRequest with id {}", requestId);
+
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
@@ -70,13 +81,19 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
         friendRequest.setStatus(status);
 
-        return friendRequestRepository.save(friendRequest);
+        friendRequestRepository.save(friendRequest);
+
+        log.info("updated friendRequest with id {}", requestId);
+
+        return friendRequest;
     }
 
     @Override
     @Transactional
     @ValidateUserNotBlocked
     public void deleteFriendRequest(User user, UUID requestId) {
+        log.info("deleting friendRequest with id {}", requestId);
+
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
@@ -91,10 +108,20 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         }
 
         friendRequestRepository.delete(friendRequest);
+
+        log.info("deleted friendRequest with id {}", requestId);
     }
 
     @Override
     public Page<FriendRequest> getFriendRequestsByStatus(User user, FriendRequest.Status status, Pageable pageable) {
-        return friendRequestRepository.findByUserStatus(user, status, pageable);
+        UUID id = user.getId();
+
+        log.info("fetching friendRequests of user with user {} and status {}", id, status);
+
+        Page<FriendRequest> friendRequests = friendRequestRepository.findByUserStatus(user, status, pageable);
+
+        log.info("fetched friendRequests of user with user {} and status {}", id, status);
+
+        return friendRequests;
     }
 }
