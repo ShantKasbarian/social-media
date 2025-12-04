@@ -15,7 +15,7 @@ public interface PostService {
     Post getPostById(@NotNull(message = "id must be specified") UUID id);
     Post updatePost(User user, @NotNull(message = "id must be specified") UUID id, String title);
     void deletePost(User user, @NotNull(message = "id must be specified") UUID id);
-    Page<Post> getFriendsPosts(User user, Pageable pageable);
+    Page<Post> getPostsByUserIdAcceptedFriendRequests(UUID id, Pageable pageable);
     Page<Post> getUserPosts(User user, @NotNull(message = "id must be specified") UUID userId, Pageable pageable);
-    Page<Post> getUserLikedPosts(User user, Pageable pageable);
+    Page<Post> getUserLikedPosts(UUID id, Pageable pageable);
 }

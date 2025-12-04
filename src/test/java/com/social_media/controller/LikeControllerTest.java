@@ -82,13 +82,13 @@ class LikeControllerTest {
     }
 
     @Test
-    void removeLike() {
+    void deleteLike() {
         when(authentication.getPrincipal()).thenReturn(user);
-        doNothing().when(likeService).removeLike(any(UUID.class), any(UUID.class));
+        doNothing().when(likeService).deleteLikeByPostId(any(UUID.class), any(UUID.class));
 
-        likeController.removeLike(authentication, post.getId());
+        likeController.deleteLike(authentication, post.getId());
 
         verify(authentication).getPrincipal();
-        verify(likeService).removeLike(any(UUID.class), any(UUID.class));
+        verify(likeService).deleteLikeByPostId(any(UUID.class), any(UUID.class));
     }
 }

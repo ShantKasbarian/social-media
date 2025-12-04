@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import javax.crypto.KeyGenerator;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@Slf4j
 public class JwtServiceImpl implements JwtService {
     private static final String AUTHORIZATION = "Authorization";
 
@@ -37,9 +39,11 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public String generateToken(String username) {
+        log.info("generating token for user with username {}", username);
+
         Map<String, Object> claims = new HashMap<>();
 
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .claims()
                 .add(claims)
                 .subject(username)
@@ -48,27 +52,51 @@ public class JwtServiceImpl implements JwtService {
                 .and()
                 .signWith(getKey())
                 .compact();
+
+        log.info("generated token for user with username {}", username);
+
+        return token;
     }
 
     @Override
     public boolean validateToken(String token, UserDetails userDetails) {
-        final String name = extractUsername(token);
-        return (name.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        String userDetailsUsername = userDetails.getUsername();
+
+        log.info("validating token of userDetails username {}", userDetailsUsername);
+
+        final String username = extractUsername(token);
+        boolean isValid = username.equals(userDetailsUsername) && !isTokenExpired(token);
+
+        log.info("validated token of userDetails username {}", userDetailsUsername);
+
+        return isValid;
     }
 
     @Override
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        log.info("extracting username from token");
+
+        String username = extractClaim(token, Claims::getSubject);
+
+        log.info("extracted username {} from token", username);
+
+        return username;
     }
 
     @Override
     public String fetchToken(HttpServletRequest request) {
+        String requestId = request.getRequestId();
+
+        log.info("fetching token from request with id {}", requestId);
+
         String authHeader = request.getHeader(AUTHORIZATION);
         String token = null;
 
         if (authHeader != null && authHeader.startsWith(BEARER)) {
             token = authHeader.substring(BEGIN_INDEX);
         }
+
+        log.info("fetched token from request with id {}", requestId);
 
         return token;
     }

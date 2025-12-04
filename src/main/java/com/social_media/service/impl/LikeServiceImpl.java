@@ -11,6 +11,7 @@ import com.social_media.repository.PostRepository;
 import com.social_media.service.LikeService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -18,6 +19,7 @@ import java.util.UUID;
 import static com.social_media.service.impl.PostServiceImpl.POST_NOT_FOUND_MESSAGE;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class LikeServiceImpl implements LikeService {
     private static final String TOO_MANY_LIKES_MESSAGE = "cannot like post more than once";
@@ -32,6 +34,8 @@ public class LikeServiceImpl implements LikeService {
     @Transactional
     @ValidateUserNotBlocked
     public Like createLike(User user, UUID id) {
+        log.info("creating like for post with id {}", id);
+
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
@@ -43,15 +47,23 @@ public class LikeServiceImpl implements LikeService {
         like.setUser(user);
         like.setPost(post);
 
-        return likeRepository.save(like);
+        likeRepository.save(like);
+
+        log.info("created like for post with id {}", id);
+
+        return like;
     }
 
     @Override
     @Transactional
-    public void removeLike(UUID userId, UUID postId) {
+    public void deleteLikeByPostId(UUID userId, UUID postId) {
+        log.info("removing like for user with id {} and post with id {}", userId, postId);
+
         Like like = likeRepository.findByUserIdPostId(userId, postId)
                 .orElseThrow(() -> new ResourceNotFoundException(LIKE_NOT_FOUND_MESSAGE));
 
         likeRepository.delete(like);
+
+        log.info("removed like for user with id {} and post with id {}", userId, postId);
     }
 }

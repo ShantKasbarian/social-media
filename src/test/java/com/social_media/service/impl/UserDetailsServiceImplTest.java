@@ -2,7 +2,6 @@ package com.social_media.service.impl;
 
 import com.social_media.entity.User;
 import com.social_media.exception.InvalidCredentialsException;
-import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

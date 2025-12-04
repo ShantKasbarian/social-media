@@ -139,7 +139,7 @@ class PostServiceImplTest {
     }
 
     @Test
-    void getFriendsPosts() {
+    void getPostsByUserIdAcceptedFriendRequests() {
         List<Post> posts = new ArrayList<>();
         posts.add(post);
 
@@ -149,15 +149,15 @@ class PostServiceImplTest {
                 posts, pageable, posts.size()
         );
 
-        when(postRepository.findByUserAcceptedFriendRequests(any(UUID.class), any(Pageable.class)))
+        when(postRepository.findByUserIdAcceptedFriendRequests(any(UUID.class), any(Pageable.class)))
                 .thenReturn(page);
 
-        var response = postService.getFriendsPosts(user, pageable);
+        var response = postService.getPostsByUserIdAcceptedFriendRequests(user.getId(), pageable);
 
         assertNotNull(page);
         assertFalse(response.isEmpty());
         assertEquals(page, response);
-        verify(postRepository).findByUserAcceptedFriendRequests(any(UUID.class), any(Pageable.class));
+        verify(postRepository).findByUserIdAcceptedFriendRequests(any(UUID.class), any(Pageable.class));
     }
 
     @Test
@@ -191,13 +191,13 @@ class PostServiceImplTest {
 
         Page<Post> page = new PageImpl<>(posts, pageable, posts.size());
 
-        when(postRepository.findByUserLikes(any(User.class), any(Pageable.class)))
+        when(postRepository.findByUserIdLikes(any(UUID.class), any(Pageable.class)))
                 .thenReturn(page);
 
-        var response = postService.getUserLikedPosts(user, pageable);
+        var response = postService.getUserLikedPosts(user.getId(), pageable);
 
         assertNotNull(response);
         assertEquals(page, response);
-        verify(postRepository).findByUserLikes(any(User.class), any(Pageable.class));
+        verify(postRepository).findByUserIdLikes(any(UUID.class), any(Pageable.class));
     }
 }

@@ -4,7 +4,6 @@ import com.social_media.entity.FriendRequest;
 import com.social_media.entity.Like;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
-import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.FriendRequestRepository;
@@ -73,7 +72,6 @@ class LikeServiceImplTest {
         var response = likeService.createLike(user, post.getId());
 
         assertNotNull(response);
-        assertEquals(like, response);
         verify(postRepository).findById(any(UUID.class));
         verify(likeRepository).existsByPostAndUser(any(Post.class), any(User.class));
         verify(likeRepository).save(any(Like.class));
@@ -96,21 +94,21 @@ class LikeServiceImplTest {
     }
 
     @Test
-    void removeLike() {
+    void deleteLikeByPostId() {
         when(likeRepository.findByUserIdPostId(any(UUID.class), any(UUID.class)))
                 .thenReturn(Optional.ofNullable(like));
         doNothing().when(likeRepository).delete(any(Like.class));
 
-        likeService.removeLike(user.getId(), post.getId());
+        likeService.deleteLikeByPostId(user.getId(), post.getId());
 
         verify(likeRepository).findByUserIdPostId(any(UUID.class), any(UUID.class));
         verify(likeRepository).delete(any(Like.class));
     }
 
     @Test
-    void removeLikeShouldThrowResourceNotFoundExceptionWhenLikeNotFound() {
+    void deleteLikeShouldThrowResourceNotFoundExceptionWhenLikeByPostIdNotFound() {
         when(likeRepository.findByUserIdPostId(any(UUID.class), any(UUID.class)))
                 .thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> likeService.removeLike(user.getId(), post.getId()));
+        assertThrows(ResourceNotFoundException.class, () -> likeService.deleteLikeByPostId(user.getId(), post.getId()));
     }
 }

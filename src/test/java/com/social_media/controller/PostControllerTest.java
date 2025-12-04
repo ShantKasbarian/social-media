@@ -137,23 +137,23 @@ class PostControllerTest {
     }
 
     @Test
-    void getPosts() {
+    void getPostsByUserIdAcceptedFriendRequests() {
         List<Post> posts = new ArrayList<>();
         posts.add(post);
 
         Page<Post> page = new PageImpl<>(posts);
 
         when(authentication.getPrincipal()).thenReturn(user);
-        when(postService.getFriendsPosts(any(User.class), any(Pageable.class))).thenReturn(page);
+        when(postService.getPostsByUserIdAcceptedFriendRequests(any(UUID.class), any(Pageable.class))).thenReturn(page);
 
-        var response = postController.getPosts(authentication, 0, 10);
+        var response = postController.getPostsByUserIdAcceptedFriendRequests(authentication, 0, 10);
 
         assertNotNull(response);
         assertNotNull(response.getBody());
         assertEquals(posts.size(), response.getBody().getContent().size());
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(authentication).getPrincipal();
-        verify(postService).getFriendsPosts(any(User.class), any(Pageable.class));
+        verify(postService).getPostsByUserIdAcceptedFriendRequests(any(UUID.class), any(Pageable.class));
     }
 
     @Test
@@ -185,7 +185,7 @@ class PostControllerTest {
         Page<Post> page = new PageImpl<>(posts);
 
         when(authentication.getPrincipal()).thenReturn(user);
-        when(postService.getUserLikedPosts(any(User.class), any(Pageable.class))).thenReturn(page);
+        when(postService.getUserLikedPosts(any(UUID.class), any(Pageable.class))).thenReturn(page);
 
         var response = postController.getUserLikedPosts(authentication, 0, 10);
 
@@ -194,6 +194,6 @@ class PostControllerTest {
         assertEquals(posts.size(), response.getBody().getContent().size());
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(authentication).getPrincipal();
-        verify(postService).getUserLikedPosts(any(User.class), any(Pageable.class));
+        verify(postService).getUserLikedPosts(any(UUID.class), any(Pageable.class));
     }
 }

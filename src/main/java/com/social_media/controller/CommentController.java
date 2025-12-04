@@ -9,6 +9,7 @@ import com.social_media.model.PageDto;
 import com.social_media.service.CommentService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -21,9 +22,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/comments")
+@Slf4j
 @AllArgsConstructor
 public class CommentController {
-    public static final String TIME_PROPERTY = "time";
+    static final String TIME_PROPERTY = "time";
 
     private final CommentService commentService;
 
@@ -35,38 +37,49 @@ public class CommentController {
     public ResponseEntity<CommentDto> createComment(
             Authentication authentication, @RequestBody @Valid CommentDto commentDto
     ) {
-        User user = (User) authentication.getPrincipal();
+        log.info("/comments with POST called, creating comment");
 
-        var comment = commentToModelConverter.convertToModel(
-                commentService.createComment(
-                        user, commentDtoToEntityConverter.convertToEntity(commentDto)
-                )
+        User user = (User) authentication.getPrincipal();
+        Comment comment = commentDtoToEntityConverter.convertToEntity(commentDto);
+
+        var result = commentToModelConverter.convertToModel(
+                commentService.createComment(user, comment)
         );
 
-        return new ResponseEntity<>(comment, HttpStatus.CREATED);
+        log.info("created comment");
+
+        return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
     @PutMapping
     public ResponseEntity<CommentDto> updateComment(
             Authentication authentication, @RequestBody @Valid CommentDto commentDto
     ) {
+        UUID id = commentDto.id();
+
+        log.info("/comments with PUT called, updating comment with id {}", id);
+
         User user = (User) authentication.getPrincipal();
 
         var comment = commentToModelConverter.convertToModel(
-                commentService.updateComment(
-                    user, commentDto.id(), commentDto.text()
-                )
+                commentService.updateComment(user, id, commentDto.text())
         );
+
+        log.info("updated comment with id {}", id);
 
         return ResponseEntity.ok(comment);
     }
 
-    @DeleteMapping("/{commentId}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteComment(
-            Authentication authentication, @PathVariable UUID commentId
-    ) {
-        commentService.deleteComment((User) authentication.getPrincipal(), commentId);
+    public void deleteComment(Authentication authentication, @PathVariable UUID id) {
+        log.info("/comments/{} with DELETE called, deleting comment with the specified id", id);
+
+        User user = (User) authentication.getPrincipal();
+
+        commentService.deleteComment(user, id);
+
+        log.info("deleted comment with id {}", id);
     }
 
     @GetMapping("/posts/{postId}")
@@ -76,6 +89,8 @@ public class CommentController {
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
+        log.info("/comments/posts/{} with GET called, fetching comments with the specified postId", postId);
+
         User user = (User) authentication.getPrincipal();
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc(TIME_PROPERTY)));
 
@@ -83,6 +98,8 @@ public class CommentController {
                 commentService.getCommentsByPostId(user, postId, pageable),
                 commentToModelConverter
         );
+
+        log.info("fetched comments with postId {}", postId);
 
         return ResponseEntity.ok(comments);
     }
