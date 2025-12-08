@@ -27,15 +27,15 @@ public class Post {
     @Column(name = "text", nullable = false)
     private String text;
 
-    @OneToMany(mappedBy = "post")
-    private List<Like> likes;
-
     @Column(name = "time")
     private LocalDateTime time;
 
-    @OneToMany(mappedBy = "post")
-    private List<Comment> comments;
-
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.DETACH)
     private User user;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<Like> likes;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<Comment> comments;
 }
