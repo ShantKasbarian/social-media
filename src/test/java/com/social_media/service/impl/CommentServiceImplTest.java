@@ -146,7 +146,7 @@ class CommentServiceImplTest {
         when(commentRepository.findByPostId(any(UUID.class), any(Pageable.class)))
                 .thenReturn(page);
 
-        var response = commentService.getCommentsByPostId(user, post.getId(), PageRequest.of(0, 10));
+        var response = commentService.getCommentsByPostId(post.getId(), PageRequest.of(0, 10));
 
         assertNotNull(response);
         assertEquals(page, response);

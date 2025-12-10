@@ -6,6 +6,7 @@ import com.social_media.exception.InvalidInputException;
 import com.social_media.repository.UserRepository;
 import com.social_media.utils.EmailValidator;
 import com.social_media.utils.UsernameValidator;
+import com.social_media.utils.impl.CredentialsValidatorImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -22,8 +23,6 @@ import static org.mockito.Mockito.*;
 class AuthenticationServiceImplTest {
     private static final String TEST_TOKEN = "some token";
 
-    private static final String INVALID_PASSWORD = "password";
-
     @InjectMocks
     private AuthenticationServiceImpl authenticationService;
 
@@ -34,10 +33,7 @@ class AuthenticationServiceImplTest {
     private JwtServiceImpl jwtService;
 
     @Mock
-    private UsernameValidator usernameValidator;
-
-    @Mock
-    private EmailValidator emailValidator;
+    private CredentialsValidatorImpl credentialsValidator;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -94,8 +90,7 @@ class AuthenticationServiceImplTest {
         String rawPassword = user.getPassword();
         String encodedPassword = "some encoded password";
 
-        when(usernameValidator.isUsernameValid(anyString())).thenReturn(true);
-        when(emailValidator.isEmailValid(anyString())).thenReturn(true);
+        doNothing().when(credentialsValidator).validateUserCredentials(anyString(), anyString(), anyString());
         when(passwordEncoder.encode(anyString())).thenReturn(encodedPassword);
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(jwtService.generateToken(anyString())).thenReturn(TEST_TOKEN);
@@ -106,34 +101,9 @@ class AuthenticationServiceImplTest {
         assertEquals(TEST_TOKEN, tokenDto.token());
         assertNotEquals(rawPassword, user.getPassword());
         assertEquals(encodedPassword, user.getPassword());
-        verify(usernameValidator).isUsernameValid(anyString());
-        verify(emailValidator).isEmailValid(anyString());
+        verify(credentialsValidator).validateUserCredentials(anyString(), anyString(), anyString());
         verify(passwordEncoder).encode(anyString());
         verify(userRepository).save(any(User.class));
         verify(jwtService).generateToken(anyString());
-    }
-
-    @Test
-    void signupShouldThrowInvalidInputExceptionWhenUsernameIsInvalid() {
-        when(usernameValidator.isUsernameValid(anyString())).thenReturn(false);
-        assertThrows(InvalidInputException.class, () -> authenticationService.signup(user));
-    }
-
-    @Test
-    void signupShouldThrowInvalidInputExceptionWhenEmailIsInvalid() {
-        when(usernameValidator.isUsernameValid(anyString())).thenReturn(true);
-        when(emailValidator.isEmailValid(anyString())).thenReturn(false);
-
-        assertThrows(InvalidInputException.class, () -> authenticationService.signup(user));
-    }
-
-    @Test
-    void signupShouldThrowInvalidInputExceptionWhenPasswordIsInvalid() {
-        user.setPassword(INVALID_PASSWORD);
-
-        when(usernameValidator.isUsernameValid(anyString())).thenReturn(true);
-        when(emailValidator.isEmailValid(anyString())).thenReturn(true);
-
-        assertThrows(InvalidInputException.class, () -> authenticationService.signup(user));
     }
 }

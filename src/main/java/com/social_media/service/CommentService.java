@@ -14,5 +14,5 @@ public interface CommentService {
     Comment createComment(User user, Comment comment);
     Comment updateComment(User user, @NotNull(message = "id must be specified") UUID id, String text);
     void deleteComment(User user, @NotNull(message = "id must be specified") UUID id);
-    Page<Comment> getCommentsByPostId(User user, @NotNull(message = "id must be specified") UUID postId, Pageable pageable);
+    Page<Comment> getCommentsByPostId(@NotNull(message = "id must be specified") UUID postId, Pageable pageable);
 }

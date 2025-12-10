@@ -30,7 +30,7 @@ public class Post {
     @Column(name = "time")
     private LocalDateTime time;
 
-    @ManyToOne(cascade = CascadeType.DETACH)
+    @ManyToOne
     private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)

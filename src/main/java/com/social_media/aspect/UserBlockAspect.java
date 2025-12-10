@@ -30,8 +30,6 @@ public class UserBlockAspect {
 
     private static final String GET_USER_POSTS_METHOD_NAME = "getUserPosts";
 
-    private static final String GET_COMMENTS_BY_POST_ID_METHOD_NAME = "getCommentsByPostId";
-
     static final String BLOCKED_USER_MESSAGE = "user is blocked";
 
     private final FriendRequestRepository friendRequestRepository;
@@ -56,8 +54,6 @@ public class UserBlockAspect {
             case CREATE_LIKE_METHOD_NAME -> checkCreateLike(args);
 
             case GET_USER_POSTS_METHOD_NAME -> checkGetUserPosts(args);
-
-            case GET_COMMENTS_BY_POST_ID_METHOD_NAME -> checkGetCommentsByPostId(args);
 
             default -> false;
         };
@@ -116,25 +112,5 @@ public class UserBlockAspect {
         }
 
         return friendRequestRepository.existsByUserIdTargetUserIdStatus(user.getId(), targetUserId, FriendRequest.Status.BLOCKED);
-    }
-
-    private boolean checkGetCommentsByPostId(Object[] args) {
-        User user = null;
-        UUID postId = null;
-
-        for (Object object: args) {
-            if (object instanceof User) {
-                user = (User) object;
-            }
-
-            if (object instanceof UUID) {
-                postId = (UUID) object;
-            }
-        }
-
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
-
-        return friendRequestRepository.existsByUserIdTargetUserIdStatus(user.getId(), post.getUser().getId(), FriendRequest.Status.BLOCKED);
     }
 }

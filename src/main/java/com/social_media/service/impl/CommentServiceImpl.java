@@ -83,8 +83,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @ValidateUserNotBlocked
-    public Page<Comment> getCommentsByPostId(User user, UUID postId, Pageable pageable) {
+    public Page<Comment> getCommentsByPostId(UUID postId, Pageable pageable) {
         log.info("fetching comments by postId {}", postId);
 
         Page<Comment> comments = commentRepository.findByPostId(postId, pageable);
