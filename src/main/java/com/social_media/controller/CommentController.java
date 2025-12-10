@@ -84,18 +84,16 @@ public class CommentController {
 
     @GetMapping("/posts/{postId}")
     public ResponseEntity<PageDto<Comment, CommentDto>>  getCommentsByPostId(
-            Authentication authentication,
             @PathVariable UUID postId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
         log.info("/comments/posts/{} with GET called, fetching comments with the specified postId", postId);
 
-        User user = (User) authentication.getPrincipal();
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc(TIME_PROPERTY)));
 
         var comments = new PageDto<>(
-                commentService.getCommentsByPostId(user, postId, pageable),
+                commentService.getCommentsByPostId(postId, pageable),
                 commentToModelConverter
         );
 

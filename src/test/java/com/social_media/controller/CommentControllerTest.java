@@ -140,16 +140,15 @@ class CommentControllerTest {
         Page<Comment> page = new PageImpl<>(comments);
 
         when(authentication.getPrincipal()).thenReturn(user);
-        when(commentService.getCommentsByPostId(any(User.class), any(UUID.class), any(Pageable.class)))
+        when(commentService.getCommentsByPostId(any(UUID.class), any(Pageable.class)))
                 .thenReturn(page);
 
-        var response = commentController.getCommentsByPostId(authentication, post.getId(), 0, 10);
+        var response = commentController.getCommentsByPostId(post.getId(), 0, 10);
 
         assertNotNull(response);
         assertNotNull(response.getBody());
         assertEquals(page.getTotalPages(), response.getBody().getTotalPages());
         assertEquals(page.getTotalElements(), response.getBody().getTotalElements());
-        verify(authentication).getPrincipal();
-        verify(commentService).getCommentsByPostId(any(User.class), any(UUID.class), any(Pageable.class));
+        verify(commentService).getCommentsByPostId(any(UUID.class), any(Pageable.class));
     }
 }
