@@ -1,10 +1,8 @@
 package com.social_media.service.impl;
 
 import com.social_media.entity.User;
-import com.social_media.exception.InvalidInputException;
 import com.social_media.repository.UserRepository;
-import com.social_media.utils.EmailValidator;
-import com.social_media.utils.UsernameValidator;
+import com.social_media.utils.impl.CredentialsValidatorImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -28,10 +26,7 @@ class UserServiceImplTest {
     private UserRepository userRepository;
 
     @Mock
-    private UsernameValidator usernameValidator;
-
-    @Mock
-    private EmailValidator emailValidator;
+    private CredentialsValidatorImpl credentialsValidator;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -53,40 +48,15 @@ class UserServiceImplTest {
 
     @Test
     void updateUser() {
-        when(usernameValidator.isUsernameValid(anyString())).thenReturn(true);
-        when(emailValidator.isEmailValid(anyString())).thenReturn(true);
+        doNothing().when(credentialsValidator).validateUserCredentials(anyString(), anyString(), anyString());
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(passwordEncoder.encode(anyString())).thenReturn(user.getPassword());
 
         userService.updateUser(user, user);
 
-        verify(usernameValidator).isUsernameValid(anyString());
-        verify(emailValidator).isEmailValid(anyString());
+        verify(credentialsValidator).validateUserCredentials(anyString(), anyString(), anyString());
         verify(passwordEncoder).encode(anyString());
         verify(userRepository).save(any(User.class));
-    }
-
-    @Test
-    void updateUserShouldThrowInvalidInputExceptionWhenUsernameIsInvalid() {
-        when(usernameValidator.isUsernameValid(anyString())).thenReturn(false);
-        assertThrows(InvalidInputException.class, () -> userService.updateUser(user, user));
-    }
-
-    @Test
-    void updateUserShouldThrowInvalidInputExceptionWhenEmailIsInvalid() {
-        when(usernameValidator.isUsernameValid(anyString())).thenReturn(true);
-        when(emailValidator.isEmailValid(anyString())).thenReturn(false);
-        assertThrows(InvalidInputException.class, () -> userService.updateUser(user, user));
-    }
-
-    @Test
-    void updateUserShouldThrowInvalidInputExceptionWhenPasswordIsInvalid() {
-        String invalidPassword = "password";
-        user.setPassword(invalidPassword);
-
-        when(usernameValidator.isUsernameValid(anyString())).thenReturn(true);
-        when(emailValidator.isEmailValid(anyString())).thenReturn(true);
-        assertThrows(InvalidInputException.class, () -> userService.updateUser(user, user));
     }
 
     @Test

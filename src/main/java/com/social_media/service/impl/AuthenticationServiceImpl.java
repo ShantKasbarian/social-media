@@ -7,6 +7,7 @@ import com.social_media.model.TokenDto;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.AuthenticationService;
 import com.social_media.service.JwtService;
+import com.social_media.utils.CredentialsValidator;
 import com.social_media.utils.EmailValidator;
 import com.social_media.utils.UsernameValidator;
 import jakarta.transaction.Transactional;
@@ -23,19 +24,11 @@ import static com.social_media.utils.PasswordValidator.isPasswordValid;
 public class AuthenticationServiceImpl implements AuthenticationService {
     private static final String WRONG_USERNAME_OR_PASSWORD_MESSAGE = "wrong username or password";
 
-    public static final String INVALID_EMAIL_MESSAGE = "email is invalid";
-
-    public static final String INVALID_USERNAME_MESSAGE = "username is invalid";
-
-    public static final String INVALID_PASSWORD_MESSAGE = "password must be at least 6 characters long, contain at least 1 uppercase, 1 lowercase, 1 number and 1 special character";
-
     private final UserRepository userRepository;
 
     private final JwtService jwtService;
 
-    private final UsernameValidator usernameValidator;
-
-    private final EmailValidator emailValidator;
+    private final CredentialsValidator credentialsValidator;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -61,17 +54,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         log.info("registering user with username {}", username);
 
-        if (!usernameValidator.isUsernameValid(username)) {
-            throw new InvalidInputException(INVALID_USERNAME_MESSAGE);
-        }
-
-        if (!emailValidator.isEmailValid(user.getEmail())) {
-            throw new InvalidInputException(INVALID_EMAIL_MESSAGE);
-        }
-
-        if (!isPasswordValid(user.getPassword())) {
-            throw new InvalidInputException(INVALID_PASSWORD_MESSAGE);
-        }
+        credentialsValidator.validateUserCredentials(username, user.getEmail(), user.getPassword());
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 

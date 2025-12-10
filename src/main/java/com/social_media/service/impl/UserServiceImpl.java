@@ -4,6 +4,7 @@ import com.social_media.entity.User;
 import com.social_media.exception.InvalidInputException;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.UserService;
+import com.social_media.utils.CredentialsValidator;
 import com.social_media.utils.EmailValidator;
 import com.social_media.utils.UsernameValidator;
 import lombok.AllArgsConstructor;
@@ -24,9 +25,7 @@ import static com.social_media.utils.PasswordValidator.isPasswordValid;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
-    private final UsernameValidator usernameValidator;
-
-    private final EmailValidator emailValidator;
+    private final CredentialsValidator credentialsValidator;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -40,17 +39,7 @@ public class UserServiceImpl implements UserService {
         String email = target.getEmail().trim();
         String password = target.getPassword().trim();
 
-        if (!usernameValidator.isUsernameValid(username)) {
-            throw new InvalidInputException(INVALID_USERNAME_MESSAGE);
-        }
-
-        if (!emailValidator.isEmailValid(email)) {
-            throw new InvalidInputException(INVALID_EMAIL_MESSAGE);
-        }
-
-        if (!isPasswordValid(password)) {
-            throw new InvalidInputException(INVALID_PASSWORD_MESSAGE);
-        }
+        credentialsValidator.validateUserCredentials(username, email, password);
 
         user.setUsername(username);
         user.setEmail(email);
