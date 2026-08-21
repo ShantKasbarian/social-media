@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class CommentServiceImpl implements CommentService {
-  private static final String COMMENT_NOT_FOUND_MESSAGE = "text not found";
+  private static final String COMMENT_NOT_FOUND_MESSAGE = "comment not found";
 
   private static final String UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE =
       "cannot modify or delete the text of another user";

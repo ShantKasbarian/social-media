@@ -24,7 +24,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
   private static final String USER_NOT_FOUND_MESSAGE = "user not found";
 
   private static final String FRIEND_REQUEST_ALREADY_SENT_MESSAGE =
-      "you have already sent a friend request";
+      "friend request already exists";
 
   private static final String UNABLE_TO_UPDATE_DELETE_FRIEND_REQUEST_MESSAGE =
       "cannot update or delete friendRequest";
