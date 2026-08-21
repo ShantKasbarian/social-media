@@ -1,12 +1,14 @@
 package com.social_media.service.impl;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import com.social_media.entity.User;
 import com.social_media.exception.InvalidCredentialsException;
-import com.social_media.exception.InvalidInputException;
 import com.social_media.repository.UserRepository;
-import com.social_media.utils.EmailValidator;
-import com.social_media.utils.UsernameValidator;
 import com.social_media.utils.impl.CredentialsValidatorImpl;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -14,96 +16,86 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 class AuthenticationServiceImplTest {
-    private static final String TEST_TOKEN = "some token";
+  private static final String TEST_TOKEN = "some token";
 
-    @InjectMocks
-    private AuthenticationServiceImpl authenticationService;
+  @InjectMocks private AuthenticationServiceImpl authenticationService;
 
-    @Mock
-    private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-    @Mock
-    private JwtServiceImpl jwtService;
+  @Mock private JwtServiceImpl jwtService;
 
-    @Mock
-    private CredentialsValidatorImpl credentialsValidator;
+  @Mock private CredentialsValidatorImpl credentialsValidator;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
+  @Mock private PasswordEncoder passwordEncoder;
 
-    private User user;
+  private User user;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+  @BeforeEach
+  void setUp() {
+    MockitoAnnotations.openMocks(this);
 
-        user = new User();
-        user.setId(UUID.randomUUID());
-        user.setEmail("someone@example.com");
-        user.setPassword("Password123+");
-        user.setUsername("johnDoe");
-        user.setFirstname("John");
-        user.setLastname("Doe");
-    }
+    user = new User();
+    user.setId(UUID.randomUUID());
+    user.setEmail("someone@example.com");
+    user.setPassword("Password123+");
+    user.setUsername("johnDoe");
+    user.setFirstname("John");
+    user.setLastname("Doe");
+  }
 
-    @Test
-    void login() {
-        when(userRepository.findByUsername(anyString()))
-                .thenReturn(Optional.ofNullable(user));
-        when(passwordEncoder.matches(anyString(), anyString()))
-                .thenReturn(true);
-        when(jwtService.generateToken(anyString()))
-                .thenReturn(TEST_TOKEN);
+  @Test
+  void login() {
+    when(userRepository.findByUsername(anyString())).thenReturn(Optional.ofNullable(user));
+    when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+    when(jwtService.generateToken(anyString())).thenReturn(TEST_TOKEN);
 
-        var tokenDto = authenticationService.login(user.getUsername(), user.getPassword());
+    var tokenDto = authenticationService.login(user.getUsername(), user.getPassword());
 
-        assertEquals(TEST_TOKEN, tokenDto.token());
-        verify(userRepository).findByUsername(anyString());
-        verify(jwtService).generateToken(anyString());
-    }
+    assertEquals(TEST_TOKEN, tokenDto.token());
+    verify(userRepository).findByUsername(anyString());
+    verify(jwtService).generateToken(anyString());
+  }
 
-    @Test
-    void loginShouldThrowInvalidCredentialsExceptionWhenUserNotFound() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
-        assertThrows(InvalidCredentialsException.class, () -> authenticationService.login(user.getUsername(), user.getPassword()));
-    }
+  @Test
+  void loginShouldThrowInvalidCredentialsExceptionWhenUserNotFound() {
+    when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+    assertThrows(
+        InvalidCredentialsException.class,
+        () -> authenticationService.login(user.getUsername(), user.getPassword()));
+  }
 
-    @Test
-    void loginShouldThrowInvalidCredentialsExceptionWhenPasswordIsWrong() {
-        when(userRepository.findByUsername(anyString()))
-                .thenReturn(Optional.ofNullable(user));
-        when(passwordEncoder.matches(anyString(), anyString()))
-                .thenReturn(false);
+  @Test
+  void loginShouldThrowInvalidCredentialsExceptionWhenPasswordIsWrong() {
+    when(userRepository.findByUsername(anyString())).thenReturn(Optional.ofNullable(user));
+    when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
-        assertThrows(InvalidCredentialsException.class, () -> authenticationService.login(user.getEmail(), user.getPassword()));
-    }
+    assertThrows(
+        InvalidCredentialsException.class,
+        () -> authenticationService.login(user.getEmail(), user.getPassword()));
+  }
 
-    @Test
-    void signup() {
-        String rawPassword = user.getPassword();
-        String encodedPassword = "some encoded password";
+  @Test
+  void signup() {
+    String rawPassword = user.getPassword();
+    String encodedPassword = "some encoded password";
 
-        doNothing().when(credentialsValidator).validateUserCredentials(anyString(), anyString(), anyString());
-        when(passwordEncoder.encode(anyString())).thenReturn(encodedPassword);
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        when(jwtService.generateToken(anyString())).thenReturn(TEST_TOKEN);
+    doNothing()
+        .when(credentialsValidator)
+        .validateUserCredentials(anyString(), anyString(), anyString());
+    when(passwordEncoder.encode(anyString())).thenReturn(encodedPassword);
+    when(userRepository.save(any(User.class))).thenReturn(user);
+    when(jwtService.generateToken(anyString())).thenReturn(TEST_TOKEN);
 
-        var tokenDto = authenticationService.signup(user);
+    var tokenDto = authenticationService.signup(user);
 
-        assertNotNull(tokenDto);
-        assertEquals(TEST_TOKEN, tokenDto.token());
-        assertNotEquals(rawPassword, user.getPassword());
-        assertEquals(encodedPassword, user.getPassword());
-        verify(credentialsValidator).validateUserCredentials(anyString(), anyString(), anyString());
-        verify(passwordEncoder).encode(anyString());
-        verify(userRepository).save(any(User.class));
-        verify(jwtService).generateToken(anyString());
-    }
+    assertNotNull(tokenDto);
+    assertEquals(TEST_TOKEN, tokenDto.token());
+    assertNotEquals(rawPassword, user.getPassword());
+    assertEquals(encodedPassword, user.getPassword());
+    verify(credentialsValidator).validateUserCredentials(anyString(), anyString(), anyString());
+    verify(passwordEncoder).encode(anyString());
+    verify(userRepository).save(any(User.class));
+    verify(jwtService).generateToken(anyString());
+  }
 }

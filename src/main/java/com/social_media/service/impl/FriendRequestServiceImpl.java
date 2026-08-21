@@ -9,120 +9,122 @@ import com.social_media.repository.FriendRequestRepository;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.FriendRequestService;
 import jakarta.transaction.Transactional;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 @Slf4j
 @AllArgsConstructor
 public class FriendRequestServiceImpl implements FriendRequestService {
-    private static final String USER_NOT_FOUND_MESSAGE = "user not found";
+  private static final String USER_NOT_FOUND_MESSAGE = "user not found";
 
-    private static final String FRIEND_REQUEST_ALREADY_SENT_MESSAGE = "you have already sent a friend request";
+  private static final String FRIEND_REQUEST_ALREADY_SENT_MESSAGE =
+      "you have already sent a friend request";
 
-    private static final String UNABLE_TO_UPDATE_DELETE_FRIEND_REQUEST_MESSAGE = "cannot update or delete friendRequest";
+  private static final String UNABLE_TO_UPDATE_DELETE_FRIEND_REQUEST_MESSAGE =
+      "cannot update or delete friendRequest";
 
-    private static final String FRIEND_REQUEST_NOT_FOUND_MESSAGE = "friend request not found";
+  private static final String FRIEND_REQUEST_NOT_FOUND_MESSAGE = "friend request not found";
 
-    private final FriendRequestRepository friendRequestRepository;
+  private final FriendRequestRepository friendRequestRepository;
 
-    private final UserRepository userRepository;
+  private final UserRepository userRepository;
 
-    @Override
-    @Transactional
-    public FriendRequest createFriendRequest(User user, UUID targetUserId) {
-        UUID currentUserId = user.getId();
+  @Override
+  @Transactional
+  public FriendRequest createFriendRequest(User user, UUID targetUserId) {
+    UUID currentUserId = user.getId();
 
-        log.info("creating friend request with userId {} and targetUserId {}", currentUserId, targetUserId);
+    log.info(
+        "creating friend request with userId {} and targetUserId {}", currentUserId, targetUserId);
 
-        User targetUser = userRepository.findById(targetUserId)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
+    User targetUser =
+        userRepository
+            .findById(targetUserId)
+            .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
 
-
-        if (friendRequestRepository.existsByUserIdTargetUserId(currentUserId, targetUserId)) {
-            throw new ResourceAlreadyExistsException(FRIEND_REQUEST_ALREADY_SENT_MESSAGE);
-        }
-
-        FriendRequest friendRequest = new FriendRequest();
-        friendRequest.setUser(user);
-        friendRequest.setTargetUser(targetUser);
-        friendRequest.setStatus(FriendRequest.Status.PENDING);
-
-        friendRequestRepository.save(friendRequest);
-
-        log.info("created friend request with userId {} and targetUserId {}", currentUserId, targetUserId);
-
-        return friendRequest;
+    if (friendRequestRepository.existsByUserIdTargetUserId(currentUserId, targetUserId)) {
+      throw new ResourceAlreadyExistsException(FRIEND_REQUEST_ALREADY_SENT_MESSAGE);
     }
 
-    @Override
-    @Transactional
-    public FriendRequest updateFriendRequestStatus(User user, UUID requestId, FriendRequest.Status status) {
-        log.info("updating friendRequest with id {}", requestId);
+    FriendRequest friendRequest = new FriendRequest();
+    friendRequest.setUser(user);
+    friendRequest.setTargetUser(targetUser);
+    friendRequest.setStatus(FriendRequest.Status.PENDING);
 
-        FriendRequest friendRequest = friendRequestRepository.findById(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
+    friendRequestRepository.save(friendRequest);
 
-        if (
-            FriendRequest.Status.BLOCKED.equals(friendRequest.getStatus()) ||
-            (
-                !user.getId().equals(friendRequest.getTargetUser().getId()) &&
-                FriendRequest.Status.ACCEPTED.equals(status)
-            )
-        ) {
-            throw new RequestNotAllowedException(UNABLE_TO_UPDATE_DELETE_FRIEND_REQUEST_MESSAGE);
-        }
+    log.info(
+        "created friend request with userId {} and targetUserId {}", currentUserId, targetUserId);
 
-        friendRequest.setStatus(status);
+    return friendRequest;
+  }
 
-        friendRequestRepository.save(friendRequest);
+  @Override
+  @Transactional
+  public FriendRequest updateFriendRequestStatus(
+      User user, UUID requestId, FriendRequest.Status status) {
+    log.info("updating friendRequest with id {}", requestId);
 
-        log.info("updated friendRequest with id {}", requestId);
+    FriendRequest friendRequest =
+        friendRequestRepository
+            .findById(requestId)
+            .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
-        return friendRequest;
+    if (FriendRequest.Status.BLOCKED.equals(friendRequest.getStatus())
+        || (!user.getId().equals(friendRequest.getTargetUser().getId())
+            && FriendRequest.Status.ACCEPTED.equals(status))) {
+      throw new RequestNotAllowedException(UNABLE_TO_UPDATE_DELETE_FRIEND_REQUEST_MESSAGE);
     }
 
-    @Override
-    @Transactional
-    public void deleteFriendRequest(User user, UUID requestId) {
-        log.info("deleting friendRequest with id {}", requestId);
+    friendRequest.setStatus(status);
 
-        FriendRequest friendRequest = friendRequestRepository.findById(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
+    friendRequestRepository.save(friendRequest);
 
-        UUID userId = user.getId();
-        UUID targetUserId = friendRequest.getTargetUser().getId();
+    log.info("updated friendRequest with id {}", requestId);
 
-        if (
-            FriendRequest.Status.BLOCKED.equals(friendRequest.getStatus()) ||
-            (
-                !friendRequest.getUser().getId().equals(userId) &&
-                !targetUserId.equals(userId)
-            )
-        ) {
-            throw new RequestNotAllowedException(UNABLE_TO_UPDATE_DELETE_FRIEND_REQUEST_MESSAGE);
-        }
+    return friendRequest;
+  }
 
-        friendRequestRepository.delete(friendRequest);
+  @Override
+  @Transactional
+  public void deleteFriendRequest(User user, UUID requestId) {
+    log.info("deleting friendRequest with id {}", requestId);
 
-        log.info("deleted friendRequest with id {}", requestId);
+    FriendRequest friendRequest =
+        friendRequestRepository
+            .findById(requestId)
+            .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
+
+    UUID userId = user.getId();
+    UUID targetUserId = friendRequest.getTargetUser().getId();
+
+    if (FriendRequest.Status.BLOCKED.equals(friendRequest.getStatus())
+        || (!friendRequest.getUser().getId().equals(userId) && !targetUserId.equals(userId))) {
+      throw new RequestNotAllowedException(UNABLE_TO_UPDATE_DELETE_FRIEND_REQUEST_MESSAGE);
     }
 
-    @Override
-    public Page<FriendRequest> getFriendRequestsByUserStatus(User user, FriendRequest.Status status, Pageable pageable) {
-        UUID id = user.getId();
+    friendRequestRepository.delete(friendRequest);
 
-        log.info("fetching friendRequests of user with user {} and status {}", id, status);
+    log.info("deleted friendRequest with id {}", requestId);
+  }
 
-        Page<FriendRequest> friendRequests = friendRequestRepository.findByUserStatus(user, status, pageable);
+  @Override
+  public Page<FriendRequest> getFriendRequestsByUserStatus(
+      User user, FriendRequest.Status status, Pageable pageable) {
+    UUID id = user.getId();
 
-        log.info("fetched friendRequests of user with user {} and status {}", id, status);
+    log.info("fetching friendRequests of user with user {} and status {}", id, status);
 
-        return friendRequests;
-    }
+    Page<FriendRequest> friendRequests =
+        friendRequestRepository.findByUserStatus(user, status, pageable);
+
+    log.info("fetched friendRequests of user with user {} and status {}", id, status);
+
+    return friendRequests;
+  }
 }

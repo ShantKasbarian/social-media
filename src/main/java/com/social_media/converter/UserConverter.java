@@ -5,28 +5,28 @@ import com.social_media.model.UserDto;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserConverter implements ToEntityConverter<User, UserDto>, ToModelConverter<User, UserDto> {
-    @Override
-    public User convertToEntity(UserDto model) {
-        User user = new User();
-        user.setId(model.id());
-        user.setEmail(model.email());
-        user.setUsername(model.username());
-        user.setPassword(model.password());
-        user.setFirstname(model.firstname());
-        user.setLastname(model.lastname());
-        return user;
-    }
+public class UserConverter
+    implements ToEntityConverter<User, UserDto>, ToModelConverter<User, UserDto> {
+  @Override
+  public User convertToEntity(UserDto model) {
+    User user = new User();
+    user.setId(model.id());
+    user.setEmail(model.email());
+    user.setUsername(model.username());
+    user.setPassword(model.password());
+    user.setFirstname(model.firstname());
+    user.setLastname(model.lastname());
+    return user;
+  }
 
-    @Override
-    public UserDto convertToModel(User entity) {
-        return new UserDto(
-                entity.getId(),
-                entity.getEmail(),
-                entity.getUsername(),
-                entity.getPassword(),
-                entity.getFirstname(),
-                entity.getLastname()
-        );
-    }
+  @Override
+  public UserDto convertToModel(User entity) {
+    return new UserDto(
+        entity.getId(),
+        entity.getEmail(),
+        entity.getUsername(),
+        entity.getPassword(),
+        entity.getFirstname(),
+        entity.getLastname());
+  }
 }

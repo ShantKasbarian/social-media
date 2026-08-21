@@ -7,18 +7,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FriendRequestConverter implements ToModelConverter<FriendRequest, FriendRequestDto> {
-    @Override
-    public FriendRequestDto convertToModel(FriendRequest entity) {
-        User user = entity.getUser();
-        User targetUser = entity.getTargetUser();
+  @Override
+  public FriendRequestDto convertToModel(FriendRequest entity) {
+    User user = entity.getUser();
+    User targetUser = entity.getTargetUser();
 
-        return new FriendRequestDto(
-                entity.getId(),
-                user.getId(),
-                user.getUsername(),
-                targetUser.getId(),
-                targetUser.getUsername(),
-                entity.getStatus()
-        );
-    }
+    return new FriendRequestDto(
+        entity.getId(),
+        user.getId(),
+        user.getUsername(),
+        targetUser.getId(),
+        targetUser.getUsername(),
+        entity.getStatus());
+  }
 }

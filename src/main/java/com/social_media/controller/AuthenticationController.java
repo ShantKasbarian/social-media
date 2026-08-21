@@ -19,35 +19,35 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @AllArgsConstructor
 public class AuthenticationController {
-    private final AuthenticationService authenticationService;
+  private final AuthenticationService authenticationService;
 
-    private final ToEntityConverter<User, UserDto> userDtoToEntityConverter;
+  private final ToEntityConverter<User, UserDto> userDtoToEntityConverter;
 
-    @PostMapping("/login")
-    public ResponseEntity<TokenDto> login(@RequestBody @Valid LoginDto loginDto) {
-        String username = loginDto.username();
+  @PostMapping("/login")
+  public ResponseEntity<TokenDto> login(@RequestBody @Valid LoginDto loginDto) {
+    String username = loginDto.username();
 
-        log.info("/login with POST called, authenticating user with username {}", username);
+    log.info("/login with POST called, authenticating user with username {}", username);
 
-        TokenDto tokenDto = authenticationService.login(username, loginDto.password());
+    TokenDto tokenDto = authenticationService.login(username, loginDto.password());
 
-        log.info("authenticated user with username {}", username);
+    log.info("authenticated user with username {}", username);
 
-        return ResponseEntity.ok(tokenDto);
-    }
+    return ResponseEntity.ok(tokenDto);
+  }
 
-    @PostMapping("/signup")
-    public ResponseEntity<TokenDto> signup(@RequestBody @Valid UserDto userDto) {
-        String username = userDto.username();
+  @PostMapping("/signup")
+  public ResponseEntity<TokenDto> signup(@RequestBody @Valid UserDto userDto) {
+    String username = userDto.username();
 
-        log.info("/signup with POST called creating user with username {}", username);
+    log.info("/signup with POST called creating user with username {}", username);
 
-        User user = userDtoToEntityConverter.convertToEntity(userDto);
+    User user = userDtoToEntityConverter.convertToEntity(userDto);
 
-        TokenDto tokenDto = authenticationService.signup(user);
+    TokenDto tokenDto = authenticationService.signup(user);
 
-        log.info("created user with username {}", username);
+    log.info("created user with username {}", username);
 
-        return new ResponseEntity<>(tokenDto, HttpStatus.CREATED);
-    }
+    return new ResponseEntity<>(tokenDto, HttpStatus.CREATED);
+  }
 }

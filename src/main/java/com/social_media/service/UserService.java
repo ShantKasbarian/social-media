@@ -8,6 +8,8 @@ import org.springframework.validation.annotation.Validated;
 
 @Validated
 public interface UserService {
-    void updateUser(User user, User target);
-    Page<User> searchByUsername(@NotNull(message = "username must be specified") String username, Pageable pageable);
+  void updateUser(User user, User target);
+
+  Page<User> searchByUsername(
+      @NotNull(message = "username must be specified") String username, Pageable pageable);
 }

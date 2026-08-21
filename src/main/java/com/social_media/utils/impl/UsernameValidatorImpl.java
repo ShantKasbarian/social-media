@@ -10,20 +10,20 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @AllArgsConstructor
 public class UsernameValidatorImpl implements UsernameValidator {
-    private final UserRepository userRepository;
+  private final UserRepository userRepository;
 
-    @Override
-    public boolean isUsernameValid(String username) {
-        log.info("validating username {}", username);
+  @Override
+  public boolean isUsernameValid(String username) {
+    log.info("validating username {}", username);
 
-        if (username == null) {
-            return false;
-        }
-
-        boolean isValid = !username.contains(" ") && !userRepository.existsByUsername(username);
-
-        log.info("validated username {}", username);
-
-        return isValid;
+    if (username == null) {
+      return false;
     }
+
+    boolean isValid = !username.contains(" ") && !userRepository.existsByUsername(username);
+
+    log.info("validated username {}", username);
+
+    return isValid;
+  }
 }
