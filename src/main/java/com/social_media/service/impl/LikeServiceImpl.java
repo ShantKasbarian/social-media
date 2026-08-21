@@ -13,13 +13,14 @@ import com.social_media.repository.PostRepository;
 import com.social_media.service.LikeService;
 import jakarta.transaction.Transactional;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-@Service
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Service
 public class LikeServiceImpl implements LikeService {
   private static final String TOO_MANY_LIKES_MESSAGE = "cannot like post more than once";
 

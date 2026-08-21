@@ -10,20 +10,21 @@ import com.social_media.repository.UserRepository;
 import com.social_media.service.FriendRequestService;
 import jakarta.transaction.Transactional;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-@Service
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Service
 public class FriendRequestServiceImpl implements FriendRequestService {
   private static final String USER_NOT_FOUND_MESSAGE = "user not found";
 
   private static final String FRIEND_REQUEST_ALREADY_SENT_MESSAGE =
-      "you have already sent a friend request";
+      "friend request already exists";
 
   private static final String UNABLE_TO_UPDATE_DELETE_FRIEND_REQUEST_MESSAGE =
       "cannot update or delete friendRequest";

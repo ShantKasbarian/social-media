@@ -7,7 +7,7 @@ import com.social_media.model.TokenDto;
 import com.social_media.model.UserDto;
 import com.social_media.service.AuthenticationService;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
+@RestController
 public class AuthenticationController {
   private final AuthenticationService authenticationService;
 

@@ -17,8 +17,6 @@ public class PasswordValidator {
   private static final String SPECIAL_CHARACTERS_REGEX = ".*[!@#$%^&*(),.?\":{}|<>+].*";
 
   public static boolean isPasswordValid(String password) {
-    log.info("validating password");
-
     if (password == null) {
       return false;
     }
@@ -33,15 +31,10 @@ public class PasswordValidator {
     Matcher lowercase = lowercasePattern.matcher(password);
     Matcher specialCharacter = specialCharacterPattern.matcher(password);
 
-    boolean isValid =
-        password.length() > MIN_REQUIRED_LENGTH
+    return password.length() > MIN_REQUIRED_LENGTH
             && number.find()
             && uppercase.find()
             && lowercase.find()
             && specialCharacter.find();
-
-    log.info("validated password");
-
-    return isValid;
   }
 }

@@ -9,17 +9,18 @@ import com.social_media.service.CommentService;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-@Service
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Service
 public class CommentServiceImpl implements CommentService {
-  private static final String COMMENT_NOT_FOUND_MESSAGE = "text not found";
+  private static final String COMMENT_NOT_FOUND_MESSAGE = "comment not found";
 
   private static final String UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE =
       "cannot modify or delete the text of another user";

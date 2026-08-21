@@ -9,17 +9,18 @@ import com.social_media.service.PostService;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+@Slf4j
+@RequiredArgsConstructor
 @Service
 @Validated
-@Slf4j
-@AllArgsConstructor
 public class PostServiceImpl implements PostService {
   public static final String POST_NOT_FOUND_MESSAGE = "post not found";
 
