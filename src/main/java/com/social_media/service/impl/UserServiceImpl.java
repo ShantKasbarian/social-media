@@ -1,22 +1,21 @@
 package com.social_media.service.impl;
 
-import static com.social_media.service.impl.AuthenticationServiceImpl.*;
-
 import com.social_media.entity.User;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.UserService;
 import com.social_media.utils.CredentialsValidator;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-@Service
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Service
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
 

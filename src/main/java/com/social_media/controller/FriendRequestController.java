@@ -7,7 +7,8 @@ import com.social_media.model.FriendRequestDto;
 import com.social_media.model.PageDto;
 import com.social_media.service.FriendRequestService;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,10 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/friend-requests")
-@Slf4j
-@AllArgsConstructor
 public class FriendRequestController {
   private final FriendRequestService friendRequestService;
 

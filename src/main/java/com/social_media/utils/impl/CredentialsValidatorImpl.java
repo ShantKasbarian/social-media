@@ -6,11 +6,11 @@ import com.social_media.exception.InvalidInputException;
 import com.social_media.utils.CredentialsValidator;
 import com.social_media.utils.EmailValidator;
 import com.social_media.utils.UsernameValidator;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+@RequiredArgsConstructor
 @Component
-@AllArgsConstructor
 public class CredentialsValidatorImpl implements CredentialsValidator {
   private static final String INVALID_EMAIL_MESSAGE = "email is invalid";
 

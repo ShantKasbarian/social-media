@@ -18,8 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-@Service
 @Slf4j
+@Service
 public class JwtServiceImpl implements JwtService {
   private static final String AUTHORIZATION = "Authorization";
 

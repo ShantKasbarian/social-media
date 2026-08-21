@@ -8,14 +8,14 @@ import com.social_media.service.AuthenticationService;
 import com.social_media.service.JwtService;
 import com.social_media.utils.CredentialsValidator;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-@Service
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Service
 public class AuthenticationServiceImpl implements AuthenticationService {
   private static final String WRONG_USERNAME_OR_PASSWORD_MESSAGE = "wrong username or password";
 
