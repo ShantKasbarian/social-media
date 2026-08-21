@@ -8,8 +8,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @EnableAspectJAutoProxy
 public class SocialMediaApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SocialMediaApplication.class, args);
-	}
-
+  public static void main(String[] args) {
+    SpringApplication.run(SocialMediaApplication.class, args);
+  }
 }

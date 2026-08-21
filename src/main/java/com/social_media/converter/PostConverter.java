@@ -6,32 +6,32 @@ import com.social_media.model.PostDto;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PostConverter implements ToEntityConverter<Post, PostDto>, ToModelConverter<Post, PostDto> {
-    @Override
-    public Post convertToEntity(PostDto model) {
-        Post post = new Post();
-        post.setId(model.id());
-        post.setText(model.text());
-        return post;
+public class PostConverter
+    implements ToEntityConverter<Post, PostDto>, ToModelConverter<Post, PostDto> {
+  @Override
+  public Post convertToEntity(PostDto model) {
+    Post post = new Post();
+    post.setId(model.id());
+    post.setText(model.text());
+    return post;
+  }
+
+  @Override
+  public PostDto convertToModel(Post entity) {
+    User user = entity.getUser();
+
+    int likes = 0;
+
+    if (entity.getLikes() != null) {
+      likes = entity.getLikes().size();
     }
 
-    @Override
-    public PostDto convertToModel(Post entity) {
-        User user = entity.getUser();
-
-        int likes = 0;
-
-        if (entity.getLikes() != null) {
-            likes = entity.getLikes().size();
-        }
-
-        return new PostDto(
-                entity.getId(),
-                user.getId(),
-                user.getUsername(),
-                entity.getText(),
-                (long) likes,
-                entity.getTime()
-        );
-    }
+    return new PostDto(
+        entity.getId(),
+        user.getId(),
+        user.getUsername(),
+        entity.getText(),
+        (long) likes,
+        entity.getTime());
+  }
 }

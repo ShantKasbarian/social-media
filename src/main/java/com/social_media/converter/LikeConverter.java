@@ -7,15 +7,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LikeConverter implements ToModelConverter<Like, LikeDto> {
-    @Override
-    public LikeDto convertToModel(Like entity) {
-        User user = entity.getUser();
+  @Override
+  public LikeDto convertToModel(Like entity) {
+    User user = entity.getUser();
 
-        return new LikeDto(
-                entity.getId(),
-                user.getId(),
-                user.getUsername(),
-                entity.getPost().getId()
-        );
-    }
+    return new LikeDto(entity.getId(), user.getId(), user.getUsername(), entity.getPost().getId());
+  }
 }
