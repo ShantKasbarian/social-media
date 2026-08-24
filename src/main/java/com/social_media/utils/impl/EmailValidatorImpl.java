@@ -4,7 +4,6 @@ import com.social_media.repository.UserRepository;
 import com.social_media.utils.EmailValidator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

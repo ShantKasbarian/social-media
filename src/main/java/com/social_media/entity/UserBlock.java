@@ -13,8 +13,8 @@ import org.hibernate.annotations.UuidGenerator;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "friend_requests")
-public class FriendRequest {
+@Table(name = "user_blocks")
+public class UserBlock {
   @Id
   @GeneratedValue
   @UuidGenerator
@@ -28,14 +28,4 @@ public class FriendRequest {
   @ManyToOne
   @JoinColumn(name = "target_user_id")
   private User targetUser;
-
-  @Column(name = "status")
-  @Enumerated(EnumType.STRING)
-  private Status status;
-
-  public enum Status {
-    ACCEPTED,
-    REJECTED,
-    PENDING
-  }
 }

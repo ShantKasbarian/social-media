@@ -51,7 +51,11 @@ class PostRepositoryTest {
 
     postRepository.save(post);
 
-    FriendRequest friendRequest = new FriendRequest(user, user2, FriendRequest.Status.ACCEPTED);
+    FriendRequest friendRequest = new FriendRequest();
+    friendRequest.setUser(user);
+    friendRequest.setTargetUser(user2);
+    friendRequest.setStatus(FriendRequest.Status.ACCEPTED);
+
     friendRequestRepository.save(friendRequest);
   }
 

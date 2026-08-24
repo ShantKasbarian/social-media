@@ -11,7 +11,6 @@ import com.social_media.model.PostDto;
 import com.social_media.service.PostService;
 import jakarta.validation.Valid;
 import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -49,10 +49,13 @@ public class PostController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<PostDto> getPostById(@PathVariable UUID id) {
+  public ResponseEntity<PostDto> getPostById(
+      @AuthenticationPrincipal Authentication authentication, @PathVariable UUID id) {
     log.info("/posts/{} with GET called, fetching post with the specified id", id);
 
-    var post = postToModelConverter.convertToModel(postService.getPostById(id));
+    User user = (User) authentication.getPrincipal();
+
+    var post = postToModelConverter.convertToModel(postService.getPostById(id, user));
 
     log.info("fetched post with id {}", id);
 

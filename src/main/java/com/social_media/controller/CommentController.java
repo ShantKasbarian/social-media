@@ -9,7 +9,6 @@ import com.social_media.model.PageDto;
 import com.social_media.service.CommentService;
 import jakarta.validation.Valid;
 import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -81,6 +81,7 @@ public class CommentController {
 
   @GetMapping("/posts/{postId}")
   public ResponseEntity<PageDto<Comment, CommentDto>> getCommentsByPostId(
+      @AuthenticationPrincipal Authentication authentication,
       @PathVariable UUID postId,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "10") int size) {
@@ -88,10 +89,12 @@ public class CommentController {
         "/comments/posts/{} with GET called, fetching comments with the specified postId", postId);
 
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc(TIME_PROPERTY)));
+    User user = (User) authentication.getPrincipal();
 
     var comments =
         new PageDto<>(
-            commentService.getCommentsByPostId(postId, pageable), commentToModelConverter);
+            commentService.getCommentsByPostId(postId, user.getId(), pageable),
+            commentToModelConverter);
 
     log.info("fetched comments with postId {}", postId);
 

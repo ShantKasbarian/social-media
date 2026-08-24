@@ -7,7 +7,6 @@ import com.social_media.model.FriendRequestDto;
 import com.social_media.model.PageDto;
 import com.social_media.service.FriendRequestService;
 import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;

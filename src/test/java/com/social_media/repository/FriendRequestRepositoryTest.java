@@ -42,7 +42,10 @@ class FriendRequestRepositoryTest {
     userRepository.save(user1);
     userRepository.save(user2);
 
-    friendRequest = new FriendRequest(user1, user2, FriendRequest.Status.PENDING);
+    friendRequest = new FriendRequest();
+    friendRequest.setUser(user1);
+    friendRequest.setTargetUser(user2);
+    friendRequest.setStatus(FriendRequest.Status.PENDING);
     friendRequestRepository.save(friendRequest);
   }
 

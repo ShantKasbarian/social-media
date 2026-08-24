@@ -1,9 +1,6 @@
 package com.social_media.converter;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.social_media.entity.Comment;
 import com.social_media.entity.Post;
@@ -61,15 +58,11 @@ class CommentConverterTest {
 
   @Test
   void convertToEntity() {
-    when(postService.getPostById(any(UUID.class))).thenReturn(post);
-
     Comment comment = commentConverter.convertToEntity(commentDto);
 
     assertNotNull(comment);
     assertEquals(commentDto.id(), comment.getId());
-    assertEquals(commentDto.postId(), comment.getPost().getId());
     assertEquals(commentDto.text(), comment.getText());
-    verify(postService).getPostById(any(UUID.class));
   }
 
   @Test

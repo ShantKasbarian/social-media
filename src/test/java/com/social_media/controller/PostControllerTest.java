@@ -91,16 +91,16 @@ class PostControllerTest {
   @Test
   void getPostById() {
     when(postConverter.convertToModel(any(Post.class))).thenReturn(postDto);
-    when(postService.getPostById(any(UUID.class))).thenReturn(post);
+    when(postService.getPostById(any(UUID.class), any(User.class))).thenReturn(post);
 
-    var response = postController.getPostById(post.getId());
+    var response = postController.getPostById(authentication, post.getId());
 
     assertNotNull(response);
     assertNotNull(response.getBody());
     assertEquals(postDto, response.getBody());
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(postConverter).convertToModel(any(Post.class));
-    verify(postService).getPostById(any(UUID.class));
+    verify(postService).getPostById(any(UUID.class), any(User.class));
   }
 
   @Test

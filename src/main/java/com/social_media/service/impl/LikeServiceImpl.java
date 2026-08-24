@@ -2,18 +2,18 @@ package com.social_media.service.impl;
 
 import static com.social_media.service.impl.PostServiceImpl.POST_NOT_FOUND_MESSAGE;
 
-import com.social_media.annotation.ValidateUserNotBlocked;
 import com.social_media.entity.Like;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
+import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.LikeRepository;
 import com.social_media.repository.PostRepository;
+import com.social_media.repository.UserBlockRepository;
 import com.social_media.service.LikeService;
 import jakarta.transaction.Transactional;
 import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,13 +26,16 @@ public class LikeServiceImpl implements LikeService {
 
   private static final String LIKE_NOT_FOUND_MESSAGE = "liked not found";
 
+  static final String BLOCKED_USER_MESSAGE = "cannot interact with or view blocked user posts";
+
   private final LikeRepository likeRepository;
 
   private final PostRepository postRepository;
 
+  private final UserBlockRepository userBlockRepository;
+
   @Override
   @Transactional
-  @ValidateUserNotBlocked
   public Like createLike(User user, UUID id) {
     log.info("creating like for post with id {}", id);
 
@@ -40,6 +43,10 @@ public class LikeServiceImpl implements LikeService {
         postRepository
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
+
+    if (userBlockRepository.existsBlockBetween(user.getId(), post.getUser().getId())) {
+      throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
+    }
 
     if (likeRepository.existsByPostAndUser(post, user)) {
       throw new ResourceAlreadyExistsException(TOO_MANY_LIKES_MESSAGE);

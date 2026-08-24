@@ -61,7 +61,7 @@ class PostServiceImplTest {
   void getPostById() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
 
-    Post response = postService.getPostById(post.getId());
+    Post response = postService.getPostById(post.getId(), user);
 
     assertEquals(post, response);
     verify(postRepository).findById(any(UUID.class));
@@ -70,7 +70,8 @@ class PostServiceImplTest {
   @Test
   void getPostByIdShouldThrowResourceNotFoundExceptionWhenPostNotFound() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
-    assertThrows(ResourceNotFoundException.class, () -> postService.getPostById(post.getId()));
+    assertThrows(
+        ResourceNotFoundException.class, () -> postService.getPostById(post.getId(), user));
   }
 
   @Test

@@ -124,7 +124,7 @@ class FriendRequestServiceImplTest {
         ResourceNotFoundException.class,
         () ->
             friendRequestService.updateFriendRequestStatus(
-                user1, friendRequest.getId(), FriendRequest.Status.BLOCKED));
+                user1, friendRequest.getId(), FriendRequest.Status.REJECTED));
   }
 
   @Test
@@ -142,7 +142,7 @@ class FriendRequestServiceImplTest {
 
   @Test
   void updateFriendRequestStatusShouldThrowRequestNotAllowedExceptionWhenFriendRequestIsBlocked() {
-    friendRequest.setStatus(FriendRequest.Status.BLOCKED);
+    friendRequest.setStatus(FriendRequest.Status.REJECTED);
 
     when(friendRequestRepository.findById(friendRequest.getId()))
         .thenReturn(Optional.ofNullable(friendRequest));
@@ -195,7 +195,7 @@ class FriendRequestServiceImplTest {
 
   @Test
   void deleteFriendRequestShouldThrowRequestNotAllowedExceptionWhenFriendRequestIsBlocked() {
-    friendRequest.setStatus(FriendRequest.Status.BLOCKED);
+    friendRequest.setStatus(FriendRequest.Status.REJECTED);
 
     when(friendRequestRepository.findById(any(UUID.class)))
         .thenReturn(Optional.ofNullable(friendRequest));
