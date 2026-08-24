@@ -3,7 +3,9 @@ package com.social_media.repository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.social_media.entity.*;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +48,7 @@ class PostRepositoryTest {
 
     post = new Post();
     post.setUser(user2);
-    post.setTime(LocalDateTime.now());
+    post.setTime(Instant.now());
     post.setText("some text");
 
     postRepository.save(post);

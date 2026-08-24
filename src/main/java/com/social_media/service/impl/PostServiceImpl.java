@@ -8,7 +8,8 @@ import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.*;
 import com.social_media.service.PostService;
 import jakarta.transaction.Transactional;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,7 @@ public class PostServiceImpl implements PostService {
 
     log.info("creating post for user with id {}", id);
 
-    post.setTime(LocalDateTime.now());
+    post.setTime(Instant.now());
     post.setUser(user);
 
     postRepository.save(post);

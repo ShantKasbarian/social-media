@@ -6,7 +6,8 @@ import com.social_media.entity.Like;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
 import com.social_media.model.LikeDto;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ class LikeConverterTest {
     Post post = new Post();
     post.setId(UUID.randomUUID());
     post.setUser(user);
-    post.setTime(LocalDateTime.now());
+    post.setTime(Instant.now());
     post.setText("some text");
 
     like = new Like(UUID.randomUUID(), user, post);

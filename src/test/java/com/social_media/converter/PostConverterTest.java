@@ -5,7 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
 import com.social_media.model.PostDto;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +35,7 @@ class PostConverterTest {
 
     post = new Post();
     post.setId(UUID.randomUUID());
-    post.setTime(LocalDateTime.now());
+    post.setTime(Instant.now());
     post.setText("some text");
     post.setUser(user);
     post.setLikes(new ArrayList<>());

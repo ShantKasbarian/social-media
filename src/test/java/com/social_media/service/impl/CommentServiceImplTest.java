@@ -8,7 +8,8 @@ import com.social_media.entity.*;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.CommentRepository;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -51,7 +52,7 @@ class CommentServiceImplTest {
     post = new Post();
     post.setId(UUID.randomUUID());
     post.setUser(user);
-    post.setTime(LocalDateTime.now());
+    post.setTime(Instant.now());
     post.setText("some text");
 
     friendRequest = new FriendRequest();
@@ -60,7 +61,7 @@ class CommentServiceImplTest {
     friendRequest.setTargetUser(new User());
     friendRequest.setStatus(FriendRequest.Status.PENDING);
 
-    comment = new Comment(UUID.randomUUID(), "some text", LocalDateTime.now(), post, user);
+    comment = new Comment(UUID.randomUUID(), "some text", Instant.now(), post, user);
   }
 
   @Test

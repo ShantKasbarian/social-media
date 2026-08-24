@@ -1,7 +1,8 @@
 package com.social_media.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,7 @@ public class Post {
   private String text;
 
   @Column(name = "time")
-  private LocalDateTime time;
+  private Instant time;
 
   @ManyToOne private User user;
 

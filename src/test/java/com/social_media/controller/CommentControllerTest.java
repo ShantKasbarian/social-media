@@ -11,7 +11,8 @@ import com.social_media.entity.Post;
 import com.social_media.entity.User;
 import com.social_media.model.CommentDto;
 import com.social_media.service.CommentService;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -57,11 +58,11 @@ class CommentControllerTest {
 
     post = new Post();
     post.setId(UUID.randomUUID());
-    post.setTime(LocalDateTime.now());
+    post.setTime(Instant.now());
     post.setText("some text");
     post.setUser(user);
 
-    comment = new Comment(UUID.randomUUID(), "some text", LocalDateTime.now(), post, user);
+    comment = new Comment(UUID.randomUUID(), "some text", Instant.now(), post, user);
 
     commentDto =
         new CommentDto(

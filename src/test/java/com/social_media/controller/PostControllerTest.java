@@ -10,7 +10,8 @@ import com.social_media.entity.Post;
 import com.social_media.entity.User;
 import com.social_media.model.PostDto;
 import com.social_media.service.PostService;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -54,7 +55,7 @@ class PostControllerTest {
 
     post = new Post();
     post.setId(UUID.randomUUID());
-    post.setTime(LocalDateTime.now());
+    post.setTime(Instant.now());
     post.setText("some text");
     post.setUser(user);
     post.setLikes(new ArrayList<>());

@@ -11,7 +11,8 @@ import com.social_media.repository.PostRepository;
 import com.social_media.repository.UserBlockRepository;
 import com.social_media.service.CommentService;
 import jakarta.transaction.Transactional;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,7 @@ public class CommentServiceImpl implements CommentService {
       throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
     }
 
-    comment.setTime(LocalDateTime.now());
+    comment.setTime(Instant.now());
 
     commentRepository.save(comment);
 

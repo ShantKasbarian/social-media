@@ -13,7 +13,8 @@ import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.FriendRequestRepository;
 import com.social_media.repository.LikeRepository;
 import com.social_media.repository.PostRepository;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +53,7 @@ class LikeServiceImplTest {
     post = new Post();
     post.setId(UUID.randomUUID());
     post.setUser(user);
-    post.setTime(LocalDateTime.now());
+    post.setTime(Instant.now());
     post.setText("some text");
 
     like = new Like(UUID.randomUUID(), user, post);
