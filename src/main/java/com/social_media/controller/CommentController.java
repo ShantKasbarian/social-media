@@ -1,7 +1,6 @@
 package com.social_media.controller;
 
-import com.social_media.converter.ToEntityConverter;
-import com.social_media.converter.ToModelConverter;
+import com.social_media.converter.CommentConverter;
 import com.social_media.entity.Comment;
 import com.social_media.entity.User;
 import com.social_media.model.CommentDto;
@@ -29,9 +28,7 @@ public class CommentController {
 
   private final CommentService commentService;
 
-  private final ToModelConverter<Comment, CommentDto> commentToModelConverter;
-
-  private final ToEntityConverter<Comment, CommentDto> commentDtoToEntityConverter;
+  private final CommentConverter commentConverter;
 
   @PostMapping
   public ResponseEntity<CommentDto> createComment(
@@ -39,10 +36,10 @@ public class CommentController {
     log.info("/comments with POST called, creating comment");
 
     User user = (User) authentication.getPrincipal();
-    Comment comment = commentDtoToEntityConverter.convertToEntity(commentDto);
+    Comment comment = commentConverter.convertToEntity(commentDto);
+    comment.setUser(user);
 
-    var result =
-        commentToModelConverter.convertToModel(commentService.createComment(user, comment));
+    var result = commentConverter.convertToModel(commentService.createComment(comment));
 
     log.info("created comment");
 
@@ -59,8 +56,7 @@ public class CommentController {
     User user = (User) authentication.getPrincipal();
 
     var comment =
-        commentToModelConverter.convertToModel(
-            commentService.updateComment(user, id, commentDto.text()));
+        commentConverter.convertToModel(commentService.updateComment(user, id, commentDto.text()));
 
     log.info("updated comment with id {}", id);
 
@@ -68,8 +64,8 @@ public class CommentController {
   }
 
   @DeleteMapping("/{id}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteComment(Authentication authentication, @PathVariable UUID id) {
+  public ResponseEntity<Object> deleteComment(
+      Authentication authentication, @PathVariable UUID id) {
     log.info("/comments/{} with DELETE called, deleting comment with the specified id", id);
 
     User user = (User) authentication.getPrincipal();
@@ -77,6 +73,8 @@ public class CommentController {
     commentService.deleteComment(user, id);
 
     log.info("deleted comment with id {}", id);
+
+    return ResponseEntity.noContent().build();
   }
 
   @GetMapping("/posts/{postId}")
@@ -93,8 +91,7 @@ public class CommentController {
 
     var comments =
         new PageDto<>(
-            commentService.getCommentsByPostId(postId, user.getId(), pageable),
-            commentToModelConverter);
+            commentService.getCommentsByPostId(postId, user.getId(), pageable), commentConverter);
 
     log.info("fetched comments with postId {}", postId);
 

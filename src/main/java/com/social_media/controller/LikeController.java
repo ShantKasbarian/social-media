@@ -1,7 +1,6 @@
 package com.social_media.controller;
 
-import com.social_media.converter.ToModelConverter;
-import com.social_media.entity.Like;
+import com.social_media.converter.LikeConverter;
 import com.social_media.entity.User;
 import com.social_media.model.LikeDto;
 import com.social_media.service.LikeService;
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class LikeController {
   private final LikeService likeService;
 
-  private final ToModelConverter<Like, LikeDto> likeToModelConverter;
+  private final LikeConverter likeConverter;
 
   @PostMapping("/posts/{postId}")
   public ResponseEntity<LikeDto> createLike(
@@ -33,7 +32,7 @@ public class LikeController {
 
     User user = (User) authentication.getPrincipal();
 
-    var like = likeToModelConverter.convertToModel(likeService.createLike(user, postId));
+    var like = likeConverter.convertToModel(likeService.createLike(user, postId));
 
     log.info("created like for post with id {}", postId);
 
@@ -41,8 +40,8 @@ public class LikeController {
   }
 
   @DeleteMapping("/posts/{postId}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteLike(Authentication authentication, @PathVariable UUID postId) {
+  public ResponseEntity<Object> deleteLike(
+      Authentication authentication, @PathVariable UUID postId) {
     User user = (User) authentication.getPrincipal();
     UUID userId = user.getId();
 
@@ -54,5 +53,7 @@ public class LikeController {
     likeService.deleteLikeByPostId(userId, postId);
 
     log.info("deleted like for post with id {} and user with id {}", postId, userId);
+
+    return ResponseEntity.noContent().build();
   }
 }

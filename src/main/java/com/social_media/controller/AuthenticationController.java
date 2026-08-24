@@ -1,6 +1,6 @@
 package com.social_media.controller;
 
-import com.social_media.converter.ToEntityConverter;
+import com.social_media.converter.UserConverter;
 import com.social_media.entity.User;
 import com.social_media.model.LoginDto;
 import com.social_media.model.TokenDto;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
   private final AuthenticationService authenticationService;
 
-  private final ToEntityConverter<User, UserDto> userDtoToEntityConverter;
+  private final UserConverter userConverter;
 
   @PostMapping("/login")
   public ResponseEntity<TokenDto> login(@RequestBody @Valid LoginDto loginDto) {
@@ -42,7 +42,7 @@ public class AuthenticationController {
 
     log.info("/signup with POST called creating user with username {}", username);
 
-    User user = userDtoToEntityConverter.convertToEntity(userDto);
+    User user = userConverter.convertToEntity(userDto);
 
     TokenDto tokenDto = authenticationService.signup(user);
 

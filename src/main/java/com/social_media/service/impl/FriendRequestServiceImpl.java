@@ -105,10 +105,9 @@ public class FriendRequestServiceImpl implements FriendRequestService {
             .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
     UUID userId = user.getId();
-    UUID targetUserId = friendRequest.getTargetUser().getId();
 
     if (FriendRequest.Status.REJECTED.equals(friendRequest.getStatus())
-        || (!friendRequest.getUser().getId().equals(userId) && !targetUserId.equals(userId))) {
+        || !friendRequest.getUser().getId().equals(userId)) {
       throw new RequestNotAllowedException(UNABLE_TO_UPDATE_DELETE_FRIEND_REQUEST_MESSAGE);
     }
 

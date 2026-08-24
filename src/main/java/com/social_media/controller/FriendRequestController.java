@@ -1,6 +1,6 @@
 package com.social_media.controller;
 
-import com.social_media.converter.ToModelConverter;
+import com.social_media.converter.FriendRequestConverter;
 import com.social_media.entity.FriendRequest;
 import com.social_media.entity.User;
 import com.social_media.model.FriendRequestDto;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class FriendRequestController {
   private final FriendRequestService friendRequestService;
 
-  private final ToModelConverter<FriendRequest, FriendRequestDto> friendRequestToModelConverter;
+  private final FriendRequestConverter friendRequestConverter;
 
   @PostMapping("/users/{targetUserId}")
   public ResponseEntity<FriendRequestDto> createFriendRequest(
@@ -35,7 +35,7 @@ public class FriendRequestController {
     User user = (User) authentication.getPrincipal();
 
     FriendRequestDto friendRequestDto =
-        friendRequestToModelConverter.convertToModel(
+        friendRequestConverter.convertToModel(
             friendRequestService.createFriendRequest(user, targetUserId));
 
     log.info("created friend request with targetUserId {}", targetUserId);
@@ -56,7 +56,7 @@ public class FriendRequestController {
     User user = (User) authentication.getPrincipal();
 
     FriendRequestDto friendRequestDto =
-        friendRequestToModelConverter.convertToModel(
+        friendRequestConverter.convertToModel(
             friendRequestService.updateFriendRequestStatus(user, id, status));
 
     log.info("updated friendRequest status with id {} and status {}", id, status);
@@ -65,8 +65,8 @@ public class FriendRequestController {
   }
 
   @DeleteMapping("/{id}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteFriendRequest(Authentication authentication, @PathVariable UUID id) {
+  public ResponseEntity<Object> deleteFriendRequest(
+      Authentication authentication, @PathVariable UUID id) {
     log.info(
         "/friend-requests/{} with DELETE called, deleting friendRequest with the specified id", id);
 
@@ -75,6 +75,8 @@ public class FriendRequestController {
     friendRequestService.deleteFriendRequest(user, id);
 
     log.info("deleted friendRequest with id {}", id);
+
+    return ResponseEntity.noContent().build();
   }
 
   @GetMapping("/{status}")
@@ -95,7 +97,7 @@ public class FriendRequestController {
     var friendRequests =
         new PageDto<>(
             friendRequestService.getFriendRequestsByUserStatus(user, status, pageable),
-            friendRequestToModelConverter);
+            friendRequestConverter);
 
     log.info("fetched friend-requests of user with id {} and status {}", id, status);
 

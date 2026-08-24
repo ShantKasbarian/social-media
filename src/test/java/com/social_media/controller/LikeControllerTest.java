@@ -81,8 +81,10 @@ class LikeControllerTest {
     when(authentication.getPrincipal()).thenReturn(user);
     doNothing().when(likeService).deleteLikeByPostId(any(UUID.class), any(UUID.class));
 
-    likeController.deleteLike(authentication, post.getId());
+    var response = likeController.deleteLike(authentication, post.getId());
 
+    assertNotNull(response);
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(likeService).deleteLikeByPostId(any(UUID.class), any(UUID.class));
   }

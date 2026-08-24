@@ -67,7 +67,7 @@ class CommentServiceImplTest {
   void createComment() {
     when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
-    var response = commentService.createComment(user, comment);
+    var response = commentService.createComment(comment);
 
     assertEquals(comment.getId(), response.getId());
     assertEquals(comment.getText(), response.getText());

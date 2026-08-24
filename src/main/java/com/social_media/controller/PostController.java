@@ -2,8 +2,7 @@ package com.social_media.controller;
 
 import static com.social_media.controller.CommentController.TIME_PROPERTY;
 
-import com.social_media.converter.ToEntityConverter;
-import com.social_media.converter.ToModelConverter;
+import com.social_media.converter.PostConverter;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
 import com.social_media.model.PageDto;
@@ -29,9 +28,7 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
   private final PostService postService;
 
-  private final ToModelConverter<Post, PostDto> postToModelConverter;
-
-  private final ToEntityConverter<Post, PostDto> postToEntityConverter;
+  private final PostConverter postConverter;
 
   @PostMapping
   public ResponseEntity<PostDto> createPost(
@@ -39,9 +36,9 @@ public class PostController {
     log.info("/posts called with POST, creating new post");
 
     User user = (User) authentication.getPrincipal();
-    Post post = postToEntityConverter.convertToEntity(postDto);
+    Post post = postConverter.convertToEntity(postDto);
 
-    PostDto responseDto = postToModelConverter.convertToModel(postService.createPost(user, post));
+    PostDto responseDto = postConverter.convertToModel(postService.createPost(user, post));
 
     log.info("created post");
 
@@ -55,7 +52,7 @@ public class PostController {
 
     User user = (User) authentication.getPrincipal();
 
-    var post = postToModelConverter.convertToModel(postService.getPostById(id, user));
+    var post = postConverter.convertToModel(postService.getPostById(id, user));
 
     log.info("fetched post with id {}", id);
 
@@ -71,8 +68,7 @@ public class PostController {
 
     User user = (User) authentication.getPrincipal();
 
-    var post =
-        postToModelConverter.convertToModel(postService.updatePost(user, postId, postDto.text()));
+    var post = postConverter.convertToModel(postService.updatePost(user, postId, postDto.text()));
 
     log.info("updated post with id {}", postId);
 
@@ -80,14 +76,16 @@ public class PostController {
   }
 
   @DeleteMapping("/{postId}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deletePost(Authentication authentication, @PathVariable UUID postId) {
+  public ResponseEntity<Object> deletePost(
+      Authentication authentication, @PathVariable UUID postId) {
     log.info("/posts/{} with DELETE called, deleting post with the specified id", postId);
 
     User user = (User) authentication.getPrincipal();
     postService.deletePost(user, postId);
 
     log.info("deleted post with id {}", postId);
+
+    return ResponseEntity.noContent().build();
   }
 
   @GetMapping
@@ -106,7 +104,7 @@ public class PostController {
 
     var posts =
         new PageDto<>(
-            postService.getPostsByUserIdAcceptedFriendRequests(id, pageable), postToModelConverter);
+            postService.getPostsByUserIdAcceptedFriendRequests(id, pageable), postConverter);
 
     log.info("fetched posts by user with id {} and ACCEPTED friendRequest status", id);
 
@@ -125,8 +123,7 @@ public class PostController {
     User user = (User) authentication.getPrincipal();
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc(TIME_PROPERTY)));
 
-    var posts =
-        new PageDto<>(postService.getUserPosts(user, userId, pageable), postToModelConverter);
+    var posts = new PageDto<>(postService.getUserPosts(user, userId, pageable), postConverter);
 
     log.info("fetched posts of user with id {}", userId);
 
@@ -145,7 +142,7 @@ public class PostController {
 
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc(TIME_PROPERTY)));
 
-    var posts = new PageDto<>(postService.getUserLikedPosts(id, pageable), postToModelConverter);
+    var posts = new PageDto<>(postService.getUserLikedPosts(id, pageable), postConverter);
 
     log.info("fetched liked posts by user with id {}", id);
 

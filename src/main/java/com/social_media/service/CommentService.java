@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface CommentService {
-  Comment createComment(User user, Comment comment);
+  Comment createComment(Comment comment);
 
   Comment updateComment(User user, UUID id, String text);
 

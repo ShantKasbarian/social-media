@@ -1,7 +1,6 @@
 package com.social_media.controller;
 
-import com.social_media.converter.ToEntityConverter;
-import com.social_media.converter.ToModelConverter;
+import com.social_media.converter.UserConverter;
 import com.social_media.entity.User;
 import com.social_media.model.PageDto;
 import com.social_media.model.UserDto;
@@ -24,16 +23,14 @@ public class UserController {
 
   private final UserService userService;
 
-  private final ToModelConverter<User, UserDto> userToModelConverter;
-
-  private final ToEntityConverter<User, UserDto> userDtoToEntityConverter;
+  private final UserConverter userConverter;
 
   @GetMapping
   public ResponseEntity<UserDto> getProfile(Authentication authentication) {
     log.info("/users with GET called, fetching current user profile");
 
     User user = (User) authentication.getPrincipal();
-    UserDto userDto = userToModelConverter.convertToModel(user);
+    UserDto userDto = userConverter.convertToModel(user);
 
     log.info("fetched user profile");
 
@@ -45,7 +42,7 @@ public class UserController {
     log.info("/users with PUT called, updating current user profile");
 
     User user = (User) authentication.getPrincipal();
-    userService.updateUser(user, userDtoToEntityConverter.convertToEntity(userDto));
+    userService.updateUser(user, userConverter.convertToEntity(userDto));
 
     log.info("updated user profile");
   }
@@ -61,8 +58,7 @@ public class UserController {
 
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc(USERNAME_SORT_PROPERTY)));
 
-    var users =
-        new PageDto<>(userService.searchByUsername(username, pageable), userToModelConverter);
+    var users = new PageDto<>(userService.searchByUsername(username, pageable), userConverter);
 
     log.info("fetching users with usernames containing the target username {}", username);
 

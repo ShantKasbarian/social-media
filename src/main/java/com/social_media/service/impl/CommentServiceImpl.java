@@ -36,8 +36,8 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   @Transactional
-  public Comment createComment(User user, Comment comment) {
-    UUID id = user.getId();
+  public Comment createComment(Comment comment) {
+    UUID id = comment.getUser().getId();
 
     log.info("creating comment for user with id {}", id);
 
@@ -48,13 +48,11 @@ public class CommentServiceImpl implements CommentService {
 
     UUID postAuthorId = post.getUser().getId();
 
-    if (!postAuthorId.equals(id)
-        && userBlockRepository.existsBlockBetween(postAuthorId, user.getId())) {
+    if (!postAuthorId.equals(id) && userBlockRepository.existsBlockBetween(postAuthorId, id)) {
       throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
     }
 
     comment.setTime(LocalDateTime.now());
-    comment.setUser(user);
 
     commentRepository.save(comment);
 
