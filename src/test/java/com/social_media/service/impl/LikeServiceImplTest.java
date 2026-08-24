@@ -13,7 +13,6 @@ import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.FriendRequestRepository;
 import com.social_media.repository.LikeRepository;
 import com.social_media.repository.PostRepository;
-
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;

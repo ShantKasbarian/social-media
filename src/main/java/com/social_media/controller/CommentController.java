@@ -36,10 +36,8 @@ public class CommentController {
     log.info("/comments with POST called, creating comment");
 
     User user = (User) authentication.getPrincipal();
-    Comment comment = commentConverter.convertToEntity(commentDto);
-    comment.setUser(user);
 
-    var result = commentConverter.convertToModel(commentService.createComment(comment));
+    var result = commentConverter.convertToModel(commentService.createComment(user, commentDto));
 
     log.info("created comment");
 

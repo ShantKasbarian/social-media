@@ -10,7 +10,6 @@ import com.social_media.entity.Post;
 import com.social_media.entity.User;
 import com.social_media.model.LikeDto;
 import com.social_media.service.LikeService;
-
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;

@@ -3,9 +3,7 @@ package com.social_media.repository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.social_media.entity.*;
-
 import java.time.Instant;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

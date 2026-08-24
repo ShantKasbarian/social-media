@@ -10,7 +10,6 @@ import com.social_media.entity.Post;
 import com.social_media.entity.User;
 import com.social_media.model.PostDto;
 import com.social_media.service.PostService;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;

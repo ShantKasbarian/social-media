@@ -8,16 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-public class CommentConverter
-    implements ToEntityConverter<Comment, CommentDto>, ToModelConverter<Comment, CommentDto> {
-
-  @Override
-  public Comment convertToEntity(CommentDto model) {
-    Comment comment = new Comment();
-    comment.setId(model.id());
-    comment.setText(model.text());
-    return comment;
-  }
+public class CommentConverter implements ToModelConverter<Comment, CommentDto> {
 
   @Override
   public CommentDto convertToModel(Comment entity) {

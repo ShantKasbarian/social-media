@@ -1,7 +1,6 @@
 package com.social_media.entity;
 
 import jakarta.persistence.*;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;

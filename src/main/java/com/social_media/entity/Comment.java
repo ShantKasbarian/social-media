@@ -1,7 +1,6 @@
 package com.social_media.entity;
 
 import jakarta.persistence.*;
-
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -29,7 +28,9 @@ public class Comment {
   @Column(name = "time")
   private Instant time;
 
-  @ManyToOne private Post post;
+  @ManyToOne(fetch = FetchType.LAZY)
+  private Post post;
 
-  @ManyToOne private User user;
+  @ManyToOne(fetch = FetchType.LAZY)
+  private User user;
 }
