@@ -44,7 +44,6 @@ class UserConverterTest {
     User user = userConverter.convertToEntity(userDto);
 
     assertNotNull(user);
-    assertEquals(userDto.id(), user.getId());
     assertEquals(userDto.email(), user.getEmail());
     assertEquals(userDto.username(), user.getUsername());
     assertEquals(userDto.password(), user.getPassword());

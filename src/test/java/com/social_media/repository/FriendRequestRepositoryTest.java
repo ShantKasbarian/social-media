@@ -42,28 +42,16 @@ class FriendRequestRepositoryTest {
     userRepository.save(user1);
     userRepository.save(user2);
 
-    friendRequest = new FriendRequest(user1, user2, FriendRequest.Status.PENDING);
+    friendRequest = new FriendRequest();
+    friendRequest.setUser(user1);
+    friendRequest.setTargetUser(user2);
+    friendRequest.setStatus(FriendRequest.Status.PENDING);
     friendRequestRepository.save(friendRequest);
-  }
-
-  @Test
-  void existsByIdStatus() {
-    assertTrue(
-        friendRequestRepository.existsByIdStatus(friendRequest.getId(), friendRequest.getStatus()));
   }
 
   @Test
   void existsByUserIdTargetUserId() {
     assertTrue(friendRequestRepository.existsByUserIdTargetUserId(user1.getId(), user2.getId()));
-  }
-
-  @Test
-  void existsByUserIdTargetUserIdStatus() {
-    boolean exists =
-        friendRequestRepository.existsByUserIdTargetUserIdStatus(
-            user1.getId(), user2.getId(), friendRequest.getStatus());
-
-    assertTrue(exists);
   }
 
   @Test

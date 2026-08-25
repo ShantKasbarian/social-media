@@ -73,14 +73,12 @@ class UserControllerTest {
   @Test
   void updateUser() {
     when(authentication.getPrincipal()).thenReturn(user);
-    doNothing().when(userService).updateUser(any(User.class), any(User.class));
-    when(userConverter.convertToEntity(any(UserDto.class))).thenReturn(user);
+    doNothing().when(userService).updateUser(any(User.class), any(UserDto.class));
 
     userController.updateUser(authentication, userDto);
 
     verify(authentication).getPrincipal();
-    verify(userService).updateUser(any(User.class), any(User.class));
-    verify(userConverter).convertToEntity(any(UserDto.class));
+    verify(userService).updateUser(any(User.class), any(UserDto.class));
   }
 
   @Test

@@ -121,8 +121,11 @@ class FriendRequestControllerTest {
     when(authentication.getPrincipal()).thenReturn(user1);
     doNothing().when(friendRequestService).deleteFriendRequest(any(User.class), any(UUID.class));
 
-    friendRequestController.deleteFriendRequest(authentication, friendRequest.getId());
+    var response =
+        friendRequestController.deleteFriendRequest(authentication, friendRequest.getId());
 
+    assertNotNull(response);
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(friendRequestService).deleteFriendRequest(any(User.class), any(UUID.class));
   }

@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
 import com.social_media.model.PostDto;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,8 +17,6 @@ class PostConverterTest {
   @InjectMocks private PostConverter postConverter;
 
   private Post post;
-
-  private PostDto postDto;
 
   @BeforeEach
   void setUp() {
@@ -34,28 +32,10 @@ class PostConverterTest {
 
     post = new Post();
     post.setId(UUID.randomUUID());
-    post.setTime(LocalDateTime.now());
+    post.setTime(Instant.now());
     post.setText("some text");
     post.setUser(user);
     post.setLikes(new ArrayList<>());
-
-    postDto =
-        new PostDto(
-            post.getId(),
-            post.getUser().getId(),
-            post.getUser().getUsername(),
-            post.getText(),
-            (long) post.getLikes().size(),
-            post.getTime());
-  }
-
-  @Test
-  void convertToEntity() {
-    Post post = postConverter.convertToEntity(postDto);
-
-    assertNotNull(post);
-    assertEquals(postDto.id(), post.getId());
-    assertEquals(postDto.text(), post.getText());
   }
 
   @Test

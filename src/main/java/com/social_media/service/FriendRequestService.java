@@ -2,26 +2,17 @@ package com.social_media.service;
 
 import com.social_media.entity.FriendRequest;
 import com.social_media.entity.User;
-import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.validation.annotation.Validated;
 
-@Validated
 public interface FriendRequestService {
-  FriendRequest createFriendRequest(
-      User user, @NotNull(message = "id must be specified") UUID targetUserId);
+  FriendRequest createFriendRequest(User user, UUID targetUserId);
 
-  FriendRequest updateFriendRequestStatus(
-      User user,
-      @NotNull(message = "id must be specified") UUID requestId,
-      @NotNull(message = "status must be specified") FriendRequest.Status status);
+  FriendRequest updateFriendRequestStatus(User user, UUID requestId, FriendRequest.Status status);
 
-  void deleteFriendRequest(User user, @NotNull(message = "id must be specified") UUID requestId);
+  void deleteFriendRequest(User user, UUID requestId);
 
   Page<FriendRequest> getFriendRequestsByUserStatus(
-      User user,
-      @NotNull(message = "status must be specified") FriendRequest.Status status,
-      Pageable pageable);
+      User user, FriendRequest.Status status, Pageable pageable);
 }

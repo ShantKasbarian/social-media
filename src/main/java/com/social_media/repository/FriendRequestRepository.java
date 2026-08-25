@@ -12,9 +12,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FriendRequestRepository extends JpaRepository<FriendRequest, UUID> {
-  @Query("SELECT COUNT(f) > 0 FROM FriendRequest f WHERE f.id = :id AND f.status = :status")
-  boolean existsByIdStatus(UUID id, FriendRequest.Status status);
-
   @Query(
       """
         SELECT COUNT(f) = 1 FROM FriendRequest f
@@ -26,19 +23,10 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, UU
 
   @Query(
       """
-        SELECT COUNT(f) > 0 FROM FriendRequest f
-        WHERE ((f.user.id = :currentUserId AND f.targetUser.id = :targetUserId) OR
-        (f.user.id = :targetUserId AND f.targetUser.id = :currentUserId)) AND
-        f.status = :status
-    """)
-  boolean existsByUserIdTargetUserIdStatus(
-      UUID currentUserId, UUID targetUserId, FriendRequest.Status status);
-
-  @Query(
-      """
         FROM FriendRequest f
         WHERE (f.user = :user OR f.targetUser = :user) AND
         f.status = :status
     """)
-  Page<FriendRequest> findByUserStatus(User user, FriendRequest.Status status, Pageable pageable);
+  Page<FriendRequest> findByUserStatus(
+      @Param("user") User user, @Param("status") FriendRequest.Status status, Pageable pageable);
 }

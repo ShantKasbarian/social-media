@@ -32,9 +32,9 @@ public class PasswordValidator {
     Matcher specialCharacter = specialCharacterPattern.matcher(password);
 
     return password.length() > MIN_REQUIRED_LENGTH
-            && number.find()
-            && uppercase.find()
-            && lowercase.find()
-            && specialCharacter.find();
+        && number.find()
+        && uppercase.find()
+        && lowercase.find()
+        && specialCharacter.find();
   }
 }

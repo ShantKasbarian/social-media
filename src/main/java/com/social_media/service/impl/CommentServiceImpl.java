@@ -1,15 +1,20 @@
 package com.social_media.service.impl;
 
-import com.social_media.annotation.ValidateUserNotBlocked;
+import static com.social_media.service.impl.LikeServiceImpl.BLOCKED_USER_MESSAGE;
+import static com.social_media.service.impl.PostServiceImpl.POST_NOT_FOUND_MESSAGE;
+
 import com.social_media.entity.*;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
+import com.social_media.model.CommentDto;
 import com.social_media.repository.CommentRepository;
+import com.social_media.repository.PostRepository;
+import com.social_media.repository.UserBlockRepository;
+import com.social_media.repository.UserRepository;
 import com.social_media.service.CommentService;
 import jakarta.transaction.Transactional;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -27,27 +32,48 @@ public class CommentServiceImpl implements CommentService {
 
   private final CommentRepository commentRepository;
 
+  private final UserRepository userRepository;
+
+  private final PostRepository postRepository;
+
+  private final UserBlockRepository userBlockRepository;
+
   @Override
   @Transactional
-  @ValidateUserNotBlocked
-  public Comment createComment(User user, Comment comment) {
-    UUID id = user.getId();
+  public Comment createComment(User user, CommentDto commentDto) {
+    UUID userId = user.getId();
+    UUID postId = commentDto.postId();
 
-    log.info("creating comment for user with id {}", id);
+    log.info("creating comment for user with id {}", userId);
 
-    comment.setTime(LocalDateTime.now());
-    comment.setUser(user);
+    UUID postAuthorId =
+        postRepository
+            .findAuthorIdById(postId)
+            .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
+
+    if (!postAuthorId.equals(userId)
+        && userBlockRepository.existsBlockBetween(postAuthorId, userId)) {
+      throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
+    }
+
+    Comment comment = new Comment();
+    comment.setUser(userRepository.getReferenceById(userId));
+    comment.setPost(postRepository.getReferenceById(postId));
+    comment.setText(commentDto.text());
+    comment.setTime(Instant.now());
 
     commentRepository.save(comment);
 
-    log.info("created comment for user with id {}", id);
+    log.info("created comment for user with id {}", userId);
 
     return comment;
   }
 
   @Override
   @Transactional
-  public Comment updateComment(User user, UUID id, String text) {
+  public Comment updateComment(User user, CommentDto commentDto) {
+    UUID id = commentDto.id();
+
     log.info("updating comment with id {}", id);
 
     Comment comment =
@@ -59,9 +85,7 @@ public class CommentServiceImpl implements CommentService {
       throw new RequestNotAllowedException(UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE);
     }
 
-    comment.setText(text);
-
-    commentRepository.save(comment);
+    comment.setText(commentDto.text());
 
     log.info("updated comment with id {}", id);
 
@@ -88,8 +112,18 @@ public class CommentServiceImpl implements CommentService {
   }
 
   @Override
-  public Page<Comment> getCommentsByPostId(UUID postId, Pageable pageable) {
+  public Page<Comment> getCommentsByPostId(UUID postId, UUID userId, Pageable pageable) {
     log.info("fetching comments by postId {}", postId);
+
+    UUID postAuthorId =
+        postRepository
+            .findAuthorIdById(postId)
+            .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
+
+    if (!postAuthorId.equals(userId)
+        && userBlockRepository.existsBlockBetween(postAuthorId, userId)) {
+      throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
+    }
 
     Page<Comment> comments = commentRepository.findByPostId(postId, pageable);
 

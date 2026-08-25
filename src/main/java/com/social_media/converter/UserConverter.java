@@ -10,7 +10,6 @@ public class UserConverter
   @Override
   public User convertToEntity(UserDto model) {
     User user = new User();
-    user.setId(model.id());
     user.setEmail(model.email());
     user.setUsername(model.username());
     user.setPassword(model.password());

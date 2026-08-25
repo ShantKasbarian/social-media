@@ -7,9 +7,12 @@ import static org.mockito.Mockito.*;
 import com.social_media.entity.*;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
+import com.social_media.model.CommentDto;
 import com.social_media.repository.CommentRepository;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import com.social_media.repository.PostRepository;
+import com.social_media.repository.UserBlockRepository;
+import com.social_media.repository.UserRepository;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,13 +31,21 @@ class CommentServiceImplTest {
 
   @Mock private CommentRepository commentRepository;
 
+  @Mock private PostRepository postRepository;
+
+  @Mock private UserRepository userRepository;
+
+  @Mock private UserBlockRepository userBlockRepository;
+
   private User user;
+
+  private User user2;
 
   private Comment comment;
 
   private Post post;
 
-  private FriendRequest friendRequest;
+  private CommentDto commentDto;
 
   @BeforeEach
   void setUp() {
@@ -51,45 +62,59 @@ class CommentServiceImplTest {
     post = new Post();
     post.setId(UUID.randomUUID());
     post.setUser(user);
-    post.setTime(LocalDateTime.now());
+    post.setTime(Instant.now());
     post.setText("some text");
 
-    friendRequest = new FriendRequest();
+    FriendRequest friendRequest = new FriendRequest();
     friendRequest.setId(UUID.randomUUID());
     friendRequest.setUser(user);
     friendRequest.setTargetUser(new User());
     friendRequest.setStatus(FriendRequest.Status.PENDING);
 
-    comment = new Comment(UUID.randomUUID(), "some text", LocalDateTime.now(), post, user);
+    comment = new Comment(UUID.randomUUID(), "some text", Instant.now(), post, user);
+
+    commentDto =
+        new CommentDto(
+            comment.getId(),
+            comment.getPost().getId(),
+            comment.getText(),
+            comment.getUser().getId(),
+            comment.getUser().getUsername(),
+            comment.getTime());
+
+    user2 = new User();
+    user2.setId(UUID.randomUUID());
   }
 
   @Test
   void createComment() {
+    when(postRepository.findAuthorIdById(any(UUID.class)))
+        .thenReturn(Optional.of(post.getUser().getId()));
+    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
+        .thenReturn(false);
     when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
-    var response = commentService.createComment(user, comment);
+    var response = commentService.createComment(user2, commentDto);
 
-    assertEquals(comment.getId(), response.getId());
     assertEquals(comment.getText(), response.getText());
-    assertEquals(comment.getUser().getId(), response.getUser().getId());
-    assertEquals(comment.getPost().getId(), response.getPost().getId());
+    verify(postRepository).findAuthorIdById(any(UUID.class));
+    verify(userBlockRepository).existsBlockBetween(any(UUID.class), any(UUID.class));
     verify(commentRepository).save(any(Comment.class));
   }
 
   @Test
   void updateComment() {
-    String oldCommentText = comment.getText();
-    String targetCommentText = "updated comment";
+    String oldCommentText = "updated comment";
+    comment.setText(oldCommentText);
 
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(comment));
-    when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
-    Comment response = commentService.updateComment(user, comment.getId(), targetCommentText);
+    Comment response = commentService.updateComment(user, commentDto);
 
+    assertNotNull(response);
     assertNotEquals(oldCommentText, response.getText());
-    assertEquals(targetCommentText, response.getText());
+    assertEquals(commentDto.text(), response.getText());
     verify(commentRepository).findById(any(UUID.class));
-    verify(commentRepository).save(comment);
   }
 
   @Test
@@ -101,8 +126,7 @@ class CommentServiceImplTest {
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(comment));
 
     assertThrows(
-        RequestNotAllowedException.class,
-        () -> commentService.updateComment(user, comment.getId(), comment.getText()));
+        RequestNotAllowedException.class, () -> commentService.updateComment(user, commentDto));
   }
 
   @Test
@@ -137,14 +161,16 @@ class CommentServiceImplTest {
 
   @Test
   void getCommentsByPostId() {
-    List<Comment> comments = new ArrayList<>();
-    comments.add(comment);
+    Page<Comment> page = new PageImpl<>(List.of(comment));
 
-    Page<Comment> page = new PageImpl<>(comments);
-
+    when(postRepository.findAuthorIdById(any(UUID.class)))
+        .thenReturn(Optional.of(post.getUser().getId()));
+    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
+        .thenReturn(false);
     when(commentRepository.findByPostId(any(UUID.class), any(Pageable.class))).thenReturn(page);
 
-    var response = commentService.getCommentsByPostId(post.getId(), PageRequest.of(0, 10));
+    var response =
+        commentService.getCommentsByPostId(post.getId(), UUID.randomUUID(), PageRequest.of(0, 10));
 
     assertNotNull(response);
     assertEquals(page, response);

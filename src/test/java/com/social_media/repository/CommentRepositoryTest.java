@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.social_media.entity.Comment;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,12 +38,12 @@ class CommentRepositoryTest {
 
     post = new Post();
     post.setUser(user);
-    post.setTime(LocalDateTime.now());
+    post.setTime(Instant.now());
     post.setText("some text");
 
     comment = new Comment();
     comment.setText("some text");
-    comment.setTime(LocalDateTime.now());
+    comment.setTime(Instant.now());
     comment.setPost(post);
     comment.setUser(user);
 

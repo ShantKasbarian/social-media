@@ -4,16 +4,17 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.social_media.entity.FriendRequest;
 import com.social_media.entity.Like;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
+import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.FriendRequestRepository;
 import com.social_media.repository.LikeRepository;
 import com.social_media.repository.PostRepository;
-import java.time.LocalDateTime;
+import com.social_media.repository.UserBlockRepository;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +27,8 @@ class LikeServiceImplTest {
   @InjectMocks private LikeServiceImpl likeService;
 
   @Mock private LikeRepository likeRepository;
+
+  @Mock private UserBlockRepository userBlockRepository;
 
   @Mock private PostRepository postRepository;
 
@@ -52,7 +55,7 @@ class LikeServiceImplTest {
     post = new Post();
     post.setId(UUID.randomUUID());
     post.setUser(user);
-    post.setTime(LocalDateTime.now());
+    post.setTime(Instant.now());
     post.setText("some text");
 
     like = new Like(UUID.randomUUID(), user, post);
@@ -61,6 +64,8 @@ class LikeServiceImplTest {
   @Test
   void createLike() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
+    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
+        .thenReturn(false);
     when(likeRepository.existsByPostAndUser(any(Post.class), any(User.class))).thenReturn(false);
     when(likeRepository.save(any(Like.class))).thenReturn(like);
 
@@ -75,14 +80,23 @@ class LikeServiceImplTest {
   @Test
   void createLikeShouldThrowResourceNotFoundExceptionWhenPostNotFound() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
     assertThrows(ResourceNotFoundException.class, () -> likeService.createLike(user, post.getId()));
   }
 
   @Test
-  void createLikeShouldThrowResourceAlreadyExistsExceptionWhenUserHasLikedPostOnce() {
+  void createLikeShouldThrowRequestNotAllowedExceptionWhenBlockExistsBetweenAuthorAndUser() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
-    when(friendRequestRepository.existsByUserIdTargetUserIdStatus(
-            any(UUID.class), any(UUID.class), any(FriendRequest.Status.class)))
+    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class))).thenReturn(true);
+
+    assertThrows(
+        RequestNotAllowedException.class, () -> likeService.createLike(user, post.getId()));
+  }
+
+  @Test
+  void createLikeShouldThrowResourceAlreadyExistsExceptionWhenLikeByCurrentUserAlreadyExists() {
+    when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
+    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
         .thenReturn(false);
     when(likeRepository.existsByPostAndUser(any(Post.class), any(User.class))).thenReturn(true);
     assertThrows(

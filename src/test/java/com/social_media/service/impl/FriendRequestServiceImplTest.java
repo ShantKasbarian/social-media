@@ -9,6 +9,7 @@ import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.FriendRequestRepository;
+import com.social_media.repository.UserBlockRepository;
 import com.social_media.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,8 @@ class FriendRequestServiceImplTest {
   @InjectMocks private FriendRequestServiceImpl friendRequestService;
 
   @Mock private FriendRequestRepository friendRequestRepository;
+
+  @Mock private UserBlockRepository userBlockRepository;
 
   @Mock private UserRepository userRepository;
 
@@ -63,19 +66,23 @@ class FriendRequestServiceImplTest {
 
   @Test
   void createFriendRequest() {
-    when(userRepository.findById(user2.getId())).thenReturn(Optional.ofNullable(user2));
-    when(friendRequestRepository.existsByUserIdTargetUserId(user1.getId(), user2.getId()))
+    when(userRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(user2));
+    when(friendRequestRepository.existsByUserIdTargetUserId(any(UUID.class), any(UUID.class)))
+        .thenReturn(false);
+    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
         .thenReturn(false);
     when(friendRequestRepository.save(any(FriendRequest.class))).thenReturn(friendRequest);
 
     var response = friendRequestService.createFriendRequest(user1, user2.getId());
 
+    assertNotNull(response);
     assertEquals(friendRequest.getUser().getId(), response.getUser().getId());
     assertEquals(FriendRequest.Status.PENDING, response.getStatus());
     assertEquals(friendRequest.getUser(), response.getUser());
     assertEquals(friendRequest.getTargetUser(), response.getTargetUser());
-    verify(userRepository).findById(user2.getId());
-    verify(friendRequestRepository).existsByUserIdTargetUserId(user1.getId(), user2.getId());
+    verify(userRepository).findById(any(UUID.class));
+    verify(friendRequestRepository).existsByUserIdTargetUserId(any(UUID.class), any(UUID.class));
+    verify(userBlockRepository).existsBlockBetween(any(UUID.class), any(UUID.class));
     verify(friendRequestRepository).save(any(FriendRequest.class));
   }
 
@@ -104,6 +111,8 @@ class FriendRequestServiceImplTest {
 
     when(friendRequestRepository.findById(any(UUID.class)))
         .thenReturn(Optional.ofNullable(friendRequest));
+    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
+        .thenReturn(false);
     when(friendRequestRepository.save(any(FriendRequest.class))).thenReturn(friendRequest);
 
     var response =
@@ -124,7 +133,7 @@ class FriendRequestServiceImplTest {
         ResourceNotFoundException.class,
         () ->
             friendRequestService.updateFriendRequestStatus(
-                user1, friendRequest.getId(), FriendRequest.Status.BLOCKED));
+                user1, friendRequest.getId(), FriendRequest.Status.REJECTED));
   }
 
   @Test
@@ -142,7 +151,7 @@ class FriendRequestServiceImplTest {
 
   @Test
   void updateFriendRequestStatusShouldThrowRequestNotAllowedExceptionWhenFriendRequestIsBlocked() {
-    friendRequest.setStatus(FriendRequest.Status.BLOCKED);
+    friendRequest.setStatus(FriendRequest.Status.REJECTED);
 
     when(friendRequestRepository.findById(friendRequest.getId()))
         .thenReturn(Optional.ofNullable(friendRequest));
@@ -195,7 +204,7 @@ class FriendRequestServiceImplTest {
 
   @Test
   void deleteFriendRequestShouldThrowRequestNotAllowedExceptionWhenFriendRequestIsBlocked() {
-    friendRequest.setStatus(FriendRequest.Status.BLOCKED);
+    friendRequest.setStatus(FriendRequest.Status.REJECTED);
 
     when(friendRequestRepository.findById(any(UUID.class)))
         .thenReturn(Optional.ofNullable(friendRequest));

@@ -2,20 +2,17 @@ package com.social_media.service;
 
 import com.social_media.entity.Comment;
 import com.social_media.entity.User;
-import jakarta.validation.constraints.NotNull;
+import com.social_media.model.CommentDto;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.validation.annotation.Validated;
 
-@Validated
 public interface CommentService {
-  Comment createComment(User user, Comment comment);
+  Comment createComment(User user, CommentDto commentDto);
 
-  Comment updateComment(User user, @NotNull(message = "id must be specified") UUID id, String text);
+  Comment updateComment(User user, CommentDto commentDto);
 
-  void deleteComment(User user, @NotNull(message = "id must be specified") UUID id);
+  void deleteComment(User user, UUID id);
 
-  Page<Comment> getCommentsByPostId(
-      @NotNull(message = "id must be specified") UUID postId, Pageable pageable);
+  Page<Comment> getCommentsByPostId(UUID postId, UUID userId, Pageable pageable);
 }

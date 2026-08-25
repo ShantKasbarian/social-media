@@ -6,8 +6,9 @@ import static org.mockito.Mockito.*;
 import com.social_media.entity.*;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
+import com.social_media.model.PostDto;
 import com.social_media.repository.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,8 @@ class PostServiceImplTest {
 
   private Post post;
 
+  private PostDto postDto;
+
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
@@ -42,18 +45,27 @@ class PostServiceImplTest {
     post = new Post();
     post.setId(UUID.randomUUID());
     post.setUser(user);
-    post.setTime(LocalDateTime.now());
+    post.setTime(Instant.now());
     post.setText("some text");
+    post.setLikes(List.of());
+
+    postDto =
+        new PostDto(
+            post.getId(),
+            post.getUser().getId(),
+            post.getUser().getUsername(),
+            post.getText(),
+            (long) post.getLikes().size(),
+            post.getTime());
   }
 
   @Test
   void createPost() {
     when(postRepository.save(any(Post.class))).thenReturn(post);
 
-    Post response = postService.createPost(user, post);
+    Post response = postService.createPost(user, postDto);
 
     assertNotNull(response);
-    assertEquals(post, response);
     verify(postRepository).save(any(Post.class));
   }
 
@@ -61,7 +73,7 @@ class PostServiceImplTest {
   void getPostById() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
 
-    Post response = postService.getPostById(post.getId());
+    Post response = postService.getPostById(post.getId(), user);
 
     assertEquals(post, response);
     verify(postRepository).findById(any(UUID.class));
@@ -70,32 +82,30 @@ class PostServiceImplTest {
   @Test
   void getPostByIdShouldThrowResourceNotFoundExceptionWhenPostNotFound() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
-    assertThrows(ResourceNotFoundException.class, () -> postService.getPostById(post.getId()));
+    assertThrows(
+        ResourceNotFoundException.class, () -> postService.getPostById(post.getId(), user));
   }
 
   @Test
   void updatePost() {
-    String text = post.getText();
-    String targetText = "some text 2";
+    post.setText("some different text");
+    String targetText = postDto.text();
 
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
-    when(postRepository.save(any(Post.class))).thenReturn(post);
 
-    Post response = postService.updatePost(user, post.getId(), targetText);
+    Post response = postService.updatePost(user, postDto);
 
-    assertEquals(post.getId(), response.getId());
-    assertNotEquals(text, response.getText());
+    assertNotNull(response);
     assertEquals(targetText, response.getText());
-    verify(postRepository).save(any(Post.class));
+
+    verify(postRepository).findById(any(UUID.class));
   }
 
   @Test
   void updatePostShouldThrowResourceNotFoundExceptionWhenPostNotFound() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> postService.updatePost(user, post.getId(), "some text 2"));
+    assertThrows(ResourceNotFoundException.class, () -> postService.updatePost(user, postDto));
   }
 
   @Test
@@ -105,9 +115,7 @@ class PostServiceImplTest {
 
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
 
-    assertThrows(
-        RequestNotAllowedException.class,
-        () -> postService.updatePost(user2, post.getId(), "some text 2"));
+    assertThrows(RequestNotAllowedException.class, () -> postService.updatePost(user2, postDto));
   }
 
   @Test

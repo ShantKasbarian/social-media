@@ -2,8 +2,7 @@ package com.social_media.controller;
 
 import static com.social_media.controller.CommentController.TIME_PROPERTY;
 
-import com.social_media.converter.ToEntityConverter;
-import com.social_media.converter.ToModelConverter;
+import com.social_media.converter.PostConverter;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
 import com.social_media.model.PageDto;
@@ -11,80 +10,64 @@ import com.social_media.model.PostDto;
 import com.social_media.service.PostService;
 import jakarta.validation.Valid;
 import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/posts")
 public class PostController {
   private final PostService postService;
 
-  private final ToModelConverter<Post, PostDto> postToModelConverter;
-
-  private final ToEntityConverter<Post, PostDto> postToEntityConverter;
+  private final PostConverter postConverter;
 
   @PostMapping
   public ResponseEntity<PostDto> createPost(
       Authentication authentication, @RequestBody @Valid PostDto postDto) {
-    log.info("/posts called with POST, creating new post");
-
     User user = (User) authentication.getPrincipal();
-    Post post = postToEntityConverter.convertToEntity(postDto);
 
-    PostDto responseDto = postToModelConverter.convertToModel(postService.createPost(user, post));
-
-    log.info("created post");
+    Post post = postService.createPost(user, postDto);
+    PostDto responseDto = postConverter.convertToModel(post);
 
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<PostDto> getPostById(@PathVariable UUID id) {
-    log.info("/posts/{} with GET called, fetching post with the specified id", id);
+  public ResponseEntity<PostDto> getPostById(
+      @AuthenticationPrincipal Authentication authentication, @PathVariable UUID id) {
+    User user = (User) authentication.getPrincipal();
 
-    var post = postToModelConverter.convertToModel(postService.getPostById(id));
+    var post = postService.getPostById(id, user);
+    var postDto = postConverter.convertToModel(post);
 
-    log.info("fetched post with id {}", id);
-
-    return ResponseEntity.ok(post);
+    return ResponseEntity.ok(postDto);
   }
 
   @PutMapping
   public ResponseEntity<PostDto> updatePost(
       Authentication authentication, @RequestBody @Valid PostDto postDto) {
-    UUID postId = postDto.id();
-
-    log.info("/posts with PUT called, updating post with id {}", postId);
-
     User user = (User) authentication.getPrincipal();
 
-    var post =
-        postToModelConverter.convertToModel(postService.updatePost(user, postId, postDto.text()));
+    var post = postService.updatePost(user, postDto);
+    var responseDto = postConverter.convertToModel(post);
 
-    log.info("updated post with id {}", postId);
-
-    return ResponseEntity.ok(post);
+    return ResponseEntity.ok(responseDto);
   }
 
   @DeleteMapping("/{postId}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deletePost(Authentication authentication, @PathVariable UUID postId) {
-    log.info("/posts/{} with DELETE called, deleting post with the specified id", postId);
-
+  public ResponseEntity<Void> deletePost(Authentication authentication, @PathVariable UUID postId) {
     User user = (User) authentication.getPrincipal();
+
     postService.deletePost(user, postId);
 
-    log.info("deleted post with id {}", postId);
+    return ResponseEntity.noContent().build();
   }
 
   @GetMapping
@@ -93,21 +76,12 @@ public class PostController {
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "10") int size) {
     User user = (User) authentication.getPrincipal();
-    UUID id = user.getId();
-
-    log.info(
-        "/posts with GET called, fetching posts by user with id {} and ACCEPTED friendRequest status",
-        id);
-
     Pageable pageable = PageRequest.of(page, size);
 
-    var posts =
-        new PageDto<>(
-            postService.getPostsByUserIdAcceptedFriendRequests(id, pageable), postToModelConverter);
+    var posts = postService.getPostsByUserIdAcceptedFriendRequests(user.getId(), pageable);
+    var pageDto = new PageDto<>(posts, postConverter);
 
-    log.info("fetched posts by user with id {} and ACCEPTED friendRequest status", id);
-
-    return ResponseEntity.ok(posts);
+    return ResponseEntity.ok(pageDto);
   }
 
   @GetMapping("/users/{userId}")
@@ -116,18 +90,13 @@ public class PostController {
       @PathVariable UUID userId,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "10") int size) {
-    log.info(
-        "/posts/users/{} with GET called, fetching posts of user with the specified id", userId);
-
     User user = (User) authentication.getPrincipal();
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc(TIME_PROPERTY)));
 
-    var posts =
-        new PageDto<>(postService.getUserPosts(user, userId, pageable), postToModelConverter);
+    var posts = postService.getUserPosts(user, userId, pageable);
+    var pageDto = new PageDto<>(posts, postConverter);
 
-    log.info("fetched posts of user with id {}", userId);
-
-    return ResponseEntity.ok(posts);
+    return ResponseEntity.ok(pageDto);
   }
 
   @GetMapping("/likes")
@@ -136,16 +105,11 @@ public class PostController {
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "10") int size) {
     User user = (User) authentication.getPrincipal();
-    UUID id = user.getId();
-
-    log.info("/posts/likes with GET called, fetching liked posts by user id {}", id);
-
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc(TIME_PROPERTY)));
 
-    var posts = new PageDto<>(postService.getUserLikedPosts(id, pageable), postToModelConverter);
+    var posts = postService.getUserLikedPosts(user.getId(), pageable);
+    var pageDto = new PageDto<>(posts, postConverter);
 
-    log.info("fetched liked posts by user with id {}", id);
-
-    return ResponseEntity.ok(posts);
+    return ResponseEntity.ok(pageDto);
   }
 }

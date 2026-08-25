@@ -2,7 +2,6 @@ package com.social_media.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.social_media.converter.PostConverter;
@@ -10,7 +9,7 @@ import com.social_media.entity.Post;
 import com.social_media.entity.User;
 import com.social_media.model.PostDto;
 import com.social_media.service.PostService;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -54,7 +53,7 @@ class PostControllerTest {
 
     post = new Post();
     post.setId(UUID.randomUUID());
-    post.setTime(LocalDateTime.now());
+    post.setTime(Instant.now());
     post.setText("some text");
     post.setUser(user);
     post.setLikes(new ArrayList<>());
@@ -73,8 +72,7 @@ class PostControllerTest {
   void createPost() {
     when(authentication.getPrincipal()).thenReturn(user);
     when(postConverter.convertToModel(any(Post.class))).thenReturn(postDto);
-    when(postService.createPost(any(User.class), any(Post.class))).thenReturn(post);
-    when(postConverter.convertToEntity(any(PostDto.class))).thenReturn(post);
+    when(postService.createPost(any(User.class), any(PostDto.class))).thenReturn(post);
 
     var response = postController.createPost(authentication, postDto);
 
@@ -84,30 +82,29 @@ class PostControllerTest {
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(postConverter).convertToModel(any(Post.class));
-    verify(postService).createPost(any(User.class), any(Post.class));
-    verify(postConverter).convertToEntity(any(PostDto.class));
+    verify(postService).createPost(any(User.class), any(PostDto.class));
   }
 
   @Test
   void getPostById() {
+    when(authentication.getPrincipal()).thenReturn(user);
+    when(postService.getPostById(any(UUID.class), any(User.class))).thenReturn(post);
     when(postConverter.convertToModel(any(Post.class))).thenReturn(postDto);
-    when(postService.getPostById(any(UUID.class))).thenReturn(post);
 
-    var response = postController.getPostById(post.getId());
+    var response = postController.getPostById(authentication, post.getId());
 
     assertNotNull(response);
-    assertNotNull(response.getBody());
     assertEquals(postDto, response.getBody());
     assertEquals(HttpStatus.OK, response.getStatusCode());
+    verify(postService).getPostById(any(UUID.class), any(User.class));
     verify(postConverter).convertToModel(any(Post.class));
-    verify(postService).getPostById(any(UUID.class));
   }
 
   @Test
   void updatePost() {
     when(authentication.getPrincipal()).thenReturn(user);
     when(postConverter.convertToModel(any(Post.class))).thenReturn(postDto);
-    when(postService.updatePost(any(User.class), any(UUID.class), anyString())).thenReturn(post);
+    when(postService.updatePost(any(User.class), any(PostDto.class))).thenReturn(post);
 
     var response = postController.updatePost(authentication, postDto);
 
@@ -117,7 +114,7 @@ class PostControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(postConverter).convertToModel(any(Post.class));
-    verify(postService).updatePost(any(User.class), any(UUID.class), anyString());
+    verify(postService).updatePost(any(User.class), any(PostDto.class));
   }
 
   @Test

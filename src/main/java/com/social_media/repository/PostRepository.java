@@ -1,6 +1,7 @@
 package com.social_media.repository;
 
 import com.social_media.entity.Post;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,4 +33,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
         WHERE l.user.id = :userId
     """)
   Page<Post> findByUserIdLikes(@Param("userId") UUID userId, Pageable pageable);
+
+  @Query("SELECT p.user.id FROM Post p WHERE p.id = :postId")
+  Optional<UUID> findAuthorIdById(@Param("postId") UUID postId);
 }

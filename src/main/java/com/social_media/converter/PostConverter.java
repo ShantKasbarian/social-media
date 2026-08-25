@@ -6,16 +6,7 @@ import com.social_media.model.PostDto;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PostConverter
-    implements ToEntityConverter<Post, PostDto>, ToModelConverter<Post, PostDto> {
-  @Override
-  public Post convertToEntity(PostDto model) {
-    Post post = new Post();
-    post.setId(model.id());
-    post.setText(model.text());
-    return post;
-  }
-
+public class PostConverter implements ToModelConverter<Post, PostDto> {
   @Override
   public PostDto convertToModel(Post entity) {
     User user = entity.getUser();

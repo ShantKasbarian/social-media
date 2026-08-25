@@ -1,15 +1,16 @@
 package com.social_media.service.impl;
 
-import com.social_media.annotation.ValidateUserNotBlocked;
+import static com.social_media.service.impl.LikeServiceImpl.BLOCKED_USER_MESSAGE;
+
 import com.social_media.entity.*;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
+import com.social_media.model.PostDto;
 import com.social_media.repository.*;
 import com.social_media.service.PostService;
 import jakarta.transaction.Transactional;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,14 +30,18 @@ public class PostServiceImpl implements PostService {
 
   private final PostRepository postRepository;
 
+  private final UserBlockRepository userBlockRepository;
+
   @Override
   @Transactional
-  public Post createPost(User user, Post post) {
+  public Post createPost(User user, PostDto postDto) {
     UUID id = user.getId();
 
     log.info("creating post for user with id {}", id);
 
-    post.setTime(LocalDateTime.now());
+    Post post = new Post();
+    post.setText(postDto.text());
+    post.setTime(Instant.now());
     post.setUser(user);
 
     postRepository.save(post);
@@ -47,13 +52,20 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public Post getPostById(UUID id) {
+  public Post getPostById(UUID id, User user) {
     log.info("fetching post with id {}", id);
 
     Post post =
         postRepository
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
+
+    UUID userId = user.getId();
+    UUID authorId = post.getUser().getId();
+
+    if (!userId.equals(authorId) && userBlockRepository.existsBlockBetween(userId, authorId)) {
+      throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
+    }
 
     log.info("fetched post with id {}", id);
 
@@ -62,7 +74,9 @@ public class PostServiceImpl implements PostService {
 
   @Override
   @Transactional
-  public Post updatePost(User user, UUID id, String title) {
+  public Post updatePost(User user, PostDto postDto) {
+    UUID id = postDto.id();
+
     log.info("updating post with id {}", id);
 
     Post post =
@@ -74,9 +88,7 @@ public class PostServiceImpl implements PostService {
       throw new RequestNotAllowedException(UNABLE_TO_DELETE_OR_MODIFY_POST_MESSAGE);
     }
 
-    post.setText(title);
-
-    postRepository.save(post);
+    post.setText(postDto.text());
 
     log.info("updated post with id {}", id);
 
@@ -114,9 +126,15 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  @ValidateUserNotBlocked
   public Page<Post> getUserPosts(User user, UUID userId, Pageable pageable) {
     log.info("fetching posts of user with id {}", userId);
+
+    UUID currentUserId = user.getId();
+
+    if (!currentUserId.equals(userId)
+        && userBlockRepository.existsBlockBetween(currentUserId, userId)) {
+      throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
+    }
 
     Page<Post> posts = postRepository.findByUserId(userId, pageable);
 
