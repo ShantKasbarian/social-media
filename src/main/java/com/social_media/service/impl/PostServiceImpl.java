@@ -16,12 +16,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
-@Validated
 public class PostServiceImpl implements PostService {
   public static final String POST_NOT_FOUND_MESSAGE = "post not found";
 
@@ -34,13 +32,13 @@ public class PostServiceImpl implements PostService {
 
   @Override
   @Transactional
-  public Post createPost(User user, PostDto postDto) {
+  public Post create(User user, PostDto dto) {
     UUID id = user.getId();
 
     log.info("creating post for user with id {}", id);
 
     Post post = new Post();
-    post.setText(postDto.text());
+    post.setText(dto.text());
     post.setTime(Instant.now());
     post.setUser(user);
 
@@ -52,7 +50,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public Post getPostById(UUID id, User user) {
+  public Post findById(UUID id, User user) {
     log.info("fetching post with id {}", id);
 
     Post post =
@@ -74,8 +72,8 @@ public class PostServiceImpl implements PostService {
 
   @Override
   @Transactional
-  public Post updatePost(User user, PostDto postDto) {
-    UUID id = postDto.id();
+  public Post update(User user, PostDto dto) {
+    UUID id = dto.id();
 
     log.info("updating post with id {}", id);
 
@@ -88,7 +86,7 @@ public class PostServiceImpl implements PostService {
       throw new RequestNotAllowedException(UNABLE_TO_DELETE_OR_MODIFY_POST_MESSAGE);
     }
 
-    post.setText(postDto.text());
+    post.setText(dto.text());
 
     log.info("updated post with id {}", id);
 
@@ -97,7 +95,7 @@ public class PostServiceImpl implements PostService {
 
   @Override
   @Transactional
-  public void deletePost(User user, UUID id) {
+  public void delete(User user, UUID id) {
     log.info("deleting post with id {}", id);
 
     Post post =
@@ -115,7 +113,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public Page<Post> getPostsByUserIdAcceptedFriendRequests(UUID id, Pageable pageable) {
+  public Page<Post> findByUserIdAcceptedFriendRequests(UUID id, Pageable pageable) {
     log.info("fetching friends posts of user with id {}", id);
 
     Page<Post> posts = postRepository.findByUserIdAcceptedFriendRequests(id, pageable);
@@ -126,7 +124,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public Page<Post> getUserPosts(User user, UUID userId, Pageable pageable) {
+  public Page<Post> findByUserId(User user, UUID userId, Pageable pageable) {
     log.info("fetching posts of user with id {}", userId);
 
     UUID currentUserId = user.getId();
@@ -144,7 +142,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public Page<Post> getUserLikedPosts(UUID id, Pageable pageable) {
+  public Page<Post> findLikedByUserId(UUID id, Pageable pageable) {
     log.info("fetching liked posts of user with id {}", id);
 
     Page<Post> posts = postRepository.findByUserIdLikes(id, pageable);

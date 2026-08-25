@@ -28,7 +28,7 @@ public class FriendRequestController {
       Authentication authentication, @PathVariable UUID targetUserId) {
     User user = (User) authentication.getPrincipal();
 
-    FriendRequest friendRequest = friendRequestService.createFriendRequest(user, targetUserId);
+    FriendRequest friendRequest = friendRequestService.create(user, targetUserId);
     FriendRequestDto friendRequestDto = friendRequestConverter.convertToModel(friendRequest);
 
     return new ResponseEntity<>(friendRequestDto, HttpStatus.CREATED);
@@ -41,7 +41,7 @@ public class FriendRequestController {
       @PathVariable FriendRequest.Status status) {
     User user = (User) authentication.getPrincipal();
 
-    FriendRequest friendRequest = friendRequestService.updateFriendRequestStatus(user, id, status);
+    FriendRequest friendRequest = friendRequestService.updateStatus(user, id, status);
     FriendRequestDto friendRequestDto = friendRequestConverter.convertToModel(friendRequest);
 
     return ResponseEntity.ok(friendRequestDto);
@@ -52,7 +52,7 @@ public class FriendRequestController {
       Authentication authentication, @PathVariable UUID id) {
     User user = (User) authentication.getPrincipal();
 
-    friendRequestService.deleteFriendRequest(user, id);
+    friendRequestService.delete(user, id);
 
     return ResponseEntity.noContent().build();
   }
@@ -66,7 +66,7 @@ public class FriendRequestController {
     User user = (User) authentication.getPrincipal();
     Pageable pageable = PageRequest.of(page, size);
 
-    var friendRequests = friendRequestService.getFriendRequestsByUserStatus(user, status, pageable);
+    var friendRequests = friendRequestService.findByUserAndStatus(user, status, pageable);
     var pageDto = new PageDto<>(friendRequests, friendRequestConverter);
 
     return ResponseEntity.ok(pageDto);

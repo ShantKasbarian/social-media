@@ -78,8 +78,7 @@ class FriendRequestControllerTest {
     when(authentication.getPrincipal()).thenReturn(user1);
     when(friendRequestConverter.convertToModel(any(FriendRequest.class)))
         .thenReturn(friendRequestDto);
-    when(friendRequestService.createFriendRequest(any(User.class), any(UUID.class)))
-        .thenReturn(friendRequest);
+    when(friendRequestService.create(any(User.class), any(UUID.class))).thenReturn(friendRequest);
 
     var response = friendRequestController.createFriendRequest(authentication, user2.getId());
 
@@ -89,7 +88,7 @@ class FriendRequestControllerTest {
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(friendRequestConverter).convertToModel(any(FriendRequest.class));
-    verify(friendRequestService).createFriendRequest(any(User.class), any(UUID.class));
+    verify(friendRequestService).create(any(User.class), any(UUID.class));
   }
 
   @Test
@@ -97,7 +96,7 @@ class FriendRequestControllerTest {
     when(authentication.getPrincipal()).thenReturn(user1);
     when(friendRequestConverter.convertToModel(any(FriendRequest.class)))
         .thenReturn(friendRequestDto);
-    when(friendRequestService.updateFriendRequestStatus(
+    when(friendRequestService.updateStatus(
             any(User.class), any(UUID.class), any(FriendRequest.Status.class)))
         .thenReturn(friendRequest);
 
@@ -112,14 +111,13 @@ class FriendRequestControllerTest {
     verify(authentication).getPrincipal();
     verify(friendRequestConverter).convertToModel(any(FriendRequest.class));
     verify(friendRequestService)
-        .updateFriendRequestStatus(
-            any(User.class), any(UUID.class), any(FriendRequest.Status.class));
+        .updateStatus(any(User.class), any(UUID.class), any(FriendRequest.Status.class));
   }
 
   @Test
   void deleteFriendRequest() {
     when(authentication.getPrincipal()).thenReturn(user1);
-    doNothing().when(friendRequestService).deleteFriendRequest(any(User.class), any(UUID.class));
+    doNothing().when(friendRequestService).delete(any(User.class), any(UUID.class));
 
     var response =
         friendRequestController.deleteFriendRequest(authentication, friendRequest.getId());
@@ -127,7 +125,7 @@ class FriendRequestControllerTest {
     assertNotNull(response);
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     verify(authentication).getPrincipal();
-    verify(friendRequestService).deleteFriendRequest(any(User.class), any(UUID.class));
+    verify(friendRequestService).delete(any(User.class), any(UUID.class));
   }
 
   @Test
@@ -138,7 +136,7 @@ class FriendRequestControllerTest {
     Page<FriendRequest> page = new PageImpl<>(friendRequests);
 
     when(authentication.getPrincipal()).thenReturn(user1);
-    when(friendRequestService.getFriendRequestsByUserStatus(
+    when(friendRequestService.findByUserAndStatus(
             any(User.class), any(FriendRequest.Status.class), any(Pageable.class)))
         .thenReturn(page);
 
@@ -151,7 +149,6 @@ class FriendRequestControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(friendRequestService)
-        .getFriendRequestsByUserStatus(
-            any(User.class), any(FriendRequest.Status.class), any(Pageable.class));
+        .findByUserAndStatus(any(User.class), any(FriendRequest.Status.class), any(Pageable.class));
   }
 }

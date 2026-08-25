@@ -72,7 +72,7 @@ class PostControllerTest {
   void createPost() {
     when(authentication.getPrincipal()).thenReturn(user);
     when(postConverter.convertToModel(any(Post.class))).thenReturn(postDto);
-    when(postService.createPost(any(User.class), any(PostDto.class))).thenReturn(post);
+    when(postService.create(any(User.class), any(PostDto.class))).thenReturn(post);
 
     var response = postController.createPost(authentication, postDto);
 
@@ -82,13 +82,13 @@ class PostControllerTest {
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(postConverter).convertToModel(any(Post.class));
-    verify(postService).createPost(any(User.class), any(PostDto.class));
+    verify(postService).create(any(User.class), any(PostDto.class));
   }
 
   @Test
   void getPostById() {
     when(authentication.getPrincipal()).thenReturn(user);
-    when(postService.getPostById(any(UUID.class), any(User.class))).thenReturn(post);
+    when(postService.findById(any(UUID.class), any(User.class))).thenReturn(post);
     when(postConverter.convertToModel(any(Post.class))).thenReturn(postDto);
 
     var response = postController.getPostById(authentication, post.getId());
@@ -96,7 +96,7 @@ class PostControllerTest {
     assertNotNull(response);
     assertEquals(postDto, response.getBody());
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    verify(postService).getPostById(any(UUID.class), any(User.class));
+    verify(postService).findById(any(UUID.class), any(User.class));
     verify(postConverter).convertToModel(any(Post.class));
   }
 
@@ -104,7 +104,7 @@ class PostControllerTest {
   void updatePost() {
     when(authentication.getPrincipal()).thenReturn(user);
     when(postConverter.convertToModel(any(Post.class))).thenReturn(postDto);
-    when(postService.updatePost(any(User.class), any(PostDto.class))).thenReturn(post);
+    when(postService.update(any(User.class), any(PostDto.class))).thenReturn(post);
 
     var response = postController.updatePost(authentication, postDto);
 
@@ -114,17 +114,17 @@ class PostControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(postConverter).convertToModel(any(Post.class));
-    verify(postService).updatePost(any(User.class), any(PostDto.class));
+    verify(postService).update(any(User.class), any(PostDto.class));
   }
 
   @Test
   void deletePost() {
     when(authentication.getPrincipal()).thenReturn(user);
-    doNothing().when(postService).deletePost(any(User.class), any(UUID.class));
+    doNothing().when(postService).delete(any(User.class), any(UUID.class));
 
     postController.deletePost(authentication, post.getId());
 
-    verify(postService).deletePost(any(User.class), any(UUID.class));
+    verify(postService).delete(any(User.class), any(UUID.class));
   }
 
   @Test
@@ -135,7 +135,7 @@ class PostControllerTest {
     Page<Post> page = new PageImpl<>(posts);
 
     when(authentication.getPrincipal()).thenReturn(user);
-    when(postService.getPostsByUserIdAcceptedFriendRequests(any(UUID.class), any(Pageable.class)))
+    when(postService.findByUserIdAcceptedFriendRequests(any(UUID.class), any(Pageable.class)))
         .thenReturn(page);
 
     var response = postController.getPostsByUserIdAcceptedFriendRequests(authentication, 0, 10);
@@ -145,8 +145,7 @@ class PostControllerTest {
     assertEquals(posts.size(), response.getBody().getContent().size());
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(authentication).getPrincipal();
-    verify(postService)
-        .getPostsByUserIdAcceptedFriendRequests(any(UUID.class), any(Pageable.class));
+    verify(postService).findByUserIdAcceptedFriendRequests(any(UUID.class), any(Pageable.class));
   }
 
   @Test
@@ -157,7 +156,7 @@ class PostControllerTest {
     Page<Post> page = new PageImpl<>(posts);
 
     when(authentication.getPrincipal()).thenReturn(user);
-    when(postService.getUserPosts(any(User.class), any(UUID.class), any(Pageable.class)))
+    when(postService.findByUserId(any(User.class), any(UUID.class), any(Pageable.class)))
         .thenReturn(page);
 
     var response = postController.getUserPosts(authentication, user.getId(), 0, 10);
@@ -167,7 +166,7 @@ class PostControllerTest {
     assertEquals(posts.size(), response.getBody().getContent().size());
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(authentication).getPrincipal();
-    verify(postService).getUserPosts(any(User.class), any(UUID.class), any(Pageable.class));
+    verify(postService).findByUserId(any(User.class), any(UUID.class), any(Pageable.class));
   }
 
   @Test
@@ -178,7 +177,7 @@ class PostControllerTest {
     Page<Post> page = new PageImpl<>(posts);
 
     when(authentication.getPrincipal()).thenReturn(user);
-    when(postService.getUserLikedPosts(any(UUID.class), any(Pageable.class))).thenReturn(page);
+    when(postService.findLikedByUserId(any(UUID.class), any(Pageable.class))).thenReturn(page);
 
     var response = postController.getUserLikedPosts(authentication, 0, 10);
 
@@ -187,6 +186,6 @@ class PostControllerTest {
     assertEquals(posts.size(), response.getBody().getContent().size());
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(authentication).getPrincipal();
-    verify(postService).getUserLikedPosts(any(UUID.class), any(Pageable.class));
+    verify(postService).findLikedByUserId(any(UUID.class), any(Pageable.class));
   }
 }

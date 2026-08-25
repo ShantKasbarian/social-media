@@ -36,7 +36,7 @@ public class LikeServiceImpl implements LikeService {
 
   @Override
   @Transactional
-  public Like createLike(User user, UUID id) {
+  public Like create(User user, UUID id) {
     log.info("creating like for post with id {}", id);
 
     Post post =
@@ -65,7 +65,9 @@ public class LikeServiceImpl implements LikeService {
 
   @Override
   @Transactional
-  public void deleteLikeByPostId(UUID userId, UUID postId) {
+  public void delete(User user, UUID postId) {
+    UUID userId = user.getId();
+
     log.info("removing like for user with id {} and post with id {}", userId, postId);
 
     Like like =

@@ -87,14 +87,14 @@ class CommentServiceImplTest {
   }
 
   @Test
-  void createComment() {
+  void create() {
     when(postRepository.findAuthorIdById(any(UUID.class)))
         .thenReturn(Optional.of(post.getUser().getId()));
     when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
         .thenReturn(false);
     when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
-    var response = commentService.createComment(user2, commentDto);
+    var response = commentService.create(user2, commentDto);
 
     assertEquals(comment.getText(), response.getText());
     verify(postRepository).findAuthorIdById(any(UUID.class));
@@ -103,13 +103,13 @@ class CommentServiceImplTest {
   }
 
   @Test
-  void updateComment() {
+  void update() {
     String oldCommentText = "updated comment";
     comment.setText(oldCommentText);
 
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(comment));
 
-    Comment response = commentService.updateComment(user, commentDto);
+    Comment response = commentService.update(user, commentDto);
 
     assertNotNull(response);
     assertNotEquals(oldCommentText, response.getText());
@@ -119,48 +119,47 @@ class CommentServiceImplTest {
 
   @Test
   void
-      updateCommentShouldThrowRequestNotAllowedExceptionWhenCurrentUserIdIsDifferentFromCommentAuthorId() {
+      updateShouldThrowRequestNotAllowedExceptionWhenCurrentUserIdIsDifferentFromCommentAuthorId() {
     User user = new User();
     user.setId(UUID.randomUUID());
 
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(comment));
 
-    assertThrows(
-        RequestNotAllowedException.class, () -> commentService.updateComment(user, commentDto));
+    assertThrows(RequestNotAllowedException.class, () -> commentService.update(user, commentDto));
   }
 
   @Test
-  void deleteComment() {
+  void delete() {
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(comment));
     doNothing().when(commentRepository).delete(any(Comment.class));
 
-    commentService.deleteComment(user, comment.getId());
+    commentService.delete(user, comment.getId());
 
     verify(commentRepository).findById(any(UUID.class));
     verify(commentRepository).delete(any(Comment.class));
   }
 
   @Test
-  void deleteCommentShouldThrowResourceNotFoundException() {
+  void deleteShouldThrowResourceNotFoundExceptionWhenCommentIsNotFound() {
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
     assertThrows(
-        ResourceNotFoundException.class, () -> commentService.deleteComment(user, comment.getId()));
+        ResourceNotFoundException.class, () -> commentService.delete(user, comment.getId()));
   }
 
   @Test
-  void deleteCommentShouldThrowRequestNotAllowedException() {
+  void
+      deleteShouldThrowRequestNotAllowedExceptionWhenCurrentUserIdIsDifferentFromCommentAuthorId() {
     User user = new User();
     user.setId(UUID.randomUUID());
 
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(comment));
     assertThrows(
-        RequestNotAllowedException.class,
-        () -> commentService.deleteComment(user, comment.getId()));
+        RequestNotAllowedException.class, () -> commentService.delete(user, comment.getId()));
   }
 
   @Test
-  void getCommentsByPostId() {
+  void findByPostId() {
     Page<Comment> page = new PageImpl<>(List.of(comment));
 
     when(postRepository.findAuthorIdById(any(UUID.class)))
@@ -170,7 +169,7 @@ class CommentServiceImplTest {
     when(commentRepository.findByPostId(any(UUID.class), any(Pageable.class))).thenReturn(page);
 
     var response =
-        commentService.getCommentsByPostId(post.getId(), UUID.randomUUID(), PageRequest.of(0, 10));
+        commentService.findByPostId(post.getId(), UUID.randomUUID(), PageRequest.of(0, 10));
 
     assertNotNull(response);
     assertEquals(page, response);

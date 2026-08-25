@@ -63,7 +63,7 @@ class LikeControllerTest {
   void createLike() {
     when(authentication.getPrincipal()).thenReturn(user);
     when(likeConverter.convertToModel(any(Like.class))).thenReturn(likeDto);
-    when(likeService.createLike(any(User.class), any(UUID.class))).thenReturn(like);
+    when(likeService.create(any(User.class), any(UUID.class))).thenReturn(like);
 
     var response = likeController.createLike(authentication, post.getId());
 
@@ -73,19 +73,19 @@ class LikeControllerTest {
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(likeConverter).convertToModel(any(Like.class));
-    verify(likeService).createLike(any(User.class), any(UUID.class));
+    verify(likeService).create(any(User.class), any(UUID.class));
   }
 
   @Test
   void deleteLike() {
     when(authentication.getPrincipal()).thenReturn(user);
-    doNothing().when(likeService).deleteLikeByPostId(any(UUID.class), any(UUID.class));
+    doNothing().when(likeService).delete(any(User.class), any(UUID.class));
 
     var response = likeController.deleteLike(authentication, post.getId());
 
     assertNotNull(response);
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     verify(authentication).getPrincipal();
-    verify(likeService).deleteLikeByPostId(any(UUID.class), any(UUID.class));
+    verify(likeService).delete(any(User.class), any(UUID.class));
   }
 }

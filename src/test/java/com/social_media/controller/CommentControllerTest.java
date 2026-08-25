@@ -76,7 +76,7 @@ class CommentControllerTest {
   void createComment() {
     when(authentication.getPrincipal()).thenReturn(user);
     when(commentConverter.convertToModel(any(Comment.class))).thenReturn(commentDto);
-    when(commentService.createComment(any(User.class), any(CommentDto.class))).thenReturn(comment);
+    when(commentService.create(any(User.class), any(CommentDto.class))).thenReturn(comment);
 
     var response = commentController.createComment(authentication, commentDto);
 
@@ -86,14 +86,14 @@ class CommentControllerTest {
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(commentConverter).convertToModel(any(Comment.class));
-    verify(commentService).createComment(any(User.class), any(CommentDto.class));
+    verify(commentService).create(any(User.class), any(CommentDto.class));
   }
 
   @Test
   void updateComment() {
     when(authentication.getPrincipal()).thenReturn(user);
     when(commentConverter.convertToModel(any(Comment.class))).thenReturn(commentDto);
-    when(commentService.updateComment(any(User.class), any(CommentDto.class))).thenReturn(comment);
+    when(commentService.update(any(User.class), any(CommentDto.class))).thenReturn(comment);
 
     var response = commentController.updateComment(authentication, commentDto);
 
@@ -103,19 +103,19 @@ class CommentControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(commentConverter).convertToModel(any(Comment.class));
-    verify(commentService).updateComment(any(User.class), any(CommentDto.class));
+    verify(commentService).update(any(User.class), any(CommentDto.class));
   }
 
   @Test
   void deleteComment() {
     when(authentication.getPrincipal()).thenReturn(user);
-    doNothing().when(commentService).deleteComment(any(User.class), any(UUID.class));
+    doNothing().when(commentService).delete(any(User.class), any(UUID.class));
 
     var response = commentController.deleteComment(authentication, comment.getId());
 
     assertNotNull(response);
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-    verify(commentService).deleteComment(any(User.class), any(UUID.class));
+    verify(commentService).delete(any(User.class), any(UUID.class));
   }
 
   @Test
@@ -126,7 +126,7 @@ class CommentControllerTest {
     Page<Comment> page = new PageImpl<>(comments);
 
     when(authentication.getPrincipal()).thenReturn(user);
-    when(commentService.getCommentsByPostId(any(UUID.class), any(UUID.class), any(Pageable.class)))
+    when(commentService.findByPostId(any(UUID.class), any(UUID.class), any(Pageable.class)))
         .thenReturn(page);
 
     var response = commentController.getCommentsByPostId(authentication, post.getId(), 0, 10);
@@ -135,7 +135,6 @@ class CommentControllerTest {
     assertNotNull(response.getBody());
     assertEquals(page.getTotalPages(), response.getBody().getTotalPages());
     assertEquals(page.getTotalElements(), response.getBody().getTotalElements());
-    verify(commentService)
-        .getCommentsByPostId(any(UUID.class), any(UUID.class), any(Pageable.class));
+    verify(commentService).findByPostId(any(UUID.class), any(UUID.class), any(Pageable.class));
   }
 }

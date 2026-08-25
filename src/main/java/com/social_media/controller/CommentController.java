@@ -33,7 +33,7 @@ public class CommentController {
       Authentication authentication, @RequestBody @Valid CommentDto commentDto) {
     User user = (User) authentication.getPrincipal();
 
-    var comment = commentService.createComment(user, commentDto);
+    var comment = commentService.create(user, commentDto);
     var responseDto = commentConverter.convertToModel(comment);
 
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
@@ -44,7 +44,7 @@ public class CommentController {
       Authentication authentication, @RequestBody @Valid CommentDto commentDto) {
     User user = (User) authentication.getPrincipal();
 
-    var comment = commentService.updateComment(user, commentDto);
+    var comment = commentService.update(user, commentDto);
     var responseDto = commentConverter.convertToModel(comment);
 
     return ResponseEntity.ok(responseDto);
@@ -54,7 +54,7 @@ public class CommentController {
   public ResponseEntity<Void> deleteComment(Authentication authentication, @PathVariable UUID id) {
     User user = (User) authentication.getPrincipal();
 
-    commentService.deleteComment(user, id);
+    commentService.delete(user, id);
 
     return ResponseEntity.noContent().build();
   }
@@ -68,7 +68,7 @@ public class CommentController {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc(TIME_PROPERTY)));
     User user = (User) authentication.getPrincipal();
 
-    var comments = commentService.getCommentsByPostId(postId, user.getId(), pageable);
+    var comments = commentService.findByPostId(postId, user.getId(), pageable);
     var pageDto = new PageDto<>(comments, commentConverter);
 
     return ResponseEntity.ok(pageDto);

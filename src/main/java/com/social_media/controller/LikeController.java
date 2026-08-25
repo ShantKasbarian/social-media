@@ -24,7 +24,7 @@ public class LikeController {
       Authentication authentication, @PathVariable UUID postId) {
     User user = (User) authentication.getPrincipal();
 
-    var like = likeService.createLike(user, postId);
+    var like = likeService.create(user, postId);
     var likeDto = likeConverter.convertToModel(like);
 
     return new ResponseEntity<>(likeDto, HttpStatus.CREATED);
@@ -34,7 +34,7 @@ public class LikeController {
   public ResponseEntity<Void> deleteLike(Authentication authentication, @PathVariable UUID postId) {
     User user = (User) authentication.getPrincipal();
 
-    likeService.deleteLikeByPostId(user.getId(), postId);
+    likeService.delete(user, postId);
 
     return ResponseEntity.noContent().build();
   }

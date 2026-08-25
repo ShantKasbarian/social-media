@@ -33,7 +33,7 @@ public class PostController {
       Authentication authentication, @RequestBody @Valid PostDto postDto) {
     User user = (User) authentication.getPrincipal();
 
-    Post post = postService.createPost(user, postDto);
+    Post post = postService.create(user, postDto);
     PostDto responseDto = postConverter.convertToModel(post);
 
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
@@ -44,7 +44,7 @@ public class PostController {
       @AuthenticationPrincipal Authentication authentication, @PathVariable UUID id) {
     User user = (User) authentication.getPrincipal();
 
-    var post = postService.getPostById(id, user);
+    var post = postService.findById(id, user);
     var postDto = postConverter.convertToModel(post);
 
     return ResponseEntity.ok(postDto);
@@ -55,7 +55,7 @@ public class PostController {
       Authentication authentication, @RequestBody @Valid PostDto postDto) {
     User user = (User) authentication.getPrincipal();
 
-    var post = postService.updatePost(user, postDto);
+    var post = postService.update(user, postDto);
     var responseDto = postConverter.convertToModel(post);
 
     return ResponseEntity.ok(responseDto);
@@ -65,7 +65,7 @@ public class PostController {
   public ResponseEntity<Void> deletePost(Authentication authentication, @PathVariable UUID postId) {
     User user = (User) authentication.getPrincipal();
 
-    postService.deletePost(user, postId);
+    postService.delete(user, postId);
 
     return ResponseEntity.noContent().build();
   }
@@ -78,7 +78,7 @@ public class PostController {
     User user = (User) authentication.getPrincipal();
     Pageable pageable = PageRequest.of(page, size);
 
-    var posts = postService.getPostsByUserIdAcceptedFriendRequests(user.getId(), pageable);
+    var posts = postService.findByUserIdAcceptedFriendRequests(user.getId(), pageable);
     var pageDto = new PageDto<>(posts, postConverter);
 
     return ResponseEntity.ok(pageDto);
@@ -93,7 +93,7 @@ public class PostController {
     User user = (User) authentication.getPrincipal();
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc(TIME_PROPERTY)));
 
-    var posts = postService.getUserPosts(user, userId, pageable);
+    var posts = postService.findByUserId(user, userId, pageable);
     var pageDto = new PageDto<>(posts, postConverter);
 
     return ResponseEntity.ok(pageDto);
@@ -107,7 +107,7 @@ public class PostController {
     User user = (User) authentication.getPrincipal();
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc(TIME_PROPERTY)));
 
-    var posts = postService.getUserLikedPosts(user.getId(), pageable);
+    var posts = postService.findLikedByUserId(user.getId(), pageable);
     var pageDto = new PageDto<>(posts, postConverter);
 
     return ResponseEntity.ok(pageDto);

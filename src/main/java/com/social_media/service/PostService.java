@@ -7,18 +7,12 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface PostService {
-  Post createPost(User user, PostDto postDto);
+public interface PostService extends Creatable<Post, PostDto>, Updatable<Post, PostDto>, Deletable {
+  Post findById(UUID id, User user);
 
-  Post getPostById(UUID id, User user);
+  Page<Post> findByUserIdAcceptedFriendRequests(UUID id, Pageable pageable);
 
-  Post updatePost(User user, PostDto postDto);
+  Page<Post> findByUserId(User user, UUID userId, Pageable pageable);
 
-  void deletePost(User user, UUID id);
-
-  Page<Post> getPostsByUserIdAcceptedFriendRequests(UUID id, Pageable pageable);
-
-  Page<Post> getUserPosts(User user, UUID userId, Pageable pageable);
-
-  Page<Post> getUserLikedPosts(UUID id, Pageable pageable);
+  Page<Post> findLikedByUserId(UUID id, Pageable pageable);
 }
