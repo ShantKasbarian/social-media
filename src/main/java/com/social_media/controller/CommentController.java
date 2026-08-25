@@ -53,8 +53,7 @@ public class CommentController {
 
     User user = (User) authentication.getPrincipal();
 
-    var comment =
-        commentConverter.convertToModel(commentService.updateComment(user, id, commentDto.text()));
+    var comment = commentConverter.convertToModel(commentService.updateComment(user, commentDto));
 
     log.info("updated comment with id {}", id);
 

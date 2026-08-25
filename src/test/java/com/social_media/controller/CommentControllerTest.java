@@ -2,7 +2,6 @@ package com.social_media.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.social_media.converter.CommentConverter;
@@ -94,8 +93,7 @@ class CommentControllerTest {
   void updateComment() {
     when(authentication.getPrincipal()).thenReturn(user);
     when(commentConverter.convertToModel(any(Comment.class))).thenReturn(commentDto);
-    when(commentService.updateComment(any(User.class), any(UUID.class), anyString()))
-        .thenReturn(comment);
+    when(commentService.updateComment(any(User.class), any(CommentDto.class))).thenReturn(comment);
 
     var response = commentController.updateComment(authentication, commentDto);
 
@@ -105,7 +103,7 @@ class CommentControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(commentConverter).convertToModel(any(Comment.class));
-    verify(commentService).updateComment(any(User.class), any(UUID.class), anyString());
+    verify(commentService).updateComment(any(User.class), any(CommentDto.class));
   }
 
   @Test

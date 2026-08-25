@@ -71,7 +71,9 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   @Transactional
-  public Comment updateComment(User user, UUID id, String text) {
+  public Comment updateComment(User user, CommentDto commentDto) {
+    UUID id = commentDto.id();
+
     log.info("updating comment with id {}", id);
 
     Comment comment =
@@ -83,7 +85,7 @@ public class CommentServiceImpl implements CommentService {
       throw new RequestNotAllowedException(UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE);
     }
 
-    comment.setText(text);
+    comment.setText(commentDto.text());
 
     log.info("updated comment with id {}", id);
 

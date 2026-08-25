@@ -104,15 +104,16 @@ class CommentServiceImplTest {
 
   @Test
   void updateComment() {
-    String oldCommentText = comment.getText();
-    String targetCommentText = "updated comment";
+    String oldCommentText = "updated comment";
+    comment.setText(oldCommentText);
 
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(comment));
 
-    Comment response = commentService.updateComment(user, comment.getId(), targetCommentText);
+    Comment response = commentService.updateComment(user, commentDto);
 
+    assertNotNull(response);
     assertNotEquals(oldCommentText, response.getText());
-    assertEquals(targetCommentText, response.getText());
+    assertEquals(commentDto.text(), response.getText());
     verify(commentRepository).findById(any(UUID.class));
   }
 
@@ -125,8 +126,7 @@ class CommentServiceImplTest {
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(comment));
 
     assertThrows(
-        RequestNotAllowedException.class,
-        () -> commentService.updateComment(user, comment.getId(), comment.getText()));
+        RequestNotAllowedException.class, () -> commentService.updateComment(user, commentDto));
   }
 
   @Test
