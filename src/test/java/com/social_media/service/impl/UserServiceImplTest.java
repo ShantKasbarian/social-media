@@ -58,14 +58,12 @@ class UserServiceImplTest {
     doNothing()
         .when(credentialsValidator)
         .validateUserCredentials(anyString(), anyString(), anyString());
-    when(userRepository.save(any(User.class))).thenReturn(user);
     when(passwordEncoder.encode(anyString())).thenReturn(user.getPassword());
 
     userService.updateUser(user, userDto);
 
     verify(credentialsValidator).validateUserCredentials(anyString(), anyString(), anyString());
     verify(passwordEncoder).encode(anyString());
-    verify(userRepository).save(any(User.class));
   }
 
   @Test

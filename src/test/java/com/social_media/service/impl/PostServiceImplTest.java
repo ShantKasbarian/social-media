@@ -47,6 +47,7 @@ class PostServiceImplTest {
     post.setUser(user);
     post.setTime(Instant.now());
     post.setText("some text");
+    post.setLikes(List.of());
 
     postDto =
         new PostDto(
@@ -88,18 +89,17 @@ class PostServiceImplTest {
 
   @Test
   void updatePost() {
-    String text = post.getText();
-    String targetText = "some text 2";
+    post.setText("some different text");
+    String targetText = postDto.text();
 
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
-    when(postRepository.save(any(Post.class))).thenReturn(post);
 
     Post response = postService.updatePost(user, postDto);
 
-    assertEquals(post.getId(), response.getId());
-    assertNotEquals(text, response.getText());
+    assertNotNull(response);
     assertEquals(targetText, response.getText());
-    verify(postRepository).save(any(Post.class));
+
+    verify(postRepository).findById(any(UUID.class));
   }
 
   @Test

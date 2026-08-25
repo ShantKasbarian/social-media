@@ -11,6 +11,10 @@ import com.social_media.utils.CredentialsValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +23,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
   private static final String WRONG_USERNAME_OR_PASSWORD_MESSAGE = "wrong username or password";
+
+  private final AuthenticationManager authenticationManager;
 
   private final UserRepository userRepository;
 
@@ -34,12 +40,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     log.info("authenticating user with username {}", username);
 
-    User user =
-        userRepository
-            .findByUsername(username)
-            .filter(u -> passwordEncoder.matches(loginDto.password(), u.getPassword()))
-            .orElseThrow(() -> new InvalidCredentialsException(WRONG_USERNAME_OR_PASSWORD_MESSAGE));
+    Authentication authentication;
 
+    try {
+      authentication =
+          authenticationManager.authenticate(
+              new UsernamePasswordAuthenticationToken(username, loginDto.password()));
+    } catch (AuthenticationException ex) {
+      throw new InvalidCredentialsException(WRONG_USERNAME_OR_PASSWORD_MESSAGE);
+    }
+
+    User user = (User) authentication.getPrincipal();
     String token = jwtService.generateToken(username);
 
     log.info("authenticated user with username {}", username);

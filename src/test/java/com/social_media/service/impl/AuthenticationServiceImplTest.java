@@ -8,19 +8,24 @@ import com.social_media.exception.InvalidCredentialsException;
 import com.social_media.model.LoginDto;
 import com.social_media.repository.UserRepository;
 import com.social_media.utils.impl.CredentialsValidatorImpl;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 class AuthenticationServiceImplTest {
   private static final String TEST_TOKEN = "some token";
 
   @InjectMocks private AuthenticationServiceImpl authenticationService;
+
+  @Mock private AuthenticationManager authenticationManager;
 
   @Mock private UserRepository userRepository;
 
@@ -29,6 +34,8 @@ class AuthenticationServiceImplTest {
   @Mock private CredentialsValidatorImpl credentialsValidator;
 
   @Mock private PasswordEncoder passwordEncoder;
+
+  @Mock private Authentication authentication;
 
   private User user;
 
@@ -47,34 +54,28 @@ class AuthenticationServiceImplTest {
     user.setLastname("Doe");
 
     loginDto = new LoginDto(user.getUsername(), user.getPassword());
+
+    when(authentication.getPrincipal()).thenReturn(user);
   }
 
   @Test
   void login() {
-    when(userRepository.findByUsername(anyString())).thenReturn(Optional.ofNullable(user));
-    when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+    when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+        .thenReturn(authentication);
     when(jwtService.generateToken(anyString())).thenReturn(TEST_TOKEN);
 
     var tokenDto = authenticationService.login(loginDto);
 
     assertEquals(TEST_TOKEN, tokenDto.token());
-    verify(userRepository).findByUsername(anyString());
+    verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
     verify(jwtService).generateToken(anyString());
   }
 
   @Test
-  void loginShouldThrowInvalidCredentialsExceptionWhenUserNotFound() {
-    when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
-    assertThrows(InvalidCredentialsException.class, () -> authenticationService.login(loginDto));
-  }
-
-  @Test
-  void loginShouldThrowInvalidCredentialsExceptionWhenPasswordIsWrong() {
-    user.setPassword("123");
-
-    when(userRepository.findByUsername(anyString())).thenReturn(Optional.ofNullable(user));
-    when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
-
+  void
+      loginShouldThrowInvalidCredentialsExceptionWhenAnySubClassOfAuthenticationExceptionIsThrown() {
+    when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+        .thenThrow(BadCredentialsException.class);
     assertThrows(InvalidCredentialsException.class, () -> authenticationService.login(loginDto));
   }
 
