@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import com.social_media.entity.User;
 import com.social_media.exception.InvalidCredentialsException;
+import com.social_media.model.LoginDto;
 import com.social_media.repository.UserRepository;
 import com.social_media.utils.impl.CredentialsValidatorImpl;
 import java.util.Optional;
@@ -31,6 +32,8 @@ class AuthenticationServiceImplTest {
 
   private User user;
 
+  private LoginDto loginDto;
+
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
@@ -42,6 +45,8 @@ class AuthenticationServiceImplTest {
     user.setUsername("johnDoe");
     user.setFirstname("John");
     user.setLastname("Doe");
+
+    loginDto = new LoginDto(user.getUsername(), user.getPassword());
   }
 
   @Test
@@ -50,7 +55,7 @@ class AuthenticationServiceImplTest {
     when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
     when(jwtService.generateToken(anyString())).thenReturn(TEST_TOKEN);
 
-    var tokenDto = authenticationService.login(user.getUsername(), user.getPassword());
+    var tokenDto = authenticationService.login(loginDto);
 
     assertEquals(TEST_TOKEN, tokenDto.token());
     verify(userRepository).findByUsername(anyString());
@@ -60,19 +65,17 @@ class AuthenticationServiceImplTest {
   @Test
   void loginShouldThrowInvalidCredentialsExceptionWhenUserNotFound() {
     when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
-    assertThrows(
-        InvalidCredentialsException.class,
-        () -> authenticationService.login(user.getUsername(), user.getPassword()));
+    assertThrows(InvalidCredentialsException.class, () -> authenticationService.login(loginDto));
   }
 
   @Test
   void loginShouldThrowInvalidCredentialsExceptionWhenPasswordIsWrong() {
+    user.setPassword("123");
+
     when(userRepository.findByUsername(anyString())).thenReturn(Optional.ofNullable(user));
     when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
-    assertThrows(
-        InvalidCredentialsException.class,
-        () -> authenticationService.login(user.getEmail(), user.getPassword()));
+    assertThrows(InvalidCredentialsException.class, () -> authenticationService.login(loginDto));
   }
 
   @Test

@@ -6,7 +6,6 @@ import com.social_media.model.PageDto;
 import com.social_media.model.UserDto;
 import com.social_media.service.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/users")
@@ -27,24 +25,21 @@ public class UserController {
 
   @GetMapping
   public ResponseEntity<UserDto> getProfile(Authentication authentication) {
-    log.info("/users with GET called, fetching current user profile");
-
     User user = (User) authentication.getPrincipal();
-    UserDto userDto = userConverter.convertToModel(user);
 
-    log.info("fetched user profile");
+    UserDto userDto = userConverter.convertToModel(user);
 
     return ResponseEntity.ok(userDto);
   }
 
   @PutMapping
-  public void updateUser(Authentication authentication, @RequestBody UserDto userDto) {
-    log.info("/users with PUT called, updating current user profile");
-
+  public ResponseEntity<Void> updateUser(
+      Authentication authentication, @RequestBody UserDto userDto) {
     User user = (User) authentication.getPrincipal();
+
     userService.updateUser(user, userConverter.convertToEntity(userDto));
 
-    log.info("updated user profile");
+    return ResponseEntity.ok().build();
   }
 
   @GetMapping("/{username}")
@@ -52,16 +47,11 @@ public class UserController {
       @PathVariable String username,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "10") int size) {
-    log.info(
-        "/users/{} with GET called, fetching users with usernames containing the target username",
-        username);
-
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc(USERNAME_SORT_PROPERTY)));
 
-    var users = new PageDto<>(userService.searchByUsername(username, pageable), userConverter);
+    var users = userService.searchByUsername(username, pageable);
+    var pageDto = new PageDto<>(users, userConverter);
 
-    log.info("fetching users with usernames containing the target username {}", username);
-
-    return ResponseEntity.ok(users);
+    return ResponseEntity.ok(pageDto);
   }
 }

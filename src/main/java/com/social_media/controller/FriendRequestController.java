@@ -8,7 +8,6 @@ import com.social_media.model.PageDto;
 import com.social_media.service.FriendRequestService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -16,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/friend-requests")
@@ -28,17 +26,10 @@ public class FriendRequestController {
   @PostMapping("/users/{targetUserId}")
   public ResponseEntity<FriendRequestDto> createFriendRequest(
       Authentication authentication, @PathVariable UUID targetUserId) {
-    log.info(
-        "/friend-requests/users/{} with POST called, creating friendRequest with the specified targetUserId",
-        targetUserId);
-
     User user = (User) authentication.getPrincipal();
 
-    FriendRequestDto friendRequestDto =
-        friendRequestConverter.convertToModel(
-            friendRequestService.createFriendRequest(user, targetUserId));
-
-    log.info("created friend request with targetUserId {}", targetUserId);
+    FriendRequest friendRequest = friendRequestService.createFriendRequest(user, targetUserId);
+    FriendRequestDto friendRequestDto = friendRequestConverter.convertToModel(friendRequest);
 
     return new ResponseEntity<>(friendRequestDto, HttpStatus.CREATED);
   }
@@ -48,33 +39,20 @@ public class FriendRequestController {
       Authentication authentication,
       @PathVariable UUID id,
       @PathVariable FriendRequest.Status status) {
-    log.info(
-        "/friend-requests/{}/status/{} with PATCH called, updating friendRequest with specified id to specified status",
-        id,
-        status);
-
     User user = (User) authentication.getPrincipal();
 
-    FriendRequestDto friendRequestDto =
-        friendRequestConverter.convertToModel(
-            friendRequestService.updateFriendRequestStatus(user, id, status));
-
-    log.info("updated friendRequest status with id {} and status {}", id, status);
+    FriendRequest friendRequest = friendRequestService.updateFriendRequestStatus(user, id, status);
+    FriendRequestDto friendRequestDto = friendRequestConverter.convertToModel(friendRequest);
 
     return ResponseEntity.ok(friendRequestDto);
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Object> deleteFriendRequest(
+  public ResponseEntity<Void> deleteFriendRequest(
       Authentication authentication, @PathVariable UUID id) {
-    log.info(
-        "/friend-requests/{} with DELETE called, deleting friendRequest with the specified id", id);
-
     User user = (User) authentication.getPrincipal();
 
     friendRequestService.deleteFriendRequest(user, id);
-
-    log.info("deleted friendRequest with id {}", id);
 
     return ResponseEntity.noContent().build();
   }
@@ -86,21 +64,11 @@ public class FriendRequestController {
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "10") int size) {
     User user = (User) authentication.getPrincipal();
-    UUID id = user.getId();
     Pageable pageable = PageRequest.of(page, size);
 
-    log.info(
-        "/friend-requests/{} with GET called, fetching friend-requests of user with id {} and specified status",
-        status,
-        id);
+    var friendRequests = friendRequestService.getFriendRequestsByUserStatus(user, status, pageable);
+    var pageDto = new PageDto<>(friendRequests, friendRequestConverter);
 
-    var friendRequests =
-        new PageDto<>(
-            friendRequestService.getFriendRequestsByUserStatus(user, status, pageable),
-            friendRequestConverter);
-
-    log.info("fetched friend-requests of user with id {} and status {}", id, status);
-
-    return ResponseEntity.ok(friendRequests);
+    return ResponseEntity.ok(pageDto);
   }
 }

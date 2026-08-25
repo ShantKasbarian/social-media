@@ -2,7 +2,6 @@ package com.social_media.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -65,7 +64,7 @@ class AuthenticationControllerTest {
 
   @Test
   void login() {
-    when(authenticationService.login(anyString(), anyString())).thenReturn(tokenDto);
+    when(authenticationService.login(any(LoginDto.class))).thenReturn(tokenDto);
 
     var response = authenticationController.login(loginDto);
 
@@ -73,7 +72,7 @@ class AuthenticationControllerTest {
     assertNotNull(response.getBody());
     assertEquals(tokenDto, response.getBody());
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    verify(authenticationService).login(anyString(), anyString());
+    verify(authenticationService).login(any(LoginDto.class));
   }
 
   @Test

@@ -2,6 +2,7 @@ package com.social_media.service.impl;
 
 import com.social_media.entity.User;
 import com.social_media.exception.InvalidCredentialsException;
+import com.social_media.model.LoginDto;
 import com.social_media.model.TokenDto;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.AuthenticationService;
@@ -28,13 +29,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final PasswordEncoder passwordEncoder;
 
   @Override
-  public TokenDto login(String username, String password) {
+  public TokenDto login(LoginDto loginDto) {
+    String username = loginDto.username();
+
     log.info("authenticating user with username {}", username);
 
     User user =
         userRepository
             .findByUsername(username)
-            .filter(u -> passwordEncoder.matches(password, u.getPassword()))
+            .filter(u -> passwordEncoder.matches(loginDto.password(), u.getPassword()))
             .orElseThrow(() -> new InvalidCredentialsException(WRONG_USERNAME_OR_PASSWORD_MESSAGE));
 
     String token = jwtService.generateToken(username);
@@ -52,18 +55,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     log.info("registering user with username {}", username);
 
     credentialsValidator.validateUserCredentials(username, user.getEmail(), user.getPassword());
-
     user.setPassword(passwordEncoder.encode(user.getPassword()));
 
     userRepository.save(user);
 
-    log.info("registered user with username {}", username);
-
-    log.info("generating token for user with username {}", username);
-
     String token = jwtService.generateToken(user.getUsername());
 
-    log.info("generated token for user with username {}", username);
+    log.info("registered user with username {} and generated auth token", username);
 
     return new TokenDto(token, user.getUsername(), user.getId());
   }
