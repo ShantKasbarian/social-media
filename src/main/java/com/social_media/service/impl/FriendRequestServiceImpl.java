@@ -38,7 +38,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
   @Override
   @Transactional
-  public FriendRequest createFriendRequest(User user, UUID targetUserId) {
+  public FriendRequest create(User user, UUID targetUserId) {
     UUID currentUserId = user.getId();
 
     log.info(
@@ -69,8 +69,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
   @Override
   @Transactional
-  public FriendRequest updateFriendRequestStatus(
-      User user, UUID requestId, FriendRequest.Status status) {
+  public FriendRequest updateStatus(User user, UUID requestId, FriendRequest.Status status) {
     log.info("updating friendRequest with id {}", requestId);
 
     FriendRequest friendRequest =
@@ -96,12 +95,12 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
   @Override
   @Transactional
-  public void deleteFriendRequest(User user, UUID requestId) {
-    log.info("deleting friendRequest with id {}", requestId);
+  public void delete(User user, UUID id) {
+    log.info("deleting friendRequest with id {}", id);
 
     FriendRequest friendRequest =
         friendRequestRepository
-            .findById(requestId)
+            .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
     UUID userId = user.getId();
@@ -113,11 +112,11 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     friendRequestRepository.delete(friendRequest);
 
-    log.info("deleted friendRequest with id {}", requestId);
+    log.info("deleted friendRequest with id {}", id);
   }
 
   @Override
-  public Page<FriendRequest> getFriendRequestsByUserStatus(
+  public Page<FriendRequest> findByUserAndStatus(
       User user, FriendRequest.Status status, Pageable pageable) {
     UUID id = user.getId();
 

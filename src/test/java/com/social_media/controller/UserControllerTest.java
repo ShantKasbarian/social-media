@@ -73,12 +73,12 @@ class UserControllerTest {
   @Test
   void updateUser() {
     when(authentication.getPrincipal()).thenReturn(user);
-    doNothing().when(userService).updateUser(any(User.class), any(UserDto.class));
+    when(userService.update(any(User.class), any(UserDto.class))).thenReturn(user);
 
     userController.updateUser(authentication, userDto);
 
     verify(authentication).getPrincipal();
-    verify(userService).updateUser(any(User.class), any(UserDto.class));
+    verify(userService).update(any(User.class), any(UserDto.class));
   }
 
   @Test
@@ -88,7 +88,7 @@ class UserControllerTest {
 
     Page<User> page = new PageImpl<>(users);
 
-    when(userService.searchByUsername(anyString(), any(Pageable.class))).thenReturn(page);
+    when(userService.findByUsername(anyString(), any(Pageable.class))).thenReturn(page);
 
     var response = userController.searchByUsername("o", 0, 10);
 
@@ -96,6 +96,6 @@ class UserControllerTest {
     assertNotNull(response.getBody());
     assertEquals(users.size(), response.getBody().getContent().size());
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    verify(userService).searchByUsername(anyString(), any(Pageable.class));
+    verify(userService).findByUsername(anyString(), any(Pageable.class));
   }
 }

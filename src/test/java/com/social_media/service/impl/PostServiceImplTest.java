@@ -60,40 +60,40 @@ class PostServiceImplTest {
   }
 
   @Test
-  void createPost() {
+  void create() {
     when(postRepository.save(any(Post.class))).thenReturn(post);
 
-    Post response = postService.createPost(user, postDto);
+    Post response = postService.create(user, postDto);
 
     assertNotNull(response);
     verify(postRepository).save(any(Post.class));
   }
 
   @Test
-  void getPostById() {
+  void findById() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
 
-    Post response = postService.getPostById(post.getId(), user);
+    Post response = postService.findById(post.getId(), user);
 
     assertEquals(post, response);
     verify(postRepository).findById(any(UUID.class));
   }
 
   @Test
-  void getPostByIdShouldThrowResourceNotFoundExceptionWhenPostNotFound() {
+  void findByIdShouldThrowResourceNotFoundExceptionWhenPostIsNotFound() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
-    assertThrows(
-        ResourceNotFoundException.class, () -> postService.getPostById(post.getId(), user));
+
+    assertThrows(ResourceNotFoundException.class, () -> postService.findById(post.getId(), user));
   }
 
   @Test
-  void updatePost() {
+  void update() {
     post.setText("some different text");
     String targetText = postDto.text();
 
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
 
-    Post response = postService.updatePost(user, postDto);
+    Post response = postService.update(user, postDto);
 
     assertNotNull(response);
     assertEquals(targetText, response.getText());
@@ -102,51 +102,50 @@ class PostServiceImplTest {
   }
 
   @Test
-  void updatePostShouldThrowResourceNotFoundExceptionWhenPostNotFound() {
+  void updateShouldThrowResourceNotFoundExceptionWhenPostIsNotFound() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () -> postService.updatePost(user, postDto));
+    assertThrows(ResourceNotFoundException.class, () -> postService.update(user, postDto));
   }
 
   @Test
-  void updatePostShouldThrowRequestNotAllowedExceptionWhenUserCallsUpdatePostOfDifferentUser() {
+  void updateShouldThrowRequestNotAllowedExceptionWhenCurrentUserIsNotAuthor() {
     User user2 = new User();
     user2.setId(UUID.randomUUID());
 
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
 
-    assertThrows(RequestNotAllowedException.class, () -> postService.updatePost(user2, postDto));
+    assertThrows(RequestNotAllowedException.class, () -> postService.update(user2, postDto));
   }
 
   @Test
-  void deletePost() {
+  void delete() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
     doNothing().when(postRepository).delete(any(Post.class));
 
-    postService.deletePost(user, post.getId());
+    postService.delete(user, post.getId());
 
     verify(postRepository).findById(any(UUID.class));
     verify(postRepository).delete(any(Post.class));
   }
 
   @Test
-  void deletePostShouldThrowResourceNotFoundExceptionWhenPostNotFound() {
+  void deleteShouldThrowResourceNotFoundExceptionWhenPostIsNotFound() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
-    assertThrows(ResourceNotFoundException.class, () -> postService.deletePost(user, post.getId()));
+    assertThrows(ResourceNotFoundException.class, () -> postService.delete(user, post.getId()));
   }
 
   @Test
-  void deletePostShouldThrowRequestNotAllowedException() {
+  void deletePostShouldThrowRequestNotAllowedExceptionWhenCurrentUserIsNotAuthor() {
     User user2 = new User();
     user2.setId(UUID.randomUUID());
 
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
-    assertThrows(
-        RequestNotAllowedException.class, () -> postService.deletePost(user2, post.getId()));
+    assertThrows(RequestNotAllowedException.class, () -> postService.delete(user2, post.getId()));
   }
 
   @Test
-  void getPostsByUserIdAcceptedFriendRequests() {
+  void findByUserIdAcceptedFriendRequests() {
     List<Post> posts = new ArrayList<>();
     posts.add(post);
 
@@ -157,7 +156,7 @@ class PostServiceImplTest {
     when(postRepository.findByUserIdAcceptedFriendRequests(any(UUID.class), any(Pageable.class)))
         .thenReturn(page);
 
-    var response = postService.getPostsByUserIdAcceptedFriendRequests(user.getId(), pageable);
+    var response = postService.findByUserIdAcceptedFriendRequests(user.getId(), pageable);
 
     assertNotNull(page);
     assertFalse(response.isEmpty());
@@ -166,7 +165,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void getUserPosts() {
+  void findByUserId() {
     List<Post> posts = new ArrayList<>();
     posts.add(post);
 
@@ -176,7 +175,7 @@ class PostServiceImplTest {
 
     when(postRepository.findByUserId(any(UUID.class), any(Pageable.class))).thenReturn(page);
 
-    var response = postService.getUserPosts(user, user.getId(), pageable);
+    var response = postService.findByUserId(user, user.getId(), pageable);
 
     assertNotNull(response);
     assertFalse(response.isEmpty());
@@ -185,7 +184,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void getUserLikedPosts() {
+  void findLikedByUserId() {
     List<Post> posts = new ArrayList<>();
     posts.add(post);
 
@@ -195,7 +194,7 @@ class PostServiceImplTest {
 
     when(postRepository.findByUserIdLikes(any(UUID.class), any(Pageable.class))).thenReturn(page);
 
-    var response = postService.getUserLikedPosts(user.getId(), pageable);
+    var response = postService.findLikedByUserId(user.getId(), pageable);
 
     assertNotNull(response);
     assertEquals(page, response);

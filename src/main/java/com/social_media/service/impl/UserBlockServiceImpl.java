@@ -23,7 +23,7 @@ public class UserBlockServiceImpl implements UserBlockService {
 
   @Override
   @Transactional
-  public UserBlock createUserBlock(User currentUser, UUID targetUserId) {
+  public UserBlock create(User currentUser, UUID targetUserId) {
     UUID currentUserId = currentUser.getId();
 
     log.info("user with id {} is blocking user with id {}", currentUserId, targetUserId);

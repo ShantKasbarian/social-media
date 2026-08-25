@@ -65,7 +65,7 @@ class FriendRequestServiceImplTest {
   }
 
   @Test
-  void createFriendRequest() {
+  void create() {
     when(userRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(user2));
     when(friendRequestRepository.existsByUserIdTargetUserId(any(UUID.class), any(UUID.class)))
         .thenReturn(false);
@@ -73,7 +73,7 @@ class FriendRequestServiceImplTest {
         .thenReturn(false);
     when(friendRequestRepository.save(any(FriendRequest.class))).thenReturn(friendRequest);
 
-    var response = friendRequestService.createFriendRequest(user1, user2.getId());
+    var response = friendRequestService.create(user1, user2.getId());
 
     assertNotNull(response);
     assertEquals(friendRequest.getUser().getId(), response.getUser().getId());
@@ -87,26 +87,25 @@ class FriendRequestServiceImplTest {
   }
 
   @Test
-  void createFriendRequestShouldThrowResourceNotFoundExceptionWhenTargetUserNotFound() {
+  void createShouldThrowResourceNotFoundExceptionWhenTargetUserIsNotFound() {
     when(userRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
     assertThrows(
-        ResourceNotFoundException.class,
-        () -> friendRequestService.createFriendRequest(user1, user2.getId()));
+        ResourceNotFoundException.class, () -> friendRequestService.create(user1, user2.getId()));
   }
 
   @Test
-  void createFriendRequestShouldThrowResourceAlreadyExistsExceptionWhenFriendRequestExist() {
+  void createShouldThrowResourceAlreadyExistsExceptionWhenFriendRequestExists() {
     when(userRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(user2));
     when(friendRequestRepository.existsByUserIdTargetUserId(any(UUID.class), any(UUID.class)))
         .thenReturn(true);
 
     assertThrows(
         ResourceAlreadyExistsException.class,
-        () -> friendRequestService.createFriendRequest(user1, user2.getId()));
+        () -> friendRequestService.create(user1, user2.getId()));
   }
 
   @Test
-  void updateFriendRequestStatus() {
+  void updateStatus() {
     FriendRequest.Status targetStatus = FriendRequest.Status.ACCEPTED;
 
     when(friendRequestRepository.findById(any(UUID.class)))
@@ -116,7 +115,7 @@ class FriendRequestServiceImplTest {
     when(friendRequestRepository.save(any(FriendRequest.class))).thenReturn(friendRequest);
 
     var response =
-        friendRequestService.updateFriendRequestStatus(
+        friendRequestService.updateStatus(
             friendRequest.getTargetUser(), friendRequest.getId(), targetStatus);
 
     assertNotNull(response);
@@ -126,31 +125,31 @@ class FriendRequestServiceImplTest {
   }
 
   @Test
-  void updateFriendRequestStatusShouldThrowResourceNotFoundExceptionWhenFriendRequestIsNotFound() {
+  void updateStatusShouldThrowResourceNotFoundExceptionWhenFriendRequestIsNotFound() {
     when(friendRequestRepository.findById(friendRequest.getId())).thenReturn(Optional.empty());
 
     assertThrows(
         ResourceNotFoundException.class,
         () ->
-            friendRequestService.updateFriendRequestStatus(
+            friendRequestService.updateStatus(
                 user1, friendRequest.getId(), FriendRequest.Status.REJECTED));
   }
 
   @Test
   void
-      updateFriendRequestStatusShouldThrowRequestNotAllowedExceptionWhenUserIdNotEqualsTargetUserIdAndTargetStatusIsACCEPTED() {
+      updateStatusShouldThrowRequestNotAllowedExceptionWhenUserIdNotEqualsTargetUserIdAndTargetStatusIsACCEPTED() {
     when(friendRequestRepository.findById(friendRequest.getId()))
         .thenReturn(Optional.ofNullable(friendRequest));
 
     assertThrows(
         RequestNotAllowedException.class,
         () ->
-            friendRequestService.updateFriendRequestStatus(
+            friendRequestService.updateStatus(
                 friendRequest.getUser(), friendRequest.getId(), FriendRequest.Status.ACCEPTED));
   }
 
   @Test
-  void updateFriendRequestStatusShouldThrowRequestNotAllowedExceptionWhenFriendRequestIsBlocked() {
+  void updateStatusShouldThrowRequestNotAllowedExceptionWhenUserBlockExists() {
     friendRequest.setStatus(FriendRequest.Status.REJECTED);
 
     when(friendRequestRepository.findById(friendRequest.getId()))
@@ -159,12 +158,12 @@ class FriendRequestServiceImplTest {
     assertThrows(
         RequestNotAllowedException.class,
         () ->
-            friendRequestService.updateFriendRequestStatus(
+            friendRequestService.updateStatus(
                 friendRequest.getUser(), friendRequest.getId(), FriendRequest.Status.ACCEPTED));
   }
 
   @Test
-  void deleteFriendRequest() {
+  void delete() {
     friendRequest.setUser(user1);
     friendRequest.setTargetUser(user2);
     friendRequest.setStatus(FriendRequest.Status.PENDING);
@@ -173,24 +172,23 @@ class FriendRequestServiceImplTest {
         .thenReturn(Optional.ofNullable(friendRequest));
     doNothing().when(friendRequestRepository).delete(any(FriendRequest.class));
 
-    friendRequestService.deleteFriendRequest(user1, friendRequest.getId());
+    friendRequestService.delete(user1, friendRequest.getId());
 
     verify(friendRequestRepository).findById(any(UUID.class));
     verify(friendRequestRepository).delete(any(FriendRequest.class));
   }
 
   @Test
-  void deleteFriendRequestShouldThrowResourceNotFoundExceptionWhenFriendRequestNotFound() {
+  void deleteShouldThrowResourceNotFoundExceptionWhenFriendRequestIsNotFound() {
     when(friendRequestRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
     assertThrows(
         ResourceNotFoundException.class,
-        () -> friendRequestService.deleteFriendRequest(user1, friendRequest.getId()));
+        () -> friendRequestService.delete(user1, friendRequest.getId()));
   }
 
   @Test
-  void
-      deleteFriendRequestShouldThrowRequestNotAllowedExceptionWhenUserIdNotEqualsSenderIdOrTargetUserId() {
+  void deleteShouldThrowRequestNotAllowedExceptionWhenUserIdIsNotEqualToSenderIdOrTargetUserId() {
     User user = new User();
     user.setId(UUID.randomUUID());
 
@@ -199,11 +197,11 @@ class FriendRequestServiceImplTest {
 
     assertThrows(
         RequestNotAllowedException.class,
-        () -> friendRequestService.deleteFriendRequest(user, friendRequest.getId()));
+        () -> friendRequestService.delete(user, friendRequest.getId()));
   }
 
   @Test
-  void deleteFriendRequestShouldThrowRequestNotAllowedExceptionWhenFriendRequestIsBlocked() {
+  void deleteShouldThrowRequestNotAllowedExceptionWhenFriendRequestIsBlocked() {
     friendRequest.setStatus(FriendRequest.Status.REJECTED);
 
     when(friendRequestRepository.findById(any(UUID.class)))
@@ -211,11 +209,11 @@ class FriendRequestServiceImplTest {
 
     assertThrows(
         RequestNotAllowedException.class,
-        () -> friendRequestService.deleteFriendRequest(user1, friendRequest.getId()));
+        () -> friendRequestService.delete(user1, friendRequest.getId()));
   }
 
   @Test
-  void getFriendRequestsByUserStatus() {
+  void findByUserAndStatus() {
     List<FriendRequest> friendRequests = new ArrayList<>();
     friendRequests.add(friendRequest);
     Page<FriendRequest> page = new PageImpl<>(friendRequests);
@@ -226,8 +224,7 @@ class FriendRequestServiceImplTest {
         .thenReturn(page);
 
     var response =
-        friendRequestService.getFriendRequestsByUserStatus(
-            user1, FriendRequest.Status.PENDING, pageable);
+        friendRequestService.findByUserAndStatus(user1, FriendRequest.Status.PENDING, pageable);
 
     assertNotNull(response);
     assertEquals(page, response);

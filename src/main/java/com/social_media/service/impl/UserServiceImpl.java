@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
   private final PasswordEncoder passwordEncoder;
 
   @Override
-  public void updateUser(User user, UserDto userDto) {
+  public User update(User user, UserDto userDto) {
     UUID id = user.getId();
 
     log.info("updating user with id {}", id);
@@ -40,10 +40,12 @@ public class UserServiceImpl implements UserService {
     user.setPassword(passwordEncoder.encode(password));
 
     log.info("updated user with id {}", id);
+
+    return user;
   }
 
   @Override
-  public Page<User> searchByUsername(String username, Pageable pageable) {
+  public Page<User> findByUsername(String username, Pageable pageable) {
     log.info("fetching users containing {} in username", username);
 
     Page<User> users = userRepository.findByUsernameContainingIgnoreCase(username, pageable);

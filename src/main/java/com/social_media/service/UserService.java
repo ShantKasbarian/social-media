@@ -5,8 +5,6 @@ import com.social_media.model.UserDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface UserService {
-  void updateUser(User user, UserDto userDto);
-
-  Page<User> searchByUsername(String username, Pageable pageable);
+public interface UserService extends Updatable<User, UserDto> {
+  Page<User> findByUsername(String username, Pageable pageable);
 }

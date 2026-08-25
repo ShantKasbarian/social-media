@@ -62,14 +62,14 @@ class LikeServiceImplTest {
   }
 
   @Test
-  void createLike() {
+  void create() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
     when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
         .thenReturn(false);
     when(likeRepository.existsByPostAndUser(any(Post.class), any(User.class))).thenReturn(false);
     when(likeRepository.save(any(Like.class))).thenReturn(like);
 
-    var response = likeService.createLike(user, post.getId());
+    var response = likeService.create(user, post.getId());
 
     assertNotNull(response);
     verify(postRepository).findById(any(UUID.class));
@@ -78,49 +78,46 @@ class LikeServiceImplTest {
   }
 
   @Test
-  void createLikeShouldThrowResourceNotFoundExceptionWhenPostNotFound() {
+  void createShouldThrowResourceNotFoundExceptionWhenPostIsNotFound() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () -> likeService.createLike(user, post.getId()));
+    assertThrows(ResourceNotFoundException.class, () -> likeService.create(user, post.getId()));
   }
 
   @Test
-  void createLikeShouldThrowRequestNotAllowedExceptionWhenBlockExistsBetweenAuthorAndUser() {
+  void createShouldThrowRequestNotAllowedExceptionWhenUserBlockExistsBetweenAuthorAndUser() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
     when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class))).thenReturn(true);
 
-    assertThrows(
-        RequestNotAllowedException.class, () -> likeService.createLike(user, post.getId()));
+    assertThrows(RequestNotAllowedException.class, () -> likeService.create(user, post.getId()));
   }
 
   @Test
-  void createLikeShouldThrowResourceAlreadyExistsExceptionWhenLikeByCurrentUserAlreadyExists() {
+  void createShouldThrowResourceAlreadyExistsExceptionWhenLikeByCurrentUserAlreadyExists() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
     when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
         .thenReturn(false);
     when(likeRepository.existsByPostAndUser(any(Post.class), any(User.class))).thenReturn(true);
     assertThrows(
-        ResourceAlreadyExistsException.class, () -> likeService.createLike(user, post.getId()));
+        ResourceAlreadyExistsException.class, () -> likeService.create(user, post.getId()));
   }
 
   @Test
-  void deleteLikeByPostId() {
+  void delete() {
     when(likeRepository.findByUserIdPostId(any(UUID.class), any(UUID.class)))
         .thenReturn(Optional.ofNullable(like));
     doNothing().when(likeRepository).delete(any(Like.class));
 
-    likeService.deleteLikeByPostId(user.getId(), post.getId());
+    likeService.delete(user, post.getId());
 
     verify(likeRepository).findByUserIdPostId(any(UUID.class), any(UUID.class));
     verify(likeRepository).delete(any(Like.class));
   }
 
   @Test
-  void deleteLikeShouldThrowResourceNotFoundExceptionWhenLikeByPostIdNotFound() {
+  void deleteShouldThrowResourceNotFoundExceptionWhenLikeByPostIdIsNotFound() {
     when(likeRepository.findByUserIdPostId(any(UUID.class), any(UUID.class)))
         .thenReturn(Optional.empty());
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> likeService.deleteLikeByPostId(user.getId(), post.getId()));
+    assertThrows(ResourceNotFoundException.class, () -> likeService.delete(user, post.getId()));
   }
 }

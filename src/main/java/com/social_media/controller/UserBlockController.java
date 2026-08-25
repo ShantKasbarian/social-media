@@ -28,7 +28,7 @@ public class UserBlockController {
       @AuthenticationPrincipal Authentication authentication, @PathVariable UUID userId) {
     User user = (User) authentication.getPrincipal();
 
-    UserBlock userBlock = userBlockService.createUserBlock(user, userId);
+    UserBlock userBlock = userBlockService.create(user, userId);
     UserBlockDto userBlockDto = userBlockConverter.convertToModel(userBlock);
 
     return new ResponseEntity<>(userBlockDto, HttpStatus.CREATED);

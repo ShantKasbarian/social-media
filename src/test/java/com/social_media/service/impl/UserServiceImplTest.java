@@ -54,20 +54,20 @@ class UserServiceImplTest {
   }
 
   @Test
-  void updateUser() {
+  void update() {
     doNothing()
         .when(credentialsValidator)
         .validateUserCredentials(anyString(), anyString(), anyString());
     when(passwordEncoder.encode(anyString())).thenReturn(user.getPassword());
 
-    userService.updateUser(user, userDto);
+    userService.update(user, userDto);
 
     verify(credentialsValidator).validateUserCredentials(anyString(), anyString(), anyString());
     verify(passwordEncoder).encode(anyString());
   }
 
   @Test
-  void searchByUsername() {
+  void findByUsername() {
     List<User> users = new ArrayList<>();
     users.add(user);
 
@@ -77,7 +77,7 @@ class UserServiceImplTest {
     when(userRepository.findByUsernameContainingIgnoreCase(anyString(), any(Pageable.class)))
         .thenReturn(page);
 
-    var response = userService.searchByUsername(user.getUsername(), pageable);
+    var response = userService.findByUsername(user.getUsername(), pageable);
 
     assertNotNull(response);
     assertEquals(page, response);

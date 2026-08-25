@@ -40,9 +40,9 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   @Transactional
-  public Comment createComment(User user, CommentDto commentDto) {
+  public Comment create(User user, CommentDto dto) {
     UUID userId = user.getId();
-    UUID postId = commentDto.postId();
+    UUID postId = dto.postId();
 
     log.info("creating comment for user with id {}", userId);
 
@@ -59,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
     Comment comment = new Comment();
     comment.setUser(userRepository.getReferenceById(userId));
     comment.setPost(postRepository.getReferenceById(postId));
-    comment.setText(commentDto.text());
+    comment.setText(dto.text());
     comment.setTime(Instant.now());
 
     commentRepository.save(comment);
@@ -71,8 +71,8 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   @Transactional
-  public Comment updateComment(User user, CommentDto commentDto) {
-    UUID id = commentDto.id();
+  public Comment update(User user, CommentDto dto) {
+    UUID id = dto.id();
 
     log.info("updating comment with id {}", id);
 
@@ -85,7 +85,7 @@ public class CommentServiceImpl implements CommentService {
       throw new RequestNotAllowedException(UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE);
     }
 
-    comment.setText(commentDto.text());
+    comment.setText(dto.text());
 
     log.info("updated comment with id {}", id);
 
@@ -94,7 +94,7 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   @Transactional
-  public void deleteComment(User user, UUID id) {
+  public void delete(User user, UUID id) {
     log.info("deleting comment with id {}", id);
 
     Comment comment =
@@ -112,7 +112,7 @@ public class CommentServiceImpl implements CommentService {
   }
 
   @Override
-  public Page<Comment> getCommentsByPostId(UUID postId, UUID userId, Pageable pageable) {
+  public Page<Comment> findByPostId(UUID postId, UUID userId, Pageable pageable) {
     log.info("fetching comments by postId {}", postId);
 
     UUID postAuthorId =
