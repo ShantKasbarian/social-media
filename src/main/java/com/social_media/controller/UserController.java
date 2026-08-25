@@ -37,7 +37,7 @@ public class UserController {
       Authentication authentication, @RequestBody UserDto userDto) {
     User user = (User) authentication.getPrincipal();
 
-    userService.updateUser(user, userConverter.convertToEntity(userDto));
+    userService.updateUser(user, userDto);
 
     return ResponseEntity.ok().build();
   }

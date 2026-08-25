@@ -1,6 +1,7 @@
 package com.social_media.service.impl;
 
 import com.social_media.entity.User;
+import com.social_media.model.UserDto;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.UserService;
 import com.social_media.utils.CredentialsValidator;
@@ -23,22 +24,20 @@ public class UserServiceImpl implements UserService {
   private final PasswordEncoder passwordEncoder;
 
   @Override
-  public void updateUser(User user, User target) {
+  public void updateUser(User user, UserDto userDto) {
     UUID id = user.getId();
 
     log.info("updating user with id {}", id);
 
-    String username = target.getUsername().trim();
-    String email = target.getEmail().trim();
-    String password = target.getPassword().trim();
+    String username = userDto.username().trim();
+    String email = userDto.email().trim();
+    String password = userDto.password().trim();
 
     credentialsValidator.validateUserCredentials(username, email, password);
 
     user.setUsername(username);
     user.setEmail(email);
     user.setPassword(passwordEncoder.encode(password));
-
-    userRepository.save(user);
 
     log.info("updated user with id {}", id);
   }

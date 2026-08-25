@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.social_media.entity.User;
+import com.social_media.model.UserDto;
 import com.social_media.repository.UserRepository;
 import com.social_media.utils.impl.CredentialsValidatorImpl;
 import java.util.ArrayList;
@@ -28,6 +29,8 @@ class UserServiceImplTest {
 
   private User user;
 
+  private UserDto userDto;
+
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
@@ -39,6 +42,15 @@ class UserServiceImplTest {
     user.setUsername("johnDoe");
     user.setFirstname("John");
     user.setLastname("Doe");
+
+    userDto =
+        new UserDto(
+            user.getId(),
+            user.getEmail(),
+            user.getPassword(),
+            user.getUsername(),
+            user.getFirstname(),
+            user.getLastname());
   }
 
   @Test
@@ -49,7 +61,7 @@ class UserServiceImplTest {
     when(userRepository.save(any(User.class))).thenReturn(user);
     when(passwordEncoder.encode(anyString())).thenReturn(user.getPassword());
 
-    userService.updateUser(user, user);
+    userService.updateUser(user, userDto);
 
     verify(credentialsValidator).validateUserCredentials(anyString(), anyString(), anyString());
     verify(passwordEncoder).encode(anyString());
