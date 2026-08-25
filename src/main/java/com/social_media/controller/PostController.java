@@ -32,9 +32,9 @@ public class PostController {
   public ResponseEntity<PostDto> createPost(
       Authentication authentication, @RequestBody @Valid PostDto postDto) {
     User user = (User) authentication.getPrincipal();
-    Post post = postConverter.convertToEntity(postDto);
 
-    PostDto responseDto = postConverter.convertToModel(postService.createPost(user, post));
+    Post post = postService.createPost(user, postDto);
+    PostDto responseDto = postConverter.convertToModel(post);
 
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }

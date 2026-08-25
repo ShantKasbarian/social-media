@@ -72,8 +72,7 @@ class PostControllerTest {
   void createPost() {
     when(authentication.getPrincipal()).thenReturn(user);
     when(postConverter.convertToModel(any(Post.class))).thenReturn(postDto);
-    when(postService.createPost(any(User.class), any(Post.class))).thenReturn(post);
-    when(postConverter.convertToEntity(any(PostDto.class))).thenReturn(post);
+    when(postService.createPost(any(User.class), any(PostDto.class))).thenReturn(post);
 
     var response = postController.createPost(authentication, postDto);
 
@@ -83,8 +82,7 @@ class PostControllerTest {
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(postConverter).convertToModel(any(Post.class));
-    verify(postService).createPost(any(User.class), any(Post.class));
-    verify(postConverter).convertToEntity(any(PostDto.class));
+    verify(postService).createPost(any(User.class), any(PostDto.class));
   }
 
   @Test

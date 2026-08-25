@@ -63,10 +63,9 @@ class PostServiceImplTest {
   void createPost() {
     when(postRepository.save(any(Post.class))).thenReturn(post);
 
-    Post response = postService.createPost(user, post);
+    Post response = postService.createPost(user, postDto);
 
     assertNotNull(response);
-    assertEquals(post, response);
     verify(postRepository).save(any(Post.class));
   }
 

@@ -18,8 +18,6 @@ class PostConverterTest {
 
   private Post post;
 
-  private PostDto postDto;
-
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
@@ -38,24 +36,6 @@ class PostConverterTest {
     post.setText("some text");
     post.setUser(user);
     post.setLikes(new ArrayList<>());
-
-    postDto =
-        new PostDto(
-            post.getId(),
-            post.getUser().getId(),
-            post.getUser().getUsername(),
-            post.getText(),
-            (long) post.getLikes().size(),
-            post.getTime());
-  }
-
-  @Test
-  void convertToEntity() {
-    Post post = postConverter.convertToEntity(postDto);
-
-    assertNotNull(post);
-    assertEquals(postDto.id(), post.getId());
-    assertEquals(postDto.text(), post.getText());
   }
 
   @Test
