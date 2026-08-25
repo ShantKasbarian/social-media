@@ -55,7 +55,7 @@ public class PostController {
       Authentication authentication, @RequestBody @Valid PostDto postDto) {
     User user = (User) authentication.getPrincipal();
 
-    var post = postService.updatePost(user, postDto.id(), postDto.text());
+    var post = postService.updatePost(user, postDto);
     var responseDto = postConverter.convertToModel(post);
 
     return ResponseEntity.ok(responseDto);

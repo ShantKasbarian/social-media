@@ -2,6 +2,7 @@ package com.social_media.service;
 
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
+import com.social_media.model.PostDto;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,7 +12,7 @@ public interface PostService {
 
   Post getPostById(UUID id, User user);
 
-  Post updatePost(User user, UUID id, String title);
+  Post updatePost(User user, PostDto postDto);
 
   void deletePost(User user, UUID id);
 

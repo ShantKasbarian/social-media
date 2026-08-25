@@ -5,6 +5,7 @@ import static com.social_media.service.impl.LikeServiceImpl.BLOCKED_USER_MESSAGE
 import com.social_media.entity.*;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
+import com.social_media.model.PostDto;
 import com.social_media.repository.*;
 import com.social_media.service.PostService;
 import jakarta.transaction.Transactional;
@@ -57,7 +58,10 @@ public class PostServiceImpl implements PostService {
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
-    if (userBlockRepository.existsBlockBetween(user.getId(), post.getUser().getId())) {
+    UUID userId = user.getId();
+    UUID authorId = post.getUser().getId();
+
+    if (!userId.equals(authorId) && userBlockRepository.existsBlockBetween(userId, authorId)) {
       throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
     }
 
@@ -68,7 +72,9 @@ public class PostServiceImpl implements PostService {
 
   @Override
   @Transactional
-  public Post updatePost(User user, UUID id, String title) {
+  public Post updatePost(User user, PostDto postDto) {
+    UUID id = postDto.id();
+
     log.info("updating post with id {}", id);
 
     Post post =
@@ -80,9 +86,7 @@ public class PostServiceImpl implements PostService {
       throw new RequestNotAllowedException(UNABLE_TO_DELETE_OR_MODIFY_POST_MESSAGE);
     }
 
-    post.setText(title);
-
-    postRepository.save(post);
+    post.setText(postDto.text());
 
     log.info("updated post with id {}", id);
 

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import com.social_media.entity.*;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
+import com.social_media.model.PostDto;
 import com.social_media.repository.*;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -28,6 +29,8 @@ class PostServiceImplTest {
 
   private Post post;
 
+  private PostDto postDto;
+
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
@@ -44,6 +47,15 @@ class PostServiceImplTest {
     post.setUser(user);
     post.setTime(Instant.now());
     post.setText("some text");
+
+    postDto =
+        new PostDto(
+            post.getId(),
+            post.getUser().getId(),
+            post.getUser().getUsername(),
+            post.getText(),
+            (long) post.getLikes().size(),
+            post.getTime());
   }
 
   @Test
@@ -82,7 +94,7 @@ class PostServiceImplTest {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
     when(postRepository.save(any(Post.class))).thenReturn(post);
 
-    Post response = postService.updatePost(user, post.getId(), targetText);
+    Post response = postService.updatePost(user, postDto);
 
     assertEquals(post.getId(), response.getId());
     assertNotEquals(text, response.getText());
@@ -94,9 +106,7 @@ class PostServiceImplTest {
   void updatePostShouldThrowResourceNotFoundExceptionWhenPostNotFound() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> postService.updatePost(user, post.getId(), "some text 2"));
+    assertThrows(ResourceNotFoundException.class, () -> postService.updatePost(user, postDto));
   }
 
   @Test
@@ -106,9 +116,7 @@ class PostServiceImplTest {
 
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
 
-    assertThrows(
-        RequestNotAllowedException.class,
-        () -> postService.updatePost(user2, post.getId(), "some text 2"));
+    assertThrows(RequestNotAllowedException.class, () -> postService.updatePost(user2, postDto));
   }
 
   @Test
