@@ -5,6 +5,7 @@ import com.social_media.entity.Comment;
 import com.social_media.entity.User;
 import com.social_media.model.CommentDto;
 import com.social_media.model.PageDto;
+import com.social_media.model.PatchCommentDto;
 import com.social_media.service.CommentService;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -15,7 +16,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -39,15 +39,15 @@ public class CommentController {
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
 
-  @PutMapping
+  @PatchMapping
   public ResponseEntity<CommentDto> updateComment(
-      Authentication authentication, @RequestBody @Valid CommentDto commentDto) {
+      Authentication authentication, @RequestBody @Valid PatchCommentDto patchCommentDto) {
     User user = (User) authentication.getPrincipal();
 
-    var comment = commentService.update(user, commentDto);
-    var responseDto = commentConverter.convertToModel(comment);
+    var comment = commentService.update(user, patchCommentDto);
+    var commentDto = commentConverter.convertToModel(comment);
 
-    return ResponseEntity.ok(responseDto);
+    return ResponseEntity.ok(commentDto);
   }
 
   @DeleteMapping("/{id}")
@@ -61,7 +61,7 @@ public class CommentController {
 
   @GetMapping("/posts/{postId}")
   public ResponseEntity<PageDto<Comment, CommentDto>> getCommentsByPostId(
-      @AuthenticationPrincipal Authentication authentication,
+      Authentication authentication,
       @PathVariable UUID postId,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "10") int size) {

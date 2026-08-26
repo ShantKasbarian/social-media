@@ -7,6 +7,7 @@ import com.social_media.entity.*;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.model.CommentDto;
+import com.social_media.model.PatchCommentDto;
 import com.social_media.repository.CommentRepository;
 import com.social_media.repository.PostRepository;
 import com.social_media.repository.UserBlockRepository;
@@ -71,7 +72,7 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   @Transactional
-  public Comment update(User user, CommentDto dto) {
+  public Comment update(User user, PatchCommentDto dto) {
     UUID id = dto.id();
 
     log.info("updating comment with id {}", id);

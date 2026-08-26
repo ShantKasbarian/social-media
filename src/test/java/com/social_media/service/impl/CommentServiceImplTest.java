@@ -8,6 +8,7 @@ import com.social_media.entity.*;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.model.CommentDto;
+import com.social_media.model.PatchCommentDto;
 import com.social_media.repository.CommentRepository;
 import com.social_media.repository.PostRepository;
 import com.social_media.repository.UserBlockRepository;
@@ -47,6 +48,8 @@ class CommentServiceImplTest {
 
   private CommentDto commentDto;
 
+  private PatchCommentDto patchCommentDto;
+
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
@@ -84,6 +87,8 @@ class CommentServiceImplTest {
 
     user2 = new User();
     user2.setId(UUID.randomUUID());
+
+    patchCommentDto = new PatchCommentDto(comment.getId(), comment.getText());
   }
 
   @Test
@@ -109,11 +114,11 @@ class CommentServiceImplTest {
 
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(comment));
 
-    Comment response = commentService.update(user, commentDto);
+    Comment response = commentService.update(user, patchCommentDto);
 
     assertNotNull(response);
     assertNotEquals(oldCommentText, response.getText());
-    assertEquals(commentDto.text(), response.getText());
+    assertEquals(patchCommentDto.text(), response.getText());
     verify(commentRepository).findById(any(UUID.class));
   }
 
@@ -125,7 +130,8 @@ class CommentServiceImplTest {
 
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(comment));
 
-    assertThrows(RequestNotAllowedException.class, () -> commentService.update(user, commentDto));
+    assertThrows(
+        RequestNotAllowedException.class, () -> commentService.update(user, patchCommentDto));
   }
 
   @Test

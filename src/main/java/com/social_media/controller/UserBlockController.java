@@ -36,9 +36,7 @@ public class UserBlockController {
 
   @GetMapping
   public ResponseEntity<PageDto<UserBlock, UserBlockDto>> getUserBlocksByUserId(
-      @AuthenticationPrincipal Authentication authentication,
-      @RequestParam int page,
-      @RequestParam int size) {
+      Authentication authentication, @RequestParam int page, @RequestParam int size) {
     UUID userId = ((User) authentication.getPrincipal()).getId();
 
     var userBlocks = userBlockService.getUserBlocksByUserId(userId, PageRequest.of(page, size));

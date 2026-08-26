@@ -62,7 +62,7 @@ public class DefaultExceptionHandler {
 
   @ExceptionHandler(Throwable.class)
   public ResponseEntity<ErrorDto> handle(Throwable e) {
-    log.debug(e.getLocalizedMessage());
+    log.error(e.getLocalizedMessage());
 
     return new ResponseEntity<>(
         new ErrorDto(INTERNAL_SERVER_ERROR_MESSAGE), HttpStatus.INTERNAL_SERVER_ERROR);

@@ -9,6 +9,7 @@ import com.social_media.entity.Comment;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
 import com.social_media.model.CommentDto;
+import com.social_media.model.PatchCommentDto;
 import com.social_media.service.CommentService;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -42,6 +43,8 @@ class CommentControllerTest {
 
   private CommentDto commentDto;
 
+  private PatchCommentDto patchCommentDto;
+
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
@@ -70,6 +73,8 @@ class CommentControllerTest {
             comment.getUser().getId(),
             comment.getUser().getUsername(),
             comment.getTime());
+
+    patchCommentDto = new PatchCommentDto(comment.getId(), comment.getText());
   }
 
   @Test
@@ -92,10 +97,10 @@ class CommentControllerTest {
   @Test
   void updateComment() {
     when(authentication.getPrincipal()).thenReturn(user);
+    when(commentService.update(any(User.class), any(PatchCommentDto.class))).thenReturn(comment);
     when(commentConverter.convertToModel(any(Comment.class))).thenReturn(commentDto);
-    when(commentService.update(any(User.class), any(CommentDto.class))).thenReturn(comment);
 
-    var response = commentController.updateComment(authentication, commentDto);
+    var response = commentController.updateComment(authentication, patchCommentDto);
 
     assertNotNull(response);
     assertNotNull(response.getBody());
@@ -103,7 +108,7 @@ class CommentControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(commentConverter).convertToModel(any(Comment.class));
-    verify(commentService).update(any(User.class), any(CommentDto.class));
+    verify(commentService).update(any(User.class), any(PatchCommentDto.class));
   }
 
   @Test

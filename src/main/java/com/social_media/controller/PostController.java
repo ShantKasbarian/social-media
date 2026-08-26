@@ -17,7 +17,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -40,8 +39,7 @@ public class PostController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<PostDto> getPostById(
-      @AuthenticationPrincipal Authentication authentication, @PathVariable UUID id) {
+  public ResponseEntity<PostDto> getPostById(Authentication authentication, @PathVariable UUID id) {
     User user = (User) authentication.getPrincipal();
 
     var post = postService.findById(id, user);
