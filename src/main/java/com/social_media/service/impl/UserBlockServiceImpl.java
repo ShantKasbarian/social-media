@@ -23,18 +23,18 @@ public class UserBlockServiceImpl implements UserBlockService {
 
   @Override
   @Transactional
-  public UserBlock create(User currentUser, UUID targetUserId) {
+  public UserBlock create(User currentUser, UUID data) {
     UUID currentUserId = currentUser.getId();
 
-    log.info("user with id {} is blocking user with id {}", currentUserId, targetUserId);
+    log.info("user with id {} is blocking user with id {}", currentUserId, data);
 
     UserBlock userBlock = new UserBlock();
     userBlock.setUser(currentUser);
-    userBlock.setTargetUser(userRepository.getReferenceById(targetUserId));
+    userBlock.setTargetUser(userRepository.getReferenceById(data));
 
     userBlockRepository.save(userBlock);
 
-    log.info("user with id {} blocked user with id {}", currentUserId, targetUserId);
+    log.info("user with id {} blocked user with id {}", currentUserId, data);
 
     return userBlock;
   }

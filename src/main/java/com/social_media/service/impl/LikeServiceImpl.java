@@ -36,12 +36,12 @@ public class LikeServiceImpl implements LikeService {
 
   @Override
   @Transactional
-  public Like create(User user, UUID id) {
-    log.info("creating like for post with id {}", id);
+  public Like create(User user, UUID data) {
+    log.info("creating like for post with data {}", data);
 
     Post post =
         postRepository
-            .findById(id)
+            .findById(data)
             .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
     if (userBlockRepository.existsBlockBetween(user.getId(), post.getUser().getId())) {
@@ -58,7 +58,7 @@ public class LikeServiceImpl implements LikeService {
 
     likeRepository.save(like);
 
-    log.info("created like for post with id {}", id);
+    log.info("created like for post with data {}", data);
 
     return like;
   }

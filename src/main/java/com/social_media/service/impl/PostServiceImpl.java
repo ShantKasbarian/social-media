@@ -32,13 +32,13 @@ public class PostServiceImpl implements PostService {
 
   @Override
   @Transactional
-  public Post create(User user, PostDto dto) {
+  public Post create(User user, PostDto data) {
     UUID id = user.getId();
 
     log.info("creating post for user with id {}", id);
 
     Post post = new Post();
-    post.setText(dto.text());
+    post.setText(data.text());
     post.setTime(Instant.now());
     post.setUser(user);
 

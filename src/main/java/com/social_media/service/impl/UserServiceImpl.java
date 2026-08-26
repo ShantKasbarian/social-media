@@ -21,14 +21,14 @@ public class UserServiceImpl implements UserService {
   private final PasswordEncoder passwordEncoder;
 
   @Override
-  public User update(User user, UserPatchDto userPatchDto) {
+  public User update(User user, UserPatchDto dto) {
     UUID id = user.getId();
 
     log.info("updating user with id {}", id);
 
-    user.setUsername(userPatchDto.username().trim());
-    user.setEmail(userPatchDto.email().trim());
-    user.setPassword(passwordEncoder.encode(userPatchDto.password().trim()));
+    user.setUsername(dto.username().trim());
+    user.setEmail(dto.email().trim());
+    user.setPassword(passwordEncoder.encode(dto.password().trim()));
 
     log.info("updated user with id {}", id);
 
