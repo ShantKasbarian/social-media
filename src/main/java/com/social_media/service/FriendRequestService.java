@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface FriendRequestService extends Creatable<FriendRequest, UUID>, Deletable {
-  FriendRequest updateStatus(User user, UUID requestId, FriendRequest.Status status);
+  FriendRequest acceptFriendRequest(User user, UUID requestId);
 
   Page<FriendRequest> findByUserAndStatus(
       User user, FriendRequest.Status status, Pageable pageable);

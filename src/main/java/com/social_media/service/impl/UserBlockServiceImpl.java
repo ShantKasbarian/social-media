@@ -2,6 +2,7 @@ package com.social_media.service.impl;
 
 import com.social_media.entity.User;
 import com.social_media.entity.UserBlock;
+import com.social_media.repository.FriendRequestRepository;
 import com.social_media.repository.UserBlockRepository;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.UserBlockService;
@@ -21,6 +22,8 @@ public class UserBlockServiceImpl implements UserBlockService {
 
   private final UserRepository userRepository;
 
+  private final FriendRequestRepository friendRequestRepository;
+
   @Override
   @Transactional
   public UserBlock create(User currentUser, UUID data) {
@@ -33,6 +36,7 @@ public class UserBlockServiceImpl implements UserBlockService {
     userBlock.setTargetUser(userRepository.getReferenceById(data));
 
     userBlockRepository.save(userBlock);
+    friendRequestRepository.deleteByUserIdTargetUserId(currentUserId, data);
 
     log.info("user with id {} blocked user with id {}", currentUserId, data);
 

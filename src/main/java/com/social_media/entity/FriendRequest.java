@@ -35,7 +35,6 @@ public class FriendRequest {
 
   public enum Status {
     ACCEPTED,
-    REJECTED,
     PENDING
   }
 }
