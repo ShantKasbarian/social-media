@@ -5,8 +5,8 @@ import static org.mockito.Mockito.*;
 
 import com.social_media.entity.User;
 import com.social_media.model.UserDto;
+import com.social_media.model.UserPatchDto;
 import com.social_media.repository.UserRepository;
-import com.social_media.utils.impl.CredentialsValidatorImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -23,13 +23,13 @@ class UserServiceImplTest {
 
   @Mock private UserRepository userRepository;
 
-  @Mock private CredentialsValidatorImpl credentialsValidator;
-
   @Mock private PasswordEncoder passwordEncoder;
 
   private User user;
 
   private UserDto userDto;
+
+  private UserPatchDto userPatchDto;
 
   @BeforeEach
   void setUp() {
@@ -51,18 +51,16 @@ class UserServiceImplTest {
             user.getUsername(),
             user.getFirstname(),
             user.getLastname());
+
+    userPatchDto = new UserPatchDto(user.getEmail(), user.getUsername(), user.getPassword());
   }
 
   @Test
   void update() {
-    doNothing()
-        .when(credentialsValidator)
-        .validateUserCredentials(anyString(), anyString(), anyString());
     when(passwordEncoder.encode(anyString())).thenReturn(user.getPassword());
 
-    userService.update(user, userDto);
+    userService.update(user, userPatchDto);
 
-    verify(credentialsValidator).validateUserCredentials(anyString(), anyString(), anyString());
     verify(passwordEncoder).encode(anyString());
   }
 

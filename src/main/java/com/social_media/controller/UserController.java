@@ -4,7 +4,9 @@ import com.social_media.converter.UserConverter;
 import com.social_media.entity.User;
 import com.social_media.model.PageDto;
 import com.social_media.model.UserDto;
+import com.social_media.model.UserPatchDto;
 import com.social_media.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,10 +36,10 @@ public class UserController {
 
   @PutMapping
   public ResponseEntity<Void> updateUser(
-      Authentication authentication, @RequestBody UserDto userDto) {
+      Authentication authentication, @RequestBody @Valid UserPatchDto userPatchDto) {
     User user = (User) authentication.getPrincipal();
 
-    userService.update(user, userDto);
+    userService.update(user, userPatchDto);
 
     return ResponseEntity.ok().build();
   }

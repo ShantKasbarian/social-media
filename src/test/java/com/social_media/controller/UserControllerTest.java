@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 import com.social_media.converter.UserConverter;
 import com.social_media.entity.User;
 import com.social_media.model.UserDto;
+import com.social_media.model.UserPatchDto;
 import com.social_media.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,8 @@ class UserControllerTest {
 
   private UserDto userDto;
 
+  private UserPatchDto userPatchDto;
+
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
@@ -55,6 +58,8 @@ class UserControllerTest {
             user.getUsername(),
             user.getFirstname(),
             user.getLastname());
+
+    userPatchDto = new UserPatchDto(user.getEmail(), user.getUsername(), user.getPassword());
   }
 
   @Test
@@ -73,12 +78,12 @@ class UserControllerTest {
   @Test
   void updateUser() {
     when(authentication.getPrincipal()).thenReturn(user);
-    when(userService.update(any(User.class), any(UserDto.class))).thenReturn(user);
+    when(userService.update(any(User.class), any(UserPatchDto.class))).thenReturn(user);
 
-    userController.updateUser(authentication, userDto);
+    userController.updateUser(authentication, userPatchDto);
 
     verify(authentication).getPrincipal();
-    verify(userService).update(any(User.class), any(UserDto.class));
+    verify(userService).update(any(User.class), any(UserPatchDto.class));
   }
 
   @Test
