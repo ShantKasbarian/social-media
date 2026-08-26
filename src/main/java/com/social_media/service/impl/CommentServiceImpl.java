@@ -41,9 +41,9 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   @Transactional
-  public Comment create(User user, CommentDto dto) {
+  public Comment create(User user, CommentDto data) {
     UUID userId = user.getId();
-    UUID postId = dto.postId();
+    UUID postId = data.postId();
 
     log.info("creating comment for user with id {}", userId);
 
@@ -60,7 +60,7 @@ public class CommentServiceImpl implements CommentService {
     Comment comment = new Comment();
     comment.setUser(userRepository.getReferenceById(userId));
     comment.setPost(postRepository.getReferenceById(postId));
-    comment.setText(dto.text());
+    comment.setText(data.text());
     comment.setTime(Instant.now());
 
     commentRepository.save(comment);

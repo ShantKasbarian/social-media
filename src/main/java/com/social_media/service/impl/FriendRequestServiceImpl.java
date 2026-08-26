@@ -38,19 +38,18 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
   @Override
   @Transactional
-  public FriendRequest create(User user, UUID targetUserId) {
+  public FriendRequest create(User user, UUID data) {
     UUID currentUserId = user.getId();
 
-    log.info(
-        "creating friend request with userId {} and targetUserId {}", currentUserId, targetUserId);
+    log.info("creating friend request with userId {} and data {}", currentUserId, data);
 
     User targetUser =
         userRepository
-            .findById(targetUserId)
+            .findById(data)
             .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
 
-    if (friendRequestRepository.existsByUserIdTargetUserId(currentUserId, targetUserId)
-        || userBlockRepository.existsBlockBetween(currentUserId, targetUserId)) {
+    if (friendRequestRepository.existsByUserIdTargetUserId(currentUserId, data)
+        || userBlockRepository.existsBlockBetween(currentUserId, data)) {
       throw new ResourceAlreadyExistsException(FRIEND_REQUEST_ALREADY_SENT_MESSAGE);
     }
 
@@ -61,8 +60,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     friendRequestRepository.save(friendRequest);
 
-    log.info(
-        "created friend request with userId {} and targetUserId {}", currentUserId, targetUserId);
+    log.info("created friend request with userId {} and data {}", currentUserId, data);
 
     return friendRequest;
   }
