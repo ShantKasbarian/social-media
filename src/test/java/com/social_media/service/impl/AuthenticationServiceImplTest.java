@@ -7,7 +7,6 @@ import com.social_media.entity.User;
 import com.social_media.exception.InvalidCredentialsException;
 import com.social_media.model.LoginDto;
 import com.social_media.repository.UserRepository;
-import com.social_media.utils.impl.CredentialsValidatorImpl;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,8 +29,6 @@ class AuthenticationServiceImplTest {
   @Mock private UserRepository userRepository;
 
   @Mock private JwtServiceImpl jwtService;
-
-  @Mock private CredentialsValidatorImpl credentialsValidator;
 
   @Mock private PasswordEncoder passwordEncoder;
 
@@ -84,9 +81,6 @@ class AuthenticationServiceImplTest {
     String rawPassword = user.getPassword();
     String encodedPassword = "some encoded password";
 
-    doNothing()
-        .when(credentialsValidator)
-        .validateUserCredentials(anyString(), anyString(), anyString());
     when(passwordEncoder.encode(anyString())).thenReturn(encodedPassword);
     when(userRepository.save(any(User.class))).thenReturn(user);
     when(jwtService.generateToken(anyString())).thenReturn(TEST_TOKEN);
@@ -97,7 +91,6 @@ class AuthenticationServiceImplTest {
     assertEquals(TEST_TOKEN, tokenDto.token());
     assertNotEquals(rawPassword, user.getPassword());
     assertEquals(encodedPassword, user.getPassword());
-    verify(credentialsValidator).validateUserCredentials(anyString(), anyString(), anyString());
     verify(passwordEncoder).encode(anyString());
     verify(userRepository).save(any(User.class));
     verify(jwtService).generateToken(anyString());

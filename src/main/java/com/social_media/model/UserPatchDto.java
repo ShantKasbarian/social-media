@@ -5,10 +5,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.util.UUID;
 
-public record UserDto(
-    UUID id,
+public record UserPatchDto(
     @NotBlank(message = "email must be specified") @Email(message = "email is invalid")
         String email,
     @NotBlank(message = "username must be specified")
@@ -21,6 +19,4 @@ public record UserDto(
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d]).{6,}$",
             message =
                 "password must be at least 6 characters long contain one uppercase, one lowercase, one digit and one special character")
-        String password,
-    @NotBlank(message = "firstname must be specified") String firstname,
-    @NotBlank(message = "lastname must be specified") String lastname) {}
+        String password) {}
