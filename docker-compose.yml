@@ -1,6 +1,6 @@
 services:
   postgres:
-    container_name: social-media-database
+    container_name: database
     image: postgres:17
     environment:
       POSTGRES_USER: postgres
@@ -13,7 +13,7 @@ services:
     networks:
       - social-media-network
 
-  social-media-app:
+  app:
     build: .
     ports:
       - "8080:8080"
