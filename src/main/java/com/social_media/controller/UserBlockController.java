@@ -40,9 +40,19 @@ public class UserBlockController {
       @RequestParam(defaultValue = "10", required = false) int size) {
     UUID userId = ((User) authentication.getPrincipal()).getId();
 
-    var userBlocks = userBlockService.getUserBlocksByUserId(userId, PageRequest.of(page, size));
+    var userBlocks = userBlockService.findByUserId(userId, PageRequest.of(page, size));
     var pageDto = new PageDto<>(userBlocks, userBlockConverter);
 
     return ResponseEntity.ok(pageDto);
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteUserBlock(
+      Authentication authentication, @PathVariable UUID id) {
+    User user = (User) authentication.getPrincipal();
+
+    userBlockService.delete(user, id);
+
+    return ResponseEntity.noContent().build();
   }
 }

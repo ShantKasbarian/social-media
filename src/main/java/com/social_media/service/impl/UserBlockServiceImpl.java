@@ -2,7 +2,9 @@ package com.social_media.service.impl;
 
 import com.social_media.entity.User;
 import com.social_media.entity.UserBlock;
+import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
+import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.FriendRequestRepository;
 import com.social_media.repository.UserBlockRepository;
 import com.social_media.repository.UserRepository;
@@ -21,6 +23,11 @@ import org.springframework.stereotype.Service;
 public class UserBlockServiceImpl implements UserBlockService {
   private static final String USER_BLOCK_ALREADY_EXISTS_MESSAGE =
       "cannot block user because a block relationship already exists";
+
+  private static final String USER_BLOCK_NOT_FOUND_MESSAGE = "user block not found";
+
+  private static final String CANNOT_DELETE_USER_BLOCK_MESSAGE =
+      "cannot unblock user because you are not the blocker";
 
   private final UserBlockRepository userBlockRepository;
 
@@ -52,7 +59,25 @@ public class UserBlockServiceImpl implements UserBlockService {
   }
 
   @Override
-  public Page<UserBlock> getUserBlocksByUserId(UUID userId, Pageable pageable) {
+  public void delete(User user, UUID id) {
+    log.info("deleting userBlock with id {}", id);
+
+    UserBlock userBlock =
+        userBlockRepository
+            .findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException(USER_BLOCK_NOT_FOUND_MESSAGE));
+
+    if (!userBlock.getUser().getId().equals(user.getId())) {
+      throw new RequestNotAllowedException(CANNOT_DELETE_USER_BLOCK_MESSAGE);
+    }
+
+    userBlockRepository.delete(userBlock);
+
+    log.info("deleted userBlock with id {}", id);
+  }
+
+  @Override
+  public Page<UserBlock> findByUserId(UUID userId, Pageable pageable) {
     log.info("fetching user blocks for user with id {}", userId);
 
     var page = userBlockRepository.findByUserId(userId, pageable);
