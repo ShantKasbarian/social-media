@@ -12,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -25,7 +24,7 @@ public class UserBlockController {
 
   @PostMapping("/{userId}")
   public ResponseEntity<UserBlockDto> createUserBlock(
-      @AuthenticationPrincipal Authentication authentication, @PathVariable UUID userId) {
+      Authentication authentication, @PathVariable UUID userId) {
     User user = (User) authentication.getPrincipal();
 
     UserBlock userBlock = userBlockService.create(user, userId);
@@ -36,7 +35,9 @@ public class UserBlockController {
 
   @GetMapping
   public ResponseEntity<PageDto<UserBlock, UserBlockDto>> getUserBlocksByUserId(
-      Authentication authentication, @RequestParam int page, @RequestParam int size) {
+      Authentication authentication,
+      @RequestParam(defaultValue = "0", required = false) int page,
+      @RequestParam(defaultValue = "10", required = false) int size) {
     UUID userId = ((User) authentication.getPrincipal()).getId();
 
     var userBlocks = userBlockService.getUserBlocksByUserId(userId, PageRequest.of(page, size));
