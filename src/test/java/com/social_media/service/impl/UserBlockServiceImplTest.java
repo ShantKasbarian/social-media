@@ -31,6 +31,8 @@ class UserBlockServiceImplTest {
 
   private static final String USER_BLOCK_NOT_FOUND_MESSAGE = "user block not found";
 
+  private static final String CANNOT_SELF_BLOCK_MESSAGE = "self block not allowed";
+
   private static final String CANNOT_DELETE_USER_BLOCK_MESSAGE =
       "cannot unblock user because you are not the blocker";
 
@@ -82,6 +84,15 @@ class UserBlockServiceImplTest {
     verify(userBlockRepository).existsBlockBetween(any(UUID.class), any(UUID.class));
     verify(userBlockRepository).save(any(UserBlock.class));
     verify(friendRequestRepository).deleteByUserIdTargetUserId(any(UUID.class), any(UUID.class));
+  }
+
+  @Test
+  void createShouldThrowRequestNotAllowedExceptionWhenCurrentUserIdEqualsTargetUserId() {
+    Exception exception =
+        assertThrows(
+            RequestNotAllowedException.class,
+            () -> userBlockServiceImpl.create(user, user.getId()));
+    assertEquals(CANNOT_SELF_BLOCK_MESSAGE, exception.getMessage());
   }
 
   @Test
