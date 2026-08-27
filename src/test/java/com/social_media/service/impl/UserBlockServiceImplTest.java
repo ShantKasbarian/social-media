@@ -6,11 +6,14 @@ import static org.mockito.Mockito.*;
 
 import com.social_media.entity.User;
 import com.social_media.entity.UserBlock;
+import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
+import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.FriendRequestRepository;
 import com.social_media.repository.UserBlockRepository;
 import com.social_media.repository.UserRepository;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +28,11 @@ import org.springframework.data.domain.Pageable;
 class UserBlockServiceImplTest {
   private static final String USER_BLOCK_ALREADY_EXISTS_MESSAGE =
       "cannot block user because a block relationship already exists";
+
+  private static final String USER_BLOCK_NOT_FOUND_MESSAGE = "user block not found";
+
+  private static final String CANNOT_DELETE_USER_BLOCK_MESSAGE =
+      "cannot unblock user because you are not the blocker";
 
   @InjectMocks private UserBlockServiceImpl userBlockServiceImpl;
 
@@ -88,11 +96,44 @@ class UserBlockServiceImplTest {
   }
 
   @Test
-  void getUserBlocksByUserId() {
+  void delete() {
+    when(userBlockRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(userBlock));
+    doNothing().when(userBlockRepository).delete(any(UserBlock.class));
+
+    userBlockServiceImpl.delete(user, userBlock.getId());
+
+    verify(userBlockRepository).findById(any(UUID.class));
+    verify(userBlockRepository).delete(any(UserBlock.class));
+  }
+
+  @Test
+  void deleteShouldThrowResourceNotFoundExceptionWhenUserBlockDoesNotExist() {
+    when(userBlockRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+    Exception exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () -> userBlockServiceImpl.delete(user, userBlock.getId()));
+    assertEquals(USER_BLOCK_NOT_FOUND_MESSAGE, exception.getMessage());
+  }
+
+  @Test
+  void deleteShouldThrowRequestNotAllowedExceptionWhenUserIsNotBlocker() {
+    when(userBlockRepository.findById(any(UUID.class))).thenReturn(Optional.of(userBlock));
+
+    Exception exception =
+        assertThrows(
+            RequestNotAllowedException.class,
+            () -> userBlockServiceImpl.delete(user2, userBlock.getId()));
+    assertEquals(CANNOT_DELETE_USER_BLOCK_MESSAGE, exception.getMessage());
+  }
+
+  @Test
+  void findByUserId() {
     when(userBlockRepository.findByUserId(any(UUID.class), any(Pageable.class)))
         .thenReturn(userBlocks);
 
-    var response = userBlockServiceImpl.getUserBlocksByUserId(user.getId(), PageRequest.of(0, 10));
+    var response = userBlockServiceImpl.findByUserId(user.getId(), PageRequest.of(0, 10));
 
     assertNotNull(response);
     assertEquals(userBlocks, response);

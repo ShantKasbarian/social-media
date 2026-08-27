@@ -80,7 +80,7 @@ class UserBlockControllerTest {
 
   @Test
   void getUserBlocksByUserId() {
-    when(userBlockService.getUserBlocksByUserId(any(UUID.class), any(Pageable.class)))
+    when(userBlockService.findByUserId(any(UUID.class), any(Pageable.class)))
         .thenReturn(userBlocks);
     when(userBlockConverter.convertToModel(any(UserBlock.class))).thenReturn(userBlockDto);
 
@@ -90,7 +90,18 @@ class UserBlockControllerTest {
     assertNotNull(response.getBody());
     assertEquals(userBlocks.getTotalElements(), response.getBody().getTotalElements());
     assertEquals(userBlocks.getContent().size(), response.getBody().getContent().size());
-    verify(userBlockService).getUserBlocksByUserId(any(UUID.class), any(Pageable.class));
+    verify(userBlockService).findByUserId(any(UUID.class), any(Pageable.class));
     verify(userBlockConverter, atLeastOnce()).convertToModel(any(UserBlock.class));
+  }
+
+  @Test
+  void deleteUserBlock() {
+    doNothing().when(userBlockService).delete(any(User.class), any(UUID.class));
+
+    var response = userBlockController.deleteUserBlock(authentication, userBlock.getId());
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    verify(userBlockService).delete(any(User.class), any(UUID.class));
   }
 }
