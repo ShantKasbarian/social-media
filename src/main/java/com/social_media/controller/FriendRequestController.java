@@ -34,14 +34,12 @@ public class FriendRequestController {
     return new ResponseEntity<>(friendRequestDto, HttpStatus.CREATED);
   }
 
-  @PatchMapping("/{id}/status/{status}")
-  public ResponseEntity<FriendRequestDto> updateFriendRequestStatus(
-      Authentication authentication,
-      @PathVariable UUID id,
-      @PathVariable FriendRequest.Status status) {
+  @PatchMapping("/{id}/accept")
+  public ResponseEntity<FriendRequestDto> acceptFriendRequest(
+      Authentication authentication, @PathVariable UUID id) {
     User user = (User) authentication.getPrincipal();
 
-    FriendRequest friendRequest = friendRequestService.updateStatus(user, id, status);
+    FriendRequest friendRequest = friendRequestService.acceptFriendRequest(user, id);
     FriendRequestDto friendRequestDto = friendRequestConverter.convertToModel(friendRequest);
 
     return ResponseEntity.ok(friendRequestDto);

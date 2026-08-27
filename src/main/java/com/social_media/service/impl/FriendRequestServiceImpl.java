@@ -25,8 +25,11 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
   private static final String FRIEND_REQUEST_ALREADY_SENT_MESSAGE = "friend request already exists";
 
-  private static final String UNABLE_TO_UPDATE_DELETE_FRIEND_REQUEST_MESSAGE =
+  private static final String UNABLE_TO_UPDATE_FRIEND_REQUEST_STATUS_MESSAGE =
       "cannot update friendRequest status";
+
+  private static final String UNABLE_TO_DELETE_FRIEND_REQUEST_MESSAGE =
+      "cannot delete friend request";
 
   private static final String FRIEND_REQUEST_NOT_FOUND_MESSAGE = "friend request not found";
 
@@ -67,7 +70,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
   @Override
   @Transactional
-  public FriendRequest updateStatus(User user, UUID requestId, FriendRequest.Status status) {
+  public FriendRequest acceptFriendRequest(User user, UUID requestId) {
     log.info("updating friendRequest with id {}", requestId);
 
     FriendRequest friendRequest =
@@ -75,16 +78,12 @@ public class FriendRequestServiceImpl implements FriendRequestService {
             .findById(requestId)
             .orElseThrow(() -> new ResourceNotFoundException(FRIEND_REQUEST_NOT_FOUND_MESSAGE));
 
-    if (FriendRequest.Status.REJECTED.equals(friendRequest.getStatus())
-        || (!user.getId().equals(friendRequest.getTargetUser().getId())
-            && FriendRequest.Status.ACCEPTED.equals(status))
-        || userBlockRepository.existsBlockBetween(user.getId(), friendRequest.getUser().getId())) {
-      throw new RequestNotAllowedException(UNABLE_TO_UPDATE_DELETE_FRIEND_REQUEST_MESSAGE);
+    if (FriendRequest.Status.PENDING.equals(friendRequest.getStatus())
+        && !user.getId().equals(friendRequest.getTargetUser().getId())) {
+      throw new RequestNotAllowedException(UNABLE_TO_UPDATE_FRIEND_REQUEST_STATUS_MESSAGE);
     }
 
-    friendRequest.setStatus(status);
-
-    friendRequestRepository.save(friendRequest);
+    friendRequest.setStatus(FriendRequest.Status.ACCEPTED);
 
     log.info("updated friendRequest with id {}", requestId);
 
@@ -103,9 +102,9 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     UUID userId = user.getId();
 
-    if (FriendRequest.Status.REJECTED.equals(friendRequest.getStatus())
-        || !friendRequest.getUser().getId().equals(userId)) {
-      throw new RequestNotAllowedException(UNABLE_TO_UPDATE_DELETE_FRIEND_REQUEST_MESSAGE);
+    if (!friendRequest.getUser().getId().equals(userId)
+        && !friendRequest.getTargetUser().getId().equals(userId)) {
+      throw new RequestNotAllowedException(UNABLE_TO_DELETE_FRIEND_REQUEST_MESSAGE);
     }
 
     friendRequestRepository.delete(friendRequest);

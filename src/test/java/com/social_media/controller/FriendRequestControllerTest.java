@@ -92,17 +92,15 @@ class FriendRequestControllerTest {
   }
 
   @Test
-  void updateFriendRequestStatus() {
+  void acceptFriendRequest() {
     when(authentication.getPrincipal()).thenReturn(user1);
     when(friendRequestConverter.convertToModel(any(FriendRequest.class)))
         .thenReturn(friendRequestDto);
-    when(friendRequestService.updateStatus(
-            any(User.class), any(UUID.class), any(FriendRequest.Status.class)))
+    when(friendRequestService.acceptFriendRequest(any(User.class), any(UUID.class)))
         .thenReturn(friendRequest);
 
     var response =
-        friendRequestController.updateFriendRequestStatus(
-            authentication, friendRequest.getId(), FriendRequest.Status.ACCEPTED);
+        friendRequestController.acceptFriendRequest(authentication, friendRequest.getId());
 
     assertNotNull(response);
     assertNotNull(response.getBody());
@@ -110,8 +108,7 @@ class FriendRequestControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(authentication).getPrincipal();
     verify(friendRequestConverter).convertToModel(any(FriendRequest.class));
-    verify(friendRequestService)
-        .updateStatus(any(User.class), any(UUID.class), any(FriendRequest.Status.class));
+    verify(friendRequestService).acceptFriendRequest(any(User.class), any(UUID.class));
   }
 
   @Test

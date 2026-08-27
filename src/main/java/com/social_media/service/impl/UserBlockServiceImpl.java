@@ -2,6 +2,8 @@ package com.social_media.service.impl;
 
 import com.social_media.entity.User;
 import com.social_media.entity.UserBlock;
+import com.social_media.exception.ResourceAlreadyExistsException;
+import com.social_media.repository.FriendRequestRepository;
 import com.social_media.repository.UserBlockRepository;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.UserBlockService;
@@ -17,9 +19,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class UserBlockServiceImpl implements UserBlockService {
+  private static final String USER_BLOCK_ALREADY_EXISTS_MESSAGE =
+      "cannot block user because a block relationship already exists";
+
   private final UserBlockRepository userBlockRepository;
 
   private final UserRepository userRepository;
+
+  private final FriendRequestRepository friendRequestRepository;
 
   @Override
   @Transactional
@@ -28,11 +35,16 @@ public class UserBlockServiceImpl implements UserBlockService {
 
     log.info("user with id {} is blocking user with id {}", currentUserId, data);
 
+    if (userBlockRepository.existsBlockBetween(currentUserId, data)) {
+      throw new ResourceAlreadyExistsException(USER_BLOCK_ALREADY_EXISTS_MESSAGE);
+    }
+
     UserBlock userBlock = new UserBlock();
     userBlock.setUser(currentUser);
     userBlock.setTargetUser(userRepository.getReferenceById(data));
 
     userBlockRepository.save(userBlock);
+    friendRequestRepository.deleteByUserIdTargetUserId(currentUserId, data);
 
     log.info("user with id {} blocked user with id {}", currentUserId, data);
 
