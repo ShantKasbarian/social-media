@@ -9,7 +9,7 @@ import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -21,15 +21,13 @@ class CommentRepositoryTest {
 
   @Autowired private PostRepository postRepository;
 
-  private User user;
-
   private Post post;
 
   private Comment comment;
 
   @BeforeEach
   void setUp() {
-    user = new User();
+    User user = new User();
     user.setEmail("someone@example.com");
     user.setPassword("Password123+");
     user.setUsername("johnDoe");
