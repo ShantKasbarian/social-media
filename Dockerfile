@@ -1,4 +1,4 @@
-FROM openjdk:21
+FROM eclipse-temurin:25
 LABEL authors="Shant"
 ADD target/social-media-0.0.1-SNAPSHOT.jar social-media-app-v1.jar
 
