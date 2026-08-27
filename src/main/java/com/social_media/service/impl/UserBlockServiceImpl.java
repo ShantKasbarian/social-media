@@ -24,6 +24,8 @@ public class UserBlockServiceImpl implements UserBlockService {
   private static final String USER_BLOCK_ALREADY_EXISTS_MESSAGE =
       "cannot block user because a block relationship already exists";
 
+  private static final String CANNOT_SELF_BLOCK_MESSAGE = "self block not allowed";
+
   private static final String USER_BLOCK_NOT_FOUND_MESSAGE = "user block not found";
 
   private static final String CANNOT_DELETE_USER_BLOCK_MESSAGE =
@@ -41,6 +43,10 @@ public class UserBlockServiceImpl implements UserBlockService {
     UUID currentUserId = currentUser.getId();
 
     log.info("user with id {} is blocking user with id {}", currentUserId, data);
+
+    if (currentUser.getId().equals(data)) {
+      throw new RequestNotAllowedException(CANNOT_SELF_BLOCK_MESSAGE);
+    }
 
     if (userBlockRepository.existsBlockBetween(currentUserId, data)) {
       throw new ResourceAlreadyExistsException(USER_BLOCK_ALREADY_EXISTS_MESSAGE);
