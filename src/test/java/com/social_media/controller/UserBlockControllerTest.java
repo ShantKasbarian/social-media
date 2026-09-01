@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.social_media.converter.UserBlockConverter;
 import com.social_media.entity.User;
 import com.social_media.entity.UserBlock;
+import com.social_media.mapper.UserBlockMapper;
 import com.social_media.model.UserBlockDto;
 import com.social_media.service.UserBlockService;
 import java.util.List;
@@ -27,7 +27,7 @@ class UserBlockControllerTest {
 
   @Mock private UserBlockService userBlockService;
 
-  @Mock private UserBlockConverter userBlockConverter;
+  @Mock private UserBlockMapper userBlockMapper;
 
   @Mock private Authentication authentication;
 
@@ -68,7 +68,7 @@ class UserBlockControllerTest {
   @Test
   void createUserBlock() {
     when(userBlockService.create(any(User.class), any(UUID.class))).thenReturn(userBlock);
-    when(userBlockConverter.convertToModel(any(UserBlock.class))).thenReturn(userBlockDto);
+    when(userBlockMapper.toModel(any(UserBlock.class))).thenReturn(userBlockDto);
 
     var response = userBlockController.createUserBlock(authentication, user2.getId());
 
@@ -76,14 +76,14 @@ class UserBlockControllerTest {
     assertEquals(userBlockDto, response.getBody());
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     verify(userBlockService).create(any(User.class), any(UUID.class));
-    verify(userBlockConverter).convertToModel(any(UserBlock.class));
+    verify(userBlockMapper).toModel(any(UserBlock.class));
   }
 
   @Test
   void getUserBlocksByUserId() {
     when(userBlockService.findByUserId(any(UUID.class), any(Pageable.class)))
         .thenReturn(userBlocks);
-    when(userBlockConverter.convertToModel(any(UserBlock.class))).thenReturn(userBlockDto);
+    when(userBlockMapper.toModel(any(UserBlock.class))).thenReturn(userBlockDto);
 
     var response = userBlockController.getUserBlocksByUserId(authentication, 0, 10);
 
@@ -92,7 +92,7 @@ class UserBlockControllerTest {
     assertEquals(userBlocks.getTotalElements(), response.getBody().getTotalElements());
     assertEquals(userBlocks.getContent().size(), response.getBody().getContent().size());
     verify(userBlockService).findByUserId(any(UUID.class), any(Pageable.class));
-    verify(userBlockConverter, atLeastOnce()).convertToModel(any(UserBlock.class));
+    verify(userBlockMapper, atLeastOnce()).toModel(any(UserBlock.class));
   }
 
   @Test

@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-import com.social_media.converter.UserConverter;
 import com.social_media.entity.User;
+import com.social_media.mapper.UserMapper;
 import com.social_media.model.UserDto;
 import com.social_media.model.UserPatchDto;
 import com.social_media.service.UserService;
@@ -27,7 +27,7 @@ class UserControllerTest {
 
   @Mock private UserService userService;
 
-  @Mock private UserConverter userConverter;
+  @Mock private UserMapper userMapper;
 
   @Mock private Authentication authentication;
 
@@ -58,7 +58,7 @@ class UserControllerTest {
   @Test
   void getProfile() {
     when(authentication.getPrincipal()).thenReturn(user);
-    when(userConverter.convertToModel(any(User.class))).thenReturn(userDto);
+    when(userMapper.toModel(any(User.class))).thenReturn(userDto);
 
     ResponseEntity<UserDto> response = userController.getProfile(authentication);
 
