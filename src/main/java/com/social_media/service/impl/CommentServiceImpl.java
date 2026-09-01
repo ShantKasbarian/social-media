@@ -57,11 +57,12 @@ public class CommentServiceImpl implements CommentService {
       throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
     }
 
-    Comment comment = new Comment();
-    comment.setUser(userRepository.getReferenceById(userId));
-    comment.setPost(postRepository.getReferenceById(postId));
-    comment.setText(data.text());
-    comment.setTime(Instant.now());
+    Comment comment =
+        new Comment(
+            data.text(),
+            Instant.now(),
+            postRepository.getReferenceById(postId),
+            userRepository.getReferenceById(userId));
 
     commentRepository.save(comment);
 

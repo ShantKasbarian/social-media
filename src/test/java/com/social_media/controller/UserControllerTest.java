@@ -12,7 +12,6 @@ import com.social_media.model.UserPatchDto;
 import com.social_media.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -42,13 +41,7 @@ class UserControllerTest {
   void setUp() {
     MockitoAnnotations.openMocks(this);
 
-    user = new User();
-    user.setId(UUID.randomUUID());
-    user.setEmail("someone@example.com");
-    user.setPassword("Password123+");
-    user.setUsername("johnDoe");
-    user.setFirstname("John");
-    user.setLastname("Doe");
+    user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
 
     userDto =
         new UserDto(

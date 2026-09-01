@@ -27,26 +27,13 @@ class CommentRepositoryTest {
 
   @BeforeEach
   void setUp() {
-    User user = new User();
-    user.setEmail("someone@example.com");
-    user.setPassword("Password123+");
-    user.setUsername("johnDoe");
-    user.setFirstname("John");
-    user.setLastname("Doe");
-
-    post = new Post();
-    post.setUser(user);
-    post.setTime(Instant.now());
-    post.setText("some text");
-
-    comment = new Comment();
-    comment.setText("some text");
-    comment.setTime(Instant.now());
-    comment.setPost(post);
-    comment.setUser(user);
-
+    User user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
     userRepository.save(user);
+
+    post = new Post("some text", Instant.now(), user);
     postRepository.save(post);
+
+    comment = new Comment("some text", Instant.now(), post, user);
     commentRepository.save(comment);
   }
 

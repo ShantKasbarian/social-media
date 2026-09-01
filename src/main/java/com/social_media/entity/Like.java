@@ -1,26 +1,14 @@
 package com.social_media.entity;
 
 import jakarta.persistence.*;
-import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "likes")
-public class Like {
-  @Id
-  @GeneratedValue
-  @UuidGenerator
-  @Column(name = "id")
-  private UUID id;
-
+public class Like extends BaseEntity {
   @ManyToOne
   @JoinColumn(name = "user_id")
   private User user;
@@ -28,4 +16,11 @@ public class Like {
   @ManyToOne
   @JoinColumn(name = "post_id")
   private Post post;
+
+  protected Like() {}
+
+  public Like(User user, Post post) {
+    this.user = user;
+    this.post = post;
+  }
 }

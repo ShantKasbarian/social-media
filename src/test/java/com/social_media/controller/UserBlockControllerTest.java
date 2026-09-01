@@ -43,15 +43,15 @@ class UserBlockControllerTest {
   void setUp() {
     MockitoAnnotations.openMocks(this);
 
-    User user = new User();
+    User user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
     user.setId(UUID.randomUUID());
-    user.setUsername("john.doe");
 
-    user2 = new User();
+    user2 = new User("emily.smith@example.com", "Password123+", "Emily.Smith", "Emily", "Smith");
     user2.setId(UUID.randomUUID());
-    user2.setUsername("jack.doe");
 
-    userBlock = new UserBlock(UUID.randomUUID(), user, user2);
+    userBlock = new UserBlock(user, user2);
+    userBlock.setId(UUID.randomUUID());
+
     userBlockDto =
         new UserBlockDto(
             userBlock.getId(),
@@ -59,6 +59,7 @@ class UserBlockControllerTest {
             user.getUsername(),
             user2.getId(),
             user2.getUsername());
+
     userBlocks = new PageImpl<>(List.of(userBlock));
 
     when(authentication.getPrincipal()).thenReturn(user);

@@ -27,6 +27,8 @@ class PostServiceImplTest {
 
   private User user;
 
+  private User user2;
+
   private Post post;
 
   private PostDto postDto;
@@ -34,19 +36,14 @@ class PostServiceImplTest {
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
-    user = new User();
+    user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
     user.setId(UUID.randomUUID());
-    user.setEmail("someone@example.com");
-    user.setPassword("Password123+");
-    user.setUsername("johnDoe");
-    user.setFirstname("John");
-    user.setLastname("Doe");
 
-    post = new Post();
+    user2 = new User("emily.smith@example.com", "Password123+", "Emily.Smith", "Emily", "Smith");
+    user2.setId(UUID.randomUUID());
+
+    post = new Post("some text", Instant.now(), user);
     post.setId(UUID.randomUUID());
-    post.setUser(user);
-    post.setTime(Instant.now());
-    post.setText("some text");
     post.setLikes(List.of());
 
     postDto =
@@ -110,9 +107,6 @@ class PostServiceImplTest {
 
   @Test
   void updateShouldThrowRequestNotAllowedExceptionWhenCurrentUserIsNotAuthor() {
-    User user2 = new User();
-    user2.setId(UUID.randomUUID());
-
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
 
     assertThrows(RequestNotAllowedException.class, () -> postService.update(user2, postDto));
@@ -137,9 +131,6 @@ class PostServiceImplTest {
 
   @Test
   void deletePostShouldThrowRequestNotAllowedExceptionWhenCurrentUserIsNotAuthor() {
-    User user2 = new User();
-    user2.setId(UUID.randomUUID());
-
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
     assertThrows(RequestNotAllowedException.class, () -> postService.delete(user2, post.getId()));
   }

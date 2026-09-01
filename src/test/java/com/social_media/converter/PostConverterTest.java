@@ -6,8 +6,6 @@ import com.social_media.entity.Post;
 import com.social_media.entity.User;
 import com.social_media.model.PostDto;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -22,20 +20,9 @@ class PostConverterTest {
   void setUp() {
     MockitoAnnotations.openMocks(this);
 
-    User user = new User();
-    user.setId(UUID.randomUUID());
-    user.setEmail("someone@example.com");
-    user.setPassword("Password123+");
-    user.setUsername("johnDoe");
-    user.setFirstname("John");
-    user.setLastname("Doe");
+    User user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
 
-    post = new Post();
-    post.setId(UUID.randomUUID());
-    post.setTime(Instant.now());
-    post.setText("some text");
-    post.setUser(user);
-    post.setLikes(new ArrayList<>());
+    post = new Post("some text", Instant.now(), user);
   }
 
   @Test

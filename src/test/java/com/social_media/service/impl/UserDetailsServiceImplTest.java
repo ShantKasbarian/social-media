@@ -27,13 +27,8 @@ class UserDetailsServiceImplTest {
   void setUp() {
     MockitoAnnotations.openMocks(this);
 
-    user = new User();
+    user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
     user.setId(UUID.randomUUID());
-    user.setEmail("someone@example.com");
-    user.setPassword("Password123+");
-    user.setUsername("johnDoe");
-    user.setFirstname("John");
-    user.setLastname("Doe");
   }
 
   @Test

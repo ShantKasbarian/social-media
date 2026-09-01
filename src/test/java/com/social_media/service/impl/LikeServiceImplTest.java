@@ -10,7 +10,6 @@ import com.social_media.entity.User;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.exception.ResourceNotFoundException;
-import com.social_media.repository.FriendRequestRepository;
 import com.social_media.repository.LikeRepository;
 import com.social_media.repository.PostRepository;
 import com.social_media.repository.UserBlockRepository;
@@ -32,8 +31,6 @@ class LikeServiceImplTest {
 
   @Mock private PostRepository postRepository;
 
-  @Mock private FriendRequestRepository friendRequestRepository;
-
   private User user;
 
   private Post post;
@@ -44,21 +41,14 @@ class LikeServiceImplTest {
   void setUp() {
     MockitoAnnotations.openMocks(this);
 
-    user = new User();
+    user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
     user.setId(UUID.randomUUID());
-    user.setEmail("someone@example.com");
-    user.setPassword("Password123+");
-    user.setUsername("johnDoe");
-    user.setFirstname("John");
-    user.setLastname("Doe");
 
-    post = new Post();
+    post = new Post("some text", Instant.now(), user);
     post.setId(UUID.randomUUID());
-    post.setUser(user);
-    post.setTime(Instant.now());
-    post.setText("some text");
 
-    like = new Like(UUID.randomUUID(), user, post);
+    like = new Like(user, post);
+    like.setId(UUID.randomUUID());
   }
 
   @Test

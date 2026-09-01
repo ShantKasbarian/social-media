@@ -9,13 +9,8 @@ public class UserConverter
     implements ToEntityConverter<User, UserDto>, ToModelConverter<User, UserDto> {
   @Override
   public User convertToEntity(UserDto model) {
-    User user = new User();
-    user.setEmail(model.email());
-    user.setUsername(model.username());
-    user.setPassword(model.password());
-    user.setFirstname(model.firstname());
-    user.setLastname(model.lastname());
-    return user;
+    return new User(
+        model.email(), model.password(), model.username(), model.firstname(), model.lastname());
   }
 
   @Override

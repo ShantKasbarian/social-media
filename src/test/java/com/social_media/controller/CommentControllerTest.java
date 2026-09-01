@@ -49,21 +49,14 @@ class CommentControllerTest {
   void setUp() {
     MockitoAnnotations.openMocks(this);
 
-    user = new User();
+    user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
     user.setId(UUID.randomUUID());
-    user.setEmail("someone@example.com");
-    user.setPassword("Password123+");
-    user.setUsername("johnDoe");
-    user.setFirstname("John");
-    user.setLastname("Doe");
 
-    post = new Post();
+    post = new Post("some text", Instant.now(), user);
     post.setId(UUID.randomUUID());
-    post.setTime(Instant.now());
-    post.setText("some text");
-    post.setUser(user);
 
-    comment = new Comment(UUID.randomUUID(), "some text", Instant.now(), post, user);
+    comment = new Comment("some text", Instant.now(), post, user);
+    comment.setId(UUID.randomUUID());
 
     commentDto =
         new CommentDto(

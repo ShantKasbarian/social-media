@@ -37,10 +37,7 @@ public class PostServiceImpl implements PostService {
 
     log.info("creating post for user with id {}", id);
 
-    Post post = new Post();
-    post.setText(data.text());
-    post.setTime(Instant.now());
-    post.setUser(user);
+    Post post = new Post(data.text(), Instant.now(), user);
 
     postRepository.save(post);
 

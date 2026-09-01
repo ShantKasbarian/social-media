@@ -52,9 +52,7 @@ public class UserBlockServiceImpl implements UserBlockService {
       throw new ResourceAlreadyExistsException(USER_BLOCK_ALREADY_EXISTS_MESSAGE);
     }
 
-    UserBlock userBlock = new UserBlock();
-    userBlock.setUser(currentUser);
-    userBlock.setTargetUser(userRepository.getReferenceById(data));
+    UserBlock userBlock = new UserBlock(currentUser, userRepository.getReferenceById(data));
 
     userBlockRepository.save(userBlock);
     friendRequestRepository.deleteByUserIdTargetUserId(currentUserId, data);
