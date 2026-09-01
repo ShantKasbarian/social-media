@@ -1,7 +1,7 @@
 package com.social_media.controller;
 
-import com.social_media.converter.LikeConverter;
 import com.social_media.entity.User;
+import com.social_media.mapper.LikeMapper;
 import com.social_media.model.LikeDto;
 import com.social_media.service.LikeService;
 import java.util.UUID;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class LikeController {
   private final LikeService likeService;
 
-  private final LikeConverter likeConverter;
+  private final LikeMapper likeMapper;
 
   @PostMapping("/posts/{postId}")
   public ResponseEntity<LikeDto> createLike(
@@ -25,7 +25,7 @@ public class LikeController {
     User user = (User) authentication.getPrincipal();
 
     var like = likeService.create(user, postId);
-    var likeDto = likeConverter.convertToModel(like);
+    var likeDto = likeMapper.toModel(like);
 
     return new ResponseEntity<>(likeDto, HttpStatus.CREATED);
   }

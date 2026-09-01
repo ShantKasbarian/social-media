@@ -1,8 +1,8 @@
 package com.social_media.model;
 
-import com.social_media.converter.ToModelConverter;
 import com.social_media.entity.BaseEntity;
 import java.util.List;
+import java.util.function.Function;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
 
@@ -18,8 +18,8 @@ public class PageDto<E extends BaseEntity, M> {
 
   private final int totalPages;
 
-  public PageDto(Page<E> page, ToModelConverter<E, M> converter) {
-    this.content = page.getContent().stream().map(converter::convertToModel).toList();
+  public PageDto(Page<E> page, Function<E, M> mapper) {
+    this.content = page.getContent().stream().map(mapper).toList();
     this.pageNo = page.getNumber();
     this.pageSize = page.getSize();
     this.totalElements = page.getTotalElements();

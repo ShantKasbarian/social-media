@@ -11,4 +11,4 @@ public record CommentDto(
     @NotBlank(message = "text must be specified") String text,
     UUID userId,
     String username,
-    Instant commentedTime) {}
+    Instant time) {}

@@ -1,8 +1,8 @@
 package com.social_media.controller;
 
-import com.social_media.converter.UserBlockConverter;
 import com.social_media.entity.User;
 import com.social_media.entity.UserBlock;
+import com.social_media.mapper.UserBlockMapper;
 import com.social_media.model.PageDto;
 import com.social_media.model.UserBlockDto;
 import com.social_media.service.UserBlockService;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserBlockController {
   private final UserBlockService userBlockService;
 
-  private final UserBlockConverter userBlockConverter;
+  private final UserBlockMapper userBlockMapper;
 
   @PostMapping("/{userId}")
   public ResponseEntity<UserBlockDto> createUserBlock(
@@ -28,7 +28,7 @@ public class UserBlockController {
     User user = (User) authentication.getPrincipal();
 
     UserBlock userBlock = userBlockService.create(user, userId);
-    UserBlockDto userBlockDto = userBlockConverter.convertToModel(userBlock);
+    UserBlockDto userBlockDto = userBlockMapper.toModel(userBlock);
 
     return new ResponseEntity<>(userBlockDto, HttpStatus.CREATED);
   }
@@ -41,7 +41,7 @@ public class UserBlockController {
     UUID userId = ((User) authentication.getPrincipal()).getId();
 
     var userBlocks = userBlockService.findByUserId(userId, PageRequest.of(page, size));
-    var pageDto = new PageDto<>(userBlocks, userBlockConverter);
+    var pageDto = new PageDto<>(userBlocks, userBlockMapper::toModel);
 
     return ResponseEntity.ok(pageDto);
   }

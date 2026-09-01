@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.social_media.converter.FriendRequestConverter;
 import com.social_media.entity.FriendRequest;
 import com.social_media.entity.User;
+import com.social_media.mapper.FriendRequestMapper;
 import com.social_media.model.FriendRequestDto;
 import com.social_media.service.FriendRequestService;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ class FriendRequestControllerTest {
 
   @Mock private FriendRequestService friendRequestService;
 
-  @Mock private FriendRequestConverter friendRequestConverter;
+  @Mock private FriendRequestMapper friendRequestMapper;
 
   @Mock private Authentication authentication;
 
@@ -66,8 +66,7 @@ class FriendRequestControllerTest {
   @Test
   void createFriendRequest() {
     when(authentication.getPrincipal()).thenReturn(user1);
-    when(friendRequestConverter.convertToModel(any(FriendRequest.class)))
-        .thenReturn(friendRequestDto);
+    when(friendRequestMapper.toModel(any(FriendRequest.class))).thenReturn(friendRequestDto);
     when(friendRequestService.create(any(User.class), any(UUID.class))).thenReturn(friendRequest);
 
     var response = friendRequestController.createFriendRequest(authentication, user2.getId());
@@ -77,15 +76,14 @@ class FriendRequestControllerTest {
     assertEquals(friendRequestDto, response.getBody());
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     verify(authentication).getPrincipal();
-    verify(friendRequestConverter).convertToModel(any(FriendRequest.class));
+    verify(friendRequestMapper).toModel(any(FriendRequest.class));
     verify(friendRequestService).create(any(User.class), any(UUID.class));
   }
 
   @Test
   void acceptFriendRequest() {
     when(authentication.getPrincipal()).thenReturn(user1);
-    when(friendRequestConverter.convertToModel(any(FriendRequest.class)))
-        .thenReturn(friendRequestDto);
+    when(friendRequestMapper.toModel(any(FriendRequest.class))).thenReturn(friendRequestDto);
     when(friendRequestService.acceptFriendRequest(any(User.class), any(UUID.class)))
         .thenReturn(friendRequest);
 
@@ -97,7 +95,7 @@ class FriendRequestControllerTest {
     assertEquals(friendRequestDto, response.getBody());
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(authentication).getPrincipal();
-    verify(friendRequestConverter).convertToModel(any(FriendRequest.class));
+    verify(friendRequestMapper).toModel(any(FriendRequest.class));
     verify(friendRequestService).acceptFriendRequest(any(User.class), any(UUID.class));
   }
 

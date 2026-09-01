@@ -2,9 +2,9 @@ package com.social_media.controller;
 
 import static com.social_media.controller.CommentController.TIME_PROPERTY;
 
-import com.social_media.converter.PostConverter;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
+import com.social_media.mapper.PostMapper;
 import com.social_media.model.PageDto;
 import com.social_media.model.PostDto;
 import com.social_media.service.PostService;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
   private final PostService postService;
 
-  private final PostConverter postConverter;
+  private final PostMapper postMapper;
 
   @PostMapping
   public ResponseEntity<PostDto> createPost(
@@ -33,7 +33,7 @@ public class PostController {
     User user = (User) authentication.getPrincipal();
 
     Post post = postService.create(user, postDto);
-    PostDto responseDto = postConverter.convertToModel(post);
+    PostDto responseDto = postMapper.toModel(post);
 
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
@@ -43,7 +43,7 @@ public class PostController {
     User user = (User) authentication.getPrincipal();
 
     var post = postService.findById(id, user);
-    var postDto = postConverter.convertToModel(post);
+    var postDto = postMapper.toModel(post);
 
     return ResponseEntity.ok(postDto);
   }
@@ -54,7 +54,7 @@ public class PostController {
     User user = (User) authentication.getPrincipal();
 
     var post = postService.update(user, postDto);
-    var responseDto = postConverter.convertToModel(post);
+    var responseDto = postMapper.toModel(post);
 
     return ResponseEntity.ok(responseDto);
   }
@@ -77,7 +77,7 @@ public class PostController {
     Pageable pageable = PageRequest.of(page, size);
 
     var posts = postService.findByUserIdAcceptedFriendRequests(user.getId(), pageable);
-    var pageDto = new PageDto<>(posts, postConverter);
+    var pageDto = new PageDto<>(posts, postMapper::toModel);
 
     return ResponseEntity.ok(pageDto);
   }
@@ -92,7 +92,7 @@ public class PostController {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc(TIME_PROPERTY)));
 
     var posts = postService.findByUserId(user, userId, pageable);
-    var pageDto = new PageDto<>(posts, postConverter);
+    var pageDto = new PageDto<>(posts, postMapper::toModel);
 
     return ResponseEntity.ok(pageDto);
   }
@@ -106,7 +106,7 @@ public class PostController {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc(TIME_PROPERTY)));
 
     var posts = postService.findLikedByUserId(user.getId(), pageable);
-    var pageDto = new PageDto<>(posts, postConverter);
+    var pageDto = new PageDto<>(posts, postMapper::toModel);
 
     return ResponseEntity.ok(pageDto);
   }

@@ -1,8 +1,8 @@
 package com.social_media.controller;
 
-import com.social_media.converter.FriendRequestConverter;
 import com.social_media.entity.FriendRequest;
 import com.social_media.entity.User;
+import com.social_media.mapper.FriendRequestMapper;
 import com.social_media.model.FriendRequestDto;
 import com.social_media.model.PageDto;
 import com.social_media.service.FriendRequestService;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class FriendRequestController {
   private final FriendRequestService friendRequestService;
 
-  private final FriendRequestConverter friendRequestConverter;
+  private final FriendRequestMapper friendRequestMapper;
 
   @PostMapping("/users/{targetUserId}")
   public ResponseEntity<FriendRequestDto> createFriendRequest(
@@ -29,7 +29,7 @@ public class FriendRequestController {
     User user = (User) authentication.getPrincipal();
 
     FriendRequest friendRequest = friendRequestService.create(user, targetUserId);
-    FriendRequestDto friendRequestDto = friendRequestConverter.convertToModel(friendRequest);
+    FriendRequestDto friendRequestDto = friendRequestMapper.toModel(friendRequest);
 
     return new ResponseEntity<>(friendRequestDto, HttpStatus.CREATED);
   }
@@ -40,7 +40,7 @@ public class FriendRequestController {
     User user = (User) authentication.getPrincipal();
 
     FriendRequest friendRequest = friendRequestService.acceptFriendRequest(user, id);
-    FriendRequestDto friendRequestDto = friendRequestConverter.convertToModel(friendRequest);
+    FriendRequestDto friendRequestDto = friendRequestMapper.toModel(friendRequest);
 
     return ResponseEntity.ok(friendRequestDto);
   }
@@ -65,7 +65,7 @@ public class FriendRequestController {
     Pageable pageable = PageRequest.of(page, size);
 
     var friendRequests = friendRequestService.findByUserAndStatus(user, status, pageable);
-    var pageDto = new PageDto<>(friendRequests, friendRequestConverter);
+    var pageDto = new PageDto<>(friendRequests, friendRequestMapper::toModel);
 
     return ResponseEntity.ok(pageDto);
   }

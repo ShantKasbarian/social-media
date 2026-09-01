@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.social_media.converter.CommentConverter;
 import com.social_media.entity.Comment;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
+import com.social_media.mapper.CommentMapper;
 import com.social_media.model.CommentDto;
 import com.social_media.model.PatchCommentDto;
 import com.social_media.service.CommentService;
@@ -31,7 +31,7 @@ class CommentControllerTest {
 
   @Mock private CommentService commentService;
 
-  @Mock private CommentConverter commentConverter;
+  @Mock private CommentMapper commentMapper;
 
   @Mock private Authentication authentication;
 
@@ -73,7 +73,7 @@ class CommentControllerTest {
   @Test
   void createComment() {
     when(authentication.getPrincipal()).thenReturn(user);
-    when(commentConverter.convertToModel(any(Comment.class))).thenReturn(commentDto);
+    when(commentMapper.toModel(any(Comment.class))).thenReturn(commentDto);
     when(commentService.create(any(User.class), any(CommentDto.class))).thenReturn(comment);
 
     var response = commentController.createComment(authentication, commentDto);
@@ -83,7 +83,7 @@ class CommentControllerTest {
     assertEquals(commentDto, response.getBody());
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     verify(authentication).getPrincipal();
-    verify(commentConverter).convertToModel(any(Comment.class));
+    verify(commentMapper).toModel(any(Comment.class));
     verify(commentService).create(any(User.class), any(CommentDto.class));
   }
 
@@ -91,7 +91,7 @@ class CommentControllerTest {
   void updateComment() {
     when(authentication.getPrincipal()).thenReturn(user);
     when(commentService.update(any(User.class), any(PatchCommentDto.class))).thenReturn(comment);
-    when(commentConverter.convertToModel(any(Comment.class))).thenReturn(commentDto);
+    when(commentMapper.toModel(any(Comment.class))).thenReturn(commentDto);
 
     var response = commentController.updateComment(authentication, patchCommentDto);
 
@@ -100,7 +100,7 @@ class CommentControllerTest {
     assertEquals(commentDto, response.getBody());
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(authentication).getPrincipal();
-    verify(commentConverter).convertToModel(any(Comment.class));
+    verify(commentMapper).toModel(any(Comment.class));
     verify(commentService).update(any(User.class), any(PatchCommentDto.class));
   }
 

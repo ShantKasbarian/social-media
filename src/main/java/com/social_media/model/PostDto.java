@@ -10,4 +10,4 @@ public record PostDto(
     String username,
     @NotBlank(message = "text must be specified") String text,
     Long likes,
-    Instant postedTime) {}
+    Instant time) {}

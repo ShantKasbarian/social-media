@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.social_media.converter.LikeConverter;
 import com.social_media.entity.Like;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
+import com.social_media.mapper.LikeMapper;
 import com.social_media.model.LikeDto;
 import com.social_media.service.LikeService;
 import java.time.Instant;
@@ -25,7 +25,7 @@ class LikeControllerTest {
 
   @Mock private LikeService likeService;
 
-  @Mock private LikeConverter likeConverter;
+  @Mock private LikeMapper likeMapper;
 
   @Mock private Authentication authentication;
 
@@ -56,7 +56,7 @@ class LikeControllerTest {
   @Test
   void createLike() {
     when(authentication.getPrincipal()).thenReturn(user);
-    when(likeConverter.convertToModel(any(Like.class))).thenReturn(likeDto);
+    when(likeMapper.toModel(any(Like.class))).thenReturn(likeDto);
     when(likeService.create(any(User.class), any(UUID.class))).thenReturn(like);
 
     var response = likeController.createLike(authentication, post.getId());
@@ -66,7 +66,7 @@ class LikeControllerTest {
     assertEquals(likeDto, response.getBody());
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     verify(authentication).getPrincipal();
-    verify(likeConverter).convertToModel(any(Like.class));
+    verify(likeMapper).toModel(any(Like.class));
     verify(likeService).create(any(User.class), any(UUID.class));
   }
 

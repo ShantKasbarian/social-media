@@ -1,8 +1,8 @@
 package com.social_media.controller;
 
-import com.social_media.converter.CommentConverter;
 import com.social_media.entity.Comment;
 import com.social_media.entity.User;
+import com.social_media.mapper.CommentMapper;
 import com.social_media.model.CommentDto;
 import com.social_media.model.PageDto;
 import com.social_media.model.PatchCommentDto;
@@ -26,7 +26,7 @@ public class CommentController {
 
   private final CommentService commentService;
 
-  private final CommentConverter commentConverter;
+  private final CommentMapper commentMapper;
 
   @PostMapping
   public ResponseEntity<CommentDto> createComment(
@@ -34,7 +34,7 @@ public class CommentController {
     User user = (User) authentication.getPrincipal();
 
     var comment = commentService.create(user, commentDto);
-    var responseDto = commentConverter.convertToModel(comment);
+    var responseDto = commentMapper.toModel(comment);
 
     return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
   }
@@ -45,7 +45,7 @@ public class CommentController {
     User user = (User) authentication.getPrincipal();
 
     var comment = commentService.update(user, patchCommentDto);
-    var commentDto = commentConverter.convertToModel(comment);
+    var commentDto = commentMapper.toModel(comment);
 
     return ResponseEntity.ok(commentDto);
   }
@@ -69,7 +69,7 @@ public class CommentController {
     User user = (User) authentication.getPrincipal();
 
     var comments = commentService.findByPostId(postId, user.getId(), pageable);
-    var pageDto = new PageDto<>(comments, commentConverter);
+    var pageDto = new PageDto<>(comments, commentMapper::toModel);
 
     return ResponseEntity.ok(pageDto);
   }

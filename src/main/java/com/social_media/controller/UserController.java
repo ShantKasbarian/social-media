@@ -1,7 +1,7 @@
 package com.social_media.controller;
 
-import com.social_media.converter.UserConverter;
 import com.social_media.entity.User;
+import com.social_media.mapper.UserMapper;
 import com.social_media.model.PageDto;
 import com.social_media.model.UserDto;
 import com.social_media.model.UserPatchDto;
@@ -23,13 +23,13 @@ public class UserController {
 
   private final UserService userService;
 
-  private final UserConverter userConverter;
+  private final UserMapper userMapper;
 
   @GetMapping
   public ResponseEntity<UserDto> getProfile(Authentication authentication) {
     User user = (User) authentication.getPrincipal();
 
-    UserDto userDto = userConverter.convertToModel(user);
+    UserDto userDto = userMapper.toModel(user);
 
     return ResponseEntity.ok(userDto);
   }
@@ -52,7 +52,7 @@ public class UserController {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc(USERNAME_SORT_PROPERTY)));
 
     var users = userService.findByUsername(username, pageable);
-    var pageDto = new PageDto<>(users, userConverter);
+    var pageDto = new PageDto<>(users, userMapper::toModel);
 
     return ResponseEntity.ok(pageDto);
   }

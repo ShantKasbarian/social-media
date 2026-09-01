@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.social_media.converter.UserConverter;
 import com.social_media.entity.User;
+import com.social_media.mapper.UserMapper;
 import com.social_media.model.LoginDto;
 import com.social_media.model.TokenDto;
 import com.social_media.model.UserDto;
@@ -25,7 +25,7 @@ class AuthenticationControllerTest {
 
   @Mock private AuthenticationService authenticationService;
 
-  @Mock private UserConverter userConverter;
+  @Mock private UserMapper userMapper;
 
   private User user;
 
@@ -71,7 +71,7 @@ class AuthenticationControllerTest {
   @Test
   void signup() {
     when(authenticationService.signup(user)).thenReturn(tokenDto);
-    when(userConverter.convertToEntity(any(UserDto.class))).thenReturn(user);
+    when(userMapper.toEntity(any(UserDto.class))).thenReturn(user);
 
     var response = authenticationController.signup(userDto);
 
@@ -80,6 +80,6 @@ class AuthenticationControllerTest {
     assertEquals(tokenDto, response.getBody());
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     verify(authenticationService).signup(any(User.class));
-    verify(userConverter).convertToEntity(any(UserDto.class));
+    verify(userMapper).toEntity(any(UserDto.class));
   }
 }

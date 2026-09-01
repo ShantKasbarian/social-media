@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Formula;
 
 @Getter
 @Setter
@@ -18,6 +19,14 @@ public class Post extends BaseEntity {
   private Instant time;
 
   @ManyToOne private User user;
+
+  @Formula(
+      """
+        (SELECT COUNT(l.id)
+         FROM likes l
+         WHERE l.post_id = id)
+        """)
+  private long likesCount;
 
   @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
   private List<Like> likes;
