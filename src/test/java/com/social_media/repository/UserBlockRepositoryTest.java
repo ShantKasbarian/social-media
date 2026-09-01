@@ -22,27 +22,14 @@ class UserBlockRepositoryTest {
 
   @BeforeEach
   void setUp() {
-    user = new User();
-    user.setEmail("someone@example.com");
-    user.setPassword("Password123+");
-    user.setUsername("johnDoe");
-    user.setFirstname("John");
-    user.setLastname("Doe");
-
-    User user2 = new User();
-    user2.setEmail("someone2@example.com");
-    user2.setPassword("Password123+");
-    user2.setUsername("JackDoe");
-    user2.setFirstname("Jack");
-    user2.setLastname("Doe");
-
+    user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
     userRepository.save(user);
+
+    User user2 =
+        new User("emily.smith@example.com", "Password123+", "Emily.Smith", "Emily", "Smith");
     userRepository.save(user2);
 
-    userBlock = new UserBlock();
-    userBlock.setUser(user);
-    userBlock.setTargetUser(user2);
-
+    userBlock = new UserBlock(user, user2);
     userBlockRepository.save(userBlock);
   }
 

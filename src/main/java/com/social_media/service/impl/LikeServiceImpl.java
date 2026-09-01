@@ -52,9 +52,7 @@ public class LikeServiceImpl implements LikeService {
       throw new ResourceAlreadyExistsException(TOO_MANY_LIKES_MESSAGE);
     }
 
-    Like like = new Like();
-    like.setUser(user);
-    like.setPost(post);
+    Like like = new Like(user, post);
 
     likeRepository.save(like);
 

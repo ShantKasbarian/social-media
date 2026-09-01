@@ -25,25 +25,13 @@ class LikeRepositoryTest {
 
   @BeforeEach
   void setUp() {
-    user = new User();
-    user.setEmail("someone@example.com");
-    user.setPassword("Password123+");
-    user.setUsername("johnDoe");
-    user.setFirstname("John");
-    user.setLastname("Doe");
-
-    post = new Post();
-    post.setUser(user);
-    post.setTime(Instant.now());
-    post.setText("some text");
-
+    user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
     userRepository.save(user);
+
+    post = new Post("some text", Instant.now(), user);
     postRepository.save(post);
 
-    Like like = new Like();
-    like.setUser(user);
-    like.setPost(post);
-
+    Like like = new Like(user, post);
     likeRepository.save(like);
   }
 

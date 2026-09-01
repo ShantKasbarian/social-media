@@ -56,10 +56,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
       throw new ResourceAlreadyExistsException(FRIEND_REQUEST_ALREADY_SENT_MESSAGE);
     }
 
-    FriendRequest friendRequest = new FriendRequest();
-    friendRequest.setUser(user);
-    friendRequest.setTargetUser(targetUser);
-    friendRequest.setStatus(FriendRequest.Status.PENDING);
+    FriendRequest friendRequest = new FriendRequest(user, targetUser, FriendRequest.Status.PENDING);
 
     friendRequestRepository.save(friendRequest);
 

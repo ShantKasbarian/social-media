@@ -54,27 +54,20 @@ class CommentServiceImplTest {
   void setUp() {
     MockitoAnnotations.openMocks(this);
 
-    user = new User();
+    user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
     user.setId(UUID.randomUUID());
-    user.setEmail("someone@example.com");
-    user.setPassword("Password123+");
-    user.setUsername("johnDoe");
-    user.setFirstname("John");
-    user.setLastname("Doe");
 
-    post = new Post();
+    user2 = new User("emily.smith@example.com", "Password123+", "Emily.Smith", "Emily", "Smith");
+    user2.setId(UUID.randomUUID());
+
+    post = new Post("some text", Instant.now(), user);
     post.setId(UUID.randomUUID());
-    post.setUser(user);
-    post.setTime(Instant.now());
-    post.setText("some text");
 
-    FriendRequest friendRequest = new FriendRequest();
+    FriendRequest friendRequest = new FriendRequest(user, user2, FriendRequest.Status.PENDING);
     friendRequest.setId(UUID.randomUUID());
-    friendRequest.setUser(user);
-    friendRequest.setTargetUser(new User());
-    friendRequest.setStatus(FriendRequest.Status.PENDING);
 
-    comment = new Comment(UUID.randomUUID(), "some text", Instant.now(), post, user);
+    comment = new Comment("some text", Instant.now(), post, user);
+    comment.setId(UUID.randomUUID());
 
     commentDto =
         new CommentDto(
@@ -84,9 +77,6 @@ class CommentServiceImplTest {
             comment.getUser().getId(),
             comment.getUser().getUsername(),
             comment.getTime());
-
-    user2 = new User();
-    user2.setId(UUID.randomUUID());
 
     patchCommentDto = new PatchCommentDto(comment.getId(), comment.getText());
   }
@@ -125,13 +115,10 @@ class CommentServiceImplTest {
   @Test
   void
       updateShouldThrowRequestNotAllowedExceptionWhenCurrentUserIdIsDifferentFromCommentAuthorId() {
-    User user = new User();
-    user.setId(UUID.randomUUID());
-
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(comment));
 
     assertThrows(
-        RequestNotAllowedException.class, () -> commentService.update(user, patchCommentDto));
+        RequestNotAllowedException.class, () -> commentService.update(user2, patchCommentDto));
   }
 
   @Test
@@ -156,12 +143,9 @@ class CommentServiceImplTest {
   @Test
   void
       deleteShouldThrowRequestNotAllowedExceptionWhenCurrentUserIdIsDifferentFromCommentAuthorId() {
-    User user = new User();
-    user.setId(UUID.randomUUID());
-
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(comment));
     assertThrows(
-        RequestNotAllowedException.class, () -> commentService.delete(user, comment.getId()));
+        RequestNotAllowedException.class, () -> commentService.delete(user2, comment.getId()));
   }
 
   @Test

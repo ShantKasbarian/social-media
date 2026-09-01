@@ -4,29 +4,17 @@ import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class User implements UserDetails {
-  @Id
-  @GeneratedValue
-  @UuidGenerator
-  @Column(name = "id")
-  private UUID id;
-
+public class User extends BaseEntity implements UserDetails {
   @Column(name = "email", unique = true, nullable = false)
   private String email;
 
@@ -57,6 +45,16 @@ public class User implements UserDetails {
       joinColumns = @JoinColumn(name = "user_id"),
       inverseJoinColumns = @JoinColumn(name = "target_user_id"))
   private List<FriendRequest> friendRequests;
+
+  protected User() {}
+
+  public User(String email, String password, String username, String firstname, String lastname) {
+    this.email = email;
+    this.password = password;
+    this.username = username;
+    this.firstname = firstname;
+    this.lastname = lastname;
+  }
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

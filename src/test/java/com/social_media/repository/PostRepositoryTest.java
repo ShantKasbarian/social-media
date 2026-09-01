@@ -27,35 +27,20 @@ class PostRepositoryTest {
 
   @BeforeEach
   void setUp() {
-    user = new User();
-    user.setEmail("someone@example.com");
-    user.setPassword("Password123+");
-    user.setUsername("johnDoe");
-    user.setFirstname("John");
-    user.setLastname("Doe");
-
-    User user2 = new User();
-    user2.setEmail("someone2@example.com");
-    user2.setPassword("Password123+");
-    user2.setUsername("JackDoe");
-    user2.setFirstname("Jack");
-    user2.setLastname("Doe");
-
+    user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
     userRepository.save(user);
+
+    User user2 =
+        new User("emily.smith@example.com", "Password123+", "Emily.Smith", "Emily", "Smith");
     userRepository.save(user2);
 
-    post = new Post();
-    post.setUser(user2);
-    post.setTime(Instant.now());
-    post.setText("some text");
-
+    post = new Post("some text", Instant.now(), user2);
     postRepository.save(post);
 
-    FriendRequest friendRequest = new FriendRequest();
-    friendRequest.setUser(user);
-    friendRequest.setTargetUser(user2);
-    friendRequest.setStatus(FriendRequest.Status.ACCEPTED);
+    Like like = new Like(user, post);
+    likeRepository.save(like);
 
+    FriendRequest friendRequest = new FriendRequest(user, user2, FriendRequest.Status.ACCEPTED);
     friendRequestRepository.save(friendRequest);
   }
 
@@ -83,12 +68,6 @@ class PostRepositoryTest {
 
   @Test
   void findByUserIdLikes() {
-    Like like = new Like();
-    like.setUser(user);
-    like.setPost(post);
-
-    likeRepository.save(like);
-
     Page<Post> response = postRepository.findByUserIdLikes(user.getId(), PageRequest.of(0, 10));
 
     assertNotNull(response);

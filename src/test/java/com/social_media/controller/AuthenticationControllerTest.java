@@ -11,7 +11,6 @@ import com.social_media.model.LoginDto;
 import com.social_media.model.TokenDto;
 import com.social_media.model.UserDto;
 import com.social_media.service.AuthenticationService;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -40,13 +39,7 @@ class AuthenticationControllerTest {
   void setUp() {
     MockitoAnnotations.openMocks(this);
 
-    user = new User();
-    user.setId(UUID.randomUUID());
-    user.setEmail("someone@example.com");
-    user.setPassword("Password123+");
-    user.setUsername("johnDoe");
-    user.setFirstname("John");
-    user.setLastname("Doe");
+    user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
 
     userDto =
         new UserDto(

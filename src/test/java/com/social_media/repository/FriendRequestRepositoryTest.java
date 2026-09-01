@@ -25,27 +25,13 @@ class FriendRequestRepositoryTest {
 
   @BeforeEach
   void setUp() {
-    user1 = new User();
-    user1.setEmail("someone@example.com");
-    user1.setPassword("Password123+");
-    user1.setUsername("johnDoe");
-    user1.setFirstname("John");
-    user1.setLastname("Doe");
-
-    user2 = new User();
-    user2.setEmail("someone2@example.com");
-    user2.setPassword("Password123+");
-    user2.setUsername("JackDoe");
-    user2.setFirstname("Jack");
-    user2.setLastname("Doe");
-
+    user1 = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
     userRepository.save(user1);
+
+    user2 = new User("emily.smith@example.com", "Password123+", "Emily.Smith", "Emily", "Smith");
     userRepository.save(user2);
 
-    friendRequest = new FriendRequest();
-    friendRequest.setUser(user1);
-    friendRequest.setTargetUser(user2);
-    friendRequest.setStatus(FriendRequest.Status.PENDING);
+    friendRequest = new FriendRequest(user1, user2, FriendRequest.Status.PENDING);
     friendRequestRepository.save(friendRequest);
   }
 

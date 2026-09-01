@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.social_media.entity.User;
-import com.social_media.model.UserDto;
 import com.social_media.model.UserPatchDto;
 import com.social_media.repository.UserRepository;
 import java.util.ArrayList;
@@ -27,30 +26,14 @@ class UserServiceImplTest {
 
   private User user;
 
-  private UserDto userDto;
-
   private UserPatchDto userPatchDto;
 
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
 
-    user = new User();
+    user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
     user.setId(UUID.randomUUID());
-    user.setEmail("someone@example.com");
-    user.setPassword("Password123+");
-    user.setUsername("johnDoe");
-    user.setFirstname("John");
-    user.setLastname("Doe");
-
-    userDto =
-        new UserDto(
-            user.getId(),
-            user.getEmail(),
-            user.getPassword(),
-            user.getUsername(),
-            user.getFirstname(),
-            user.getLastname());
 
     userPatchDto = new UserPatchDto(user.getEmail(), user.getUsername(), user.getPassword());
   }

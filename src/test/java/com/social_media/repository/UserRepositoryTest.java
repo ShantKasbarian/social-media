@@ -20,13 +20,7 @@ class UserRepositoryTest {
 
   @BeforeEach
   void setUp() {
-    user = new User();
-    user.setEmail("someone@example.com");
-    user.setPassword("Password123+");
-    user.setUsername("johnDoe");
-    user.setFirstname("John");
-    user.setLastname("Doe");
-
+    user = new User("john.doe@example.com", "Password123+", "John.Doe", "John", "Doe");
     userRepository.save(user);
   }
 

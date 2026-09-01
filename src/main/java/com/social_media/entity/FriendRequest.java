@@ -1,26 +1,14 @@
 package com.social_media.entity;
 
 import jakarta.persistence.*;
-import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "friend_requests")
-public class FriendRequest {
-  @Id
-  @GeneratedValue
-  @UuidGenerator
-  @Column(name = "id")
-  private UUID id;
-
+public class FriendRequest extends BaseEntity {
   @ManyToOne
   @JoinColumn(name = "user_id")
   private User user;
@@ -32,6 +20,14 @@ public class FriendRequest {
   @Column(name = "status")
   @Enumerated(EnumType.STRING)
   private Status status;
+
+  protected FriendRequest() {}
+
+  public FriendRequest(User user, User targetUser, Status status) {
+    this.user = user;
+    this.targetUser = targetUser;
+    this.status = status;
+  }
 
   public enum Status {
     ACCEPTED,
