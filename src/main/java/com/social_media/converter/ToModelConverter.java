@@ -1,5 +1,7 @@
 package com.social_media.converter;
 
-public interface ToModelConverter<E, M> {
+import com.social_media.entity.BaseEntity;
+
+public interface ToModelConverter<E extends BaseEntity, M> {
   M convertToModel(E entity);
 }
