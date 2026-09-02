@@ -4,7 +4,7 @@ import com.social_media.entity.User;
 import com.social_media.model.UserDto;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface UserMapper {
   User toEntity(UserDto model);
 

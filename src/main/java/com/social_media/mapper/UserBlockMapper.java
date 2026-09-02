@@ -5,7 +5,7 @@ import com.social_media.model.UserBlockDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface UserBlockMapper {
   @Mapping(source = "user.id", target = "blockerId")
   @Mapping(source = "user.username", target = "blockerUsername")

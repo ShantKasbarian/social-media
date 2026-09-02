@@ -5,7 +5,7 @@ import com.social_media.model.CommentDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface CommentMapper {
   @Mapping(source = "post.id", target = "postId")
   @Mapping(source = "user.id", target = "userId")
