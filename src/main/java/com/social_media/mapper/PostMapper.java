@@ -5,7 +5,7 @@ import com.social_media.model.PostDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface PostMapper {
   @Mapping(source = "user.id", target = "userId")
   @Mapping(source = "user.username", target = "username")
