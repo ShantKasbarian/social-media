@@ -12,7 +12,6 @@ import com.social_media.model.PatchCommentDto;
 import com.social_media.repository.CommentRepository;
 import com.social_media.repository.PostRepository;
 import com.social_media.repository.UserBlockRepository;
-import com.social_media.repository.UserRepository;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -33,8 +32,6 @@ class CommentServiceImplTest {
   @Mock private CommentRepository commentRepository;
 
   @Mock private PostRepository postRepository;
-
-  @Mock private UserRepository userRepository;
 
   @Mock private UserBlockRepository userBlockRepository;
 
