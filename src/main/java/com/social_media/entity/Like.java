@@ -9,11 +9,11 @@ import lombok.Setter;
 @Entity
 @Table(name = "likes")
 public class Like extends BaseEntity {
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "post_id")
   private Post post;
 
