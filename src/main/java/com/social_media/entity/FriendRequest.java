@@ -9,11 +9,11 @@ import lombok.Setter;
 @Entity
 @Table(name = "friend_requests")
 public class FriendRequest extends BaseEntity {
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "target_user_id")
   private User targetUser;
 
