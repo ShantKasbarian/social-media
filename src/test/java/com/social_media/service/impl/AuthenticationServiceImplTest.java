@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import com.social_media.entity.User;
 import com.social_media.exception.InvalidCredentialsException;
+import com.social_media.exception.InvalidInputException;
 import com.social_media.model.LoginDto;
 import com.social_media.repository.UserRepository;
 import java.util.UUID;
@@ -21,6 +22,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 class AuthenticationServiceImplTest {
   private static final String TEST_TOKEN = "some token";
+
+  private static final String DUPLICATE_USERNAME_MESSAGE = "this username is already taken";
+
+  private static final String DUPLICATE_EMAIL_MESSAGE = "this email is already taken";
 
   @InjectMocks private AuthenticationServiceImpl authenticationService;
 
@@ -76,6 +81,8 @@ class AuthenticationServiceImplTest {
     String rawPassword = user.getPassword();
     String encodedPassword = "some encoded password";
 
+    when(userRepository.existsByUsername(anyString())).thenReturn(false);
+    when(userRepository.existsByEmail(anyString())).thenReturn(false);
     when(passwordEncoder.encode(anyString())).thenReturn(encodedPassword);
     when(userRepository.save(any(User.class))).thenReturn(user);
     when(jwtService.generateToken(anyString())).thenReturn(TEST_TOKEN);
@@ -89,5 +96,24 @@ class AuthenticationServiceImplTest {
     verify(passwordEncoder).encode(anyString());
     verify(userRepository).save(any(User.class));
     verify(jwtService).generateToken(anyString());
+  }
+
+  @Test
+  void signupShouldThrowInvalidInputExceptionWhenUserWithGivenUsernameAlreadyExists() {
+    when(userRepository.existsByUsername(anyString())).thenReturn(true);
+
+    Exception exception =
+        assertThrows(InvalidInputException.class, () -> authenticationService.signup(user));
+    assertEquals(DUPLICATE_USERNAME_MESSAGE, exception.getMessage());
+  }
+
+  @Test
+  void signupShouldThrowInvalidInputExceptionWhenUserWithGivenEmailAlreadyExists() {
+    when(userRepository.existsByUsername(anyString())).thenReturn(false);
+    when(userRepository.existsByEmail(anyString())).thenReturn(true);
+
+    Exception exception =
+        assertThrows(InvalidInputException.class, () -> authenticationService.signup(user));
+    assertEquals(DUPLICATE_EMAIL_MESSAGE, exception.getMessage());
   }
 }
