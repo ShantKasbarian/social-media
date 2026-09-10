@@ -20,5 +20,12 @@ public interface UserBlockRepository extends JpaRepository<UserBlock, UUID> {
         """)
   boolean existsBlockBetween(@Param("userA") UUID userA, @Param("userB") UUID userB);
 
-  Page<UserBlock> findByUserId(UUID userId, Pageable pageable);
+  @Query(
+      """
+        FROM UserBlock u
+        JOIN FETCH u.user
+        JOIN FETCH u.targetUser
+        WHERE u.user.id = :userId
+        """)
+  Page<UserBlock> findByUserId(@Param("userId") UUID userId, Pageable pageable);
 }
