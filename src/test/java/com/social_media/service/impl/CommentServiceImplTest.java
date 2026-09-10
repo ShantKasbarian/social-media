@@ -88,6 +88,7 @@ class CommentServiceImplTest {
     when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
         .thenReturn(false);
     when(commentRepository.save(any(Comment.class))).thenReturn(comment);
+    when(userRepository.getReferenceById(any(UUID.class))).thenReturn(user);
 
     var response = commentService.create(user2, commentDto);
 

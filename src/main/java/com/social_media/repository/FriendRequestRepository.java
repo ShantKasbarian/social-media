@@ -35,6 +35,8 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, UU
   @Query(
       """
         FROM FriendRequest f
+        JOIN FETCH f.user
+        JOIN FETCH f.targetUser
         WHERE (f.user = :user OR f.targetUser = :user) AND
         f.status = :status
     """)

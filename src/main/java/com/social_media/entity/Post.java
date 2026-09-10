@@ -18,7 +18,8 @@ public class Post extends BaseEntity {
   @Column(name = "time")
   private Instant time;
 
-  @ManyToOne private User user;
+  @ManyToOne(fetch = FetchType.LAZY)
+  private User user;
 
   @Formula(
       """
