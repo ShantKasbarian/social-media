@@ -28,6 +28,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 class CommentServiceImplTest {
+  private static final String POST_NOT_FOUND_MESSAGE = "post not found";
+
+  private static final String BLOCKED_USER_MESSAGE =
+      "cannot interact with or view blocked user posts";
+
   @InjectMocks private CommentServiceImpl commentService;
 
   @Mock private CommentRepository commentRepository;
@@ -96,6 +101,29 @@ class CommentServiceImplTest {
     verify(postRepository).findAuthorIdById(any(UUID.class));
     verify(userBlockRepository).existsBlockBetween(any(UUID.class), any(UUID.class));
     verify(commentRepository).save(any(Comment.class));
+  }
+
+  @Test
+  void createShouldThrowResourceNotFoundExceptionWhenPostAuthorIdIsNotFound() {
+    when(postRepository.findAuthorIdById(any(UUID.class))).thenReturn(Optional.empty());
+
+    Exception exception =
+        assertThrows(
+            ResourceNotFoundException.class, () -> commentService.create(user, commentDto));
+    assertEquals(POST_NOT_FOUND_MESSAGE, exception.getMessage());
+  }
+
+  @Test
+  void
+      createShouldThrowRequestNotAllowedExceptionWhenABlockRelationshipExistsBetweenCurrentUserAndPostAuthor() {
+    when(postRepository.findAuthorIdById(any(UUID.class)))
+        .thenReturn(Optional.of(post.getUser().getId()));
+    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class))).thenReturn(true);
+
+    Exception exception =
+        assertThrows(
+            RequestNotAllowedException.class, () -> commentService.create(user2, commentDto));
+    assertEquals(BLOCKED_USER_MESSAGE, exception.getMessage());
   }
 
   @Test
