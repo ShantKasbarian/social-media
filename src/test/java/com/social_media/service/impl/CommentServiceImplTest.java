@@ -12,6 +12,7 @@ import com.social_media.model.PatchCommentDto;
 import com.social_media.repository.CommentRepository;
 import com.social_media.repository.PostRepository;
 import com.social_media.repository.UserBlockRepository;
+import com.social_media.repository.UserRepository;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +33,8 @@ class CommentServiceImplTest {
   @Mock private CommentRepository commentRepository;
 
   @Mock private PostRepository postRepository;
+
+  @Mock private UserRepository userRepository;
 
   @Mock private UserBlockRepository userBlockRepository;
 
@@ -85,6 +88,7 @@ class CommentServiceImplTest {
     when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
         .thenReturn(false);
     when(commentRepository.save(any(Comment.class))).thenReturn(comment);
+    when(userRepository.getReferenceById(any(UUID.class))).thenReturn(user);
 
     var response = commentService.create(user2, commentDto);
 
