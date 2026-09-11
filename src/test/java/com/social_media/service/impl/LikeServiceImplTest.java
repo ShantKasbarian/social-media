@@ -1,5 +1,6 @@
 package com.social_media.service.impl;
 
+import static com.social_media.service.impl.PostServiceImpl.POST_NOT_FOUND_MESSAGE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -23,6 +24,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 class LikeServiceImplTest {
+  private static final String TOO_MANY_LIKES_MESSAGE = "cannot like post more than once";
+
+  private static final String LIKE_NOT_FOUND_MESSAGE = "liked not found";
+
+  static final String BLOCKED_USER_MESSAGE = "cannot interact with or view blocked user posts";
+
   @InjectMocks private LikeServiceImpl likeService;
 
   @Mock private LikeRepository likeRepository;
@@ -71,7 +78,9 @@ class LikeServiceImplTest {
   void createShouldThrowResourceNotFoundExceptionWhenPostIsNotFound() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () -> likeService.create(user, post.getId()));
+    Exception exception =
+        assertThrows(ResourceNotFoundException.class, () -> likeService.create(user, post.getId()));
+    assertEquals(POST_NOT_FOUND_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -79,7 +88,10 @@ class LikeServiceImplTest {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
     when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class))).thenReturn(true);
 
-    assertThrows(RequestNotAllowedException.class, () -> likeService.create(user, post.getId()));
+    Exception exception =
+        assertThrows(
+            RequestNotAllowedException.class, () -> likeService.create(user, post.getId()));
+    assertEquals(BLOCKED_USER_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -88,8 +100,11 @@ class LikeServiceImplTest {
     when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
         .thenReturn(false);
     when(likeRepository.existsByPostAndUser(any(Post.class), any(User.class))).thenReturn(true);
-    assertThrows(
-        ResourceAlreadyExistsException.class, () -> likeService.create(user, post.getId()));
+
+    Exception exception =
+        assertThrows(
+            ResourceAlreadyExistsException.class, () -> likeService.create(user, post.getId()));
+    assertEquals(TOO_MANY_LIKES_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -108,6 +123,9 @@ class LikeServiceImplTest {
   void deleteShouldThrowResourceNotFoundExceptionWhenLikeByPostIdIsNotFound() {
     when(likeRepository.findByUserIdPostId(any(UUID.class), any(UUID.class)))
         .thenReturn(Optional.empty());
-    assertThrows(ResourceNotFoundException.class, () -> likeService.delete(user, post.getId()));
+
+    Exception exception =
+        assertThrows(ResourceNotFoundException.class, () -> likeService.delete(user, post.getId()));
+    assertEquals(LIKE_NOT_FOUND_MESSAGE, exception.getMessage());
   }
 }

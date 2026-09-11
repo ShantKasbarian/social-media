@@ -23,7 +23,8 @@ import org.springframework.stereotype.Service;
 public class FriendRequestServiceImpl implements FriendRequestService {
   private static final String USER_NOT_FOUND_MESSAGE = "user not found";
 
-  private static final String FRIEND_REQUEST_ALREADY_SENT_MESSAGE = "friend request already exists";
+  private static final String FRIEND_REQUEST_ALREADY_EXISTS_MESSAGE =
+      "friend request already exists";
 
   private static final String UNABLE_TO_UPDATE_FRIEND_REQUEST_STATUS_MESSAGE =
       "cannot update friendRequest status";
@@ -53,7 +54,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     if (friendRequestRepository.existsByUserIdTargetUserId(currentUserId, data)
         || userBlockRepository.existsBlockBetween(currentUserId, data)) {
-      throw new ResourceAlreadyExistsException(FRIEND_REQUEST_ALREADY_SENT_MESSAGE);
+      throw new ResourceAlreadyExistsException(FRIEND_REQUEST_ALREADY_EXISTS_MESSAGE);
     }
 
     FriendRequest friendRequest = new FriendRequest(user, targetUser, FriendRequest.Status.PENDING);
