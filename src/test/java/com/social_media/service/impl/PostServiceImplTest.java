@@ -1,5 +1,6 @@
 package com.social_media.service.impl;
 
+import static com.social_media.service.impl.LikeServiceImpl.BLOCKED_USER_MESSAGE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -21,9 +22,16 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.*;
 
 class PostServiceImplTest {
+  public static final String POST_NOT_FOUND_MESSAGE = "post not found";
+
+  private static final String UNABLE_TO_DELETE_OR_MODIFY_POST_MESSAGE =
+      "unable to delete or modify post";
+
   @InjectMocks private PostServiceImpl postService;
 
   @Mock private PostRepository postRepository;
+
+  @Mock private UserBlockRepository userBlockRepository;
 
   private User user;
 
@@ -84,6 +92,18 @@ class PostServiceImplTest {
   }
 
   @Test
+  void
+      findByIdShouldThrowRequestNotAllowedExceptionWhenBlockRelationshipExistsBetweenCurrentUserAndAuthor() {
+    when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
+    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class))).thenReturn(true);
+
+    Exception exception =
+        assertThrows(
+            RequestNotAllowedException.class, () -> postService.findById(post.getId(), user2));
+    assertEquals(BLOCKED_USER_MESSAGE, exception.getMessage());
+  }
+
+  @Test
   void update() {
     post.setText("some different text");
     String targetText = postDto.text();
@@ -102,14 +122,18 @@ class PostServiceImplTest {
   void updateShouldThrowResourceNotFoundExceptionWhenPostIsNotFound() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () -> postService.update(user, postDto));
+    Exception exception =
+        assertThrows(ResourceNotFoundException.class, () -> postService.update(user, postDto));
+    assertEquals(POST_NOT_FOUND_MESSAGE, exception.getMessage());
   }
 
   @Test
   void updateShouldThrowRequestNotAllowedExceptionWhenCurrentUserIsNotAuthor() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
 
-    assertThrows(RequestNotAllowedException.class, () -> postService.update(user2, postDto));
+    Exception exception =
+        assertThrows(RequestNotAllowedException.class, () -> postService.update(user2, postDto));
+    assertEquals(UNABLE_TO_DELETE_OR_MODIFY_POST_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -126,13 +150,20 @@ class PostServiceImplTest {
   @Test
   void deleteShouldThrowResourceNotFoundExceptionWhenPostIsNotFound() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
-    assertThrows(ResourceNotFoundException.class, () -> postService.delete(user, post.getId()));
+
+    Exception exception =
+        assertThrows(ResourceNotFoundException.class, () -> postService.delete(user, post.getId()));
+    assertEquals(POST_NOT_FOUND_MESSAGE, exception.getMessage());
   }
 
   @Test
   void deletePostShouldThrowRequestNotAllowedExceptionWhenCurrentUserIsNotAuthor() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
-    assertThrows(RequestNotAllowedException.class, () -> postService.delete(user2, post.getId()));
+
+    Exception exception =
+        assertThrows(
+            RequestNotAllowedException.class, () -> postService.delete(user2, post.getId()));
+    assertEquals(UNABLE_TO_DELETE_OR_MODIFY_POST_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -172,6 +203,18 @@ class PostServiceImplTest {
     assertFalse(response.isEmpty());
     assertEquals(page, response);
     verify(postRepository).findByUserId(any(UUID.class), any(Pageable.class));
+  }
+
+  @Test
+  void
+      findByUserIdShouldThrowRequestNotAllowedExceptionWhenBlockRelationshipExistsBetweenCurrentUserAndTargetUser() {
+    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class))).thenReturn(true);
+
+    Exception exception =
+        assertThrows(
+            RequestNotAllowedException.class,
+            () -> postService.findByUserId(user, user2.getId(), PageRequest.of(0, 10)));
+    assertEquals(BLOCKED_USER_MESSAGE, exception.getMessage());
   }
 
   @Test
