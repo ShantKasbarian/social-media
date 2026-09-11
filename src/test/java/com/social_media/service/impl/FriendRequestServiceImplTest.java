@@ -26,6 +26,19 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 class FriendRequestServiceImplTest {
+  private static final String USER_NOT_FOUND_MESSAGE = "user not found";
+
+  private static final String FRIEND_REQUEST_ALREADY_EXISTS_MESSAGE =
+      "friend request already exists";
+
+  private static final String UNABLE_TO_UPDATE_FRIEND_REQUEST_STATUS_MESSAGE =
+      "cannot update friendRequest status";
+
+  private static final String UNABLE_TO_DELETE_FRIEND_REQUEST_MESSAGE =
+      "cannot delete friend request";
+
+  private static final String FRIEND_REQUEST_NOT_FOUND_MESSAGE = "friend request not found";
+
   @InjectMocks private FriendRequestServiceImpl friendRequestService;
 
   @Mock private FriendRequestRepository friendRequestRepository;
@@ -79,8 +92,12 @@ class FriendRequestServiceImplTest {
   @Test
   void createShouldThrowResourceNotFoundExceptionWhenTargetUserIsNotFound() {
     when(userRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
-    assertThrows(
-        ResourceNotFoundException.class, () -> friendRequestService.create(user1, user2.getId()));
+
+    Exception exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () -> friendRequestService.create(user1, user2.getId()));
+    assertEquals(USER_NOT_FOUND_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -89,9 +106,11 @@ class FriendRequestServiceImplTest {
     when(friendRequestRepository.existsByUserIdTargetUserId(any(UUID.class), any(UUID.class)))
         .thenReturn(true);
 
-    assertThrows(
-        ResourceAlreadyExistsException.class,
-        () -> friendRequestService.create(user1, user2.getId()));
+    Exception exception =
+        assertThrows(
+            ResourceAlreadyExistsException.class,
+            () -> friendRequestService.create(user1, user2.getId()));
+    assertEquals(FRIEND_REQUEST_ALREADY_EXISTS_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -114,9 +133,11 @@ class FriendRequestServiceImplTest {
   void acceptFriendRequestShouldThrowResourceNotFoundExceptionWhenFriendRequestIsNotFound() {
     when(friendRequestRepository.findById(friendRequest.getId())).thenReturn(Optional.empty());
 
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> friendRequestService.acceptFriendRequest(user1, friendRequest.getId()));
+    Exception exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () -> friendRequestService.acceptFriendRequest(user1, friendRequest.getId()));
+    assertEquals(FRIEND_REQUEST_NOT_FOUND_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -125,11 +146,13 @@ class FriendRequestServiceImplTest {
     when(friendRequestRepository.findById(friendRequest.getId()))
         .thenReturn(Optional.ofNullable(friendRequest));
 
-    assertThrows(
-        RequestNotAllowedException.class,
-        () ->
-            friendRequestService.acceptFriendRequest(
-                friendRequest.getUser(), friendRequest.getId()));
+    Exception exception =
+        assertThrows(
+            RequestNotAllowedException.class,
+            () ->
+                friendRequestService.acceptFriendRequest(
+                    friendRequest.getUser(), friendRequest.getId()));
+    assertEquals(UNABLE_TO_UPDATE_FRIEND_REQUEST_STATUS_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -152,9 +175,11 @@ class FriendRequestServiceImplTest {
   void deleteShouldThrowResourceNotFoundExceptionWhenFriendRequestIsNotFound() {
     when(friendRequestRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> friendRequestService.delete(user1, friendRequest.getId()));
+    Exception exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () -> friendRequestService.delete(user1, friendRequest.getId()));
+    assertEquals(FRIEND_REQUEST_NOT_FOUND_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -165,9 +190,11 @@ class FriendRequestServiceImplTest {
     when(friendRequestRepository.findById(any(UUID.class)))
         .thenReturn(Optional.ofNullable(friendRequest));
 
-    assertThrows(
-        RequestNotAllowedException.class,
-        () -> friendRequestService.delete(user, friendRequest.getId()));
+    Exception exception =
+        assertThrows(
+            RequestNotAllowedException.class,
+            () -> friendRequestService.delete(user, friendRequest.getId()));
+    assertEquals(UNABLE_TO_DELETE_FRIEND_REQUEST_MESSAGE, exception.getMessage());
   }
 
   @Test
