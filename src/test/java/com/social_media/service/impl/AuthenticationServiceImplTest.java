@@ -23,6 +23,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 class AuthenticationServiceImplTest {
   private static final String TEST_TOKEN = "some token";
 
+  private static final String WRONG_USERNAME_OR_PASSWORD_MESSAGE = "wrong username or password";
+
   private static final String DUPLICATE_USERNAME_MESSAGE = "this username is already taken";
 
   private static final String DUPLICATE_EMAIL_MESSAGE = "this email is already taken";
@@ -73,7 +75,11 @@ class AuthenticationServiceImplTest {
       loginShouldThrowInvalidCredentialsExceptionWhenAnySubClassOfAuthenticationExceptionIsThrown() {
     when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
         .thenThrow(BadCredentialsException.class);
-    assertThrows(InvalidCredentialsException.class, () -> authenticationService.login(loginDto));
+
+    Exception exception =
+        assertThrows(
+            InvalidCredentialsException.class, () -> authenticationService.login(loginDto));
+    assertEquals(WRONG_USERNAME_OR_PASSWORD_MESSAGE, exception.getMessage());
   }
 
   @Test

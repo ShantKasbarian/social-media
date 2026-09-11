@@ -33,6 +33,11 @@ class CommentServiceImplTest {
   private static final String BLOCKED_USER_MESSAGE =
       "cannot interact with or view blocked user posts";
 
+  private static final String COMMENT_NOT_FOUND_MESSAGE = "comment not found";
+
+  private static final String UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE =
+      "cannot modify or delete the text of another user";
+
   @InjectMocks private CommentServiceImpl commentService;
 
   @Mock private CommentRepository commentRepository;
@@ -142,12 +147,24 @@ class CommentServiceImplTest {
   }
 
   @Test
+  void updateShouldThrowResourceNotFoundExceptionWhenCommentIsNotFound() {
+    when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+    Exception exception =
+        assertThrows(
+            ResourceNotFoundException.class, () -> commentService.update(user, patchCommentDto));
+    assertEquals(COMMENT_NOT_FOUND_MESSAGE, exception.getMessage());
+  }
+
+  @Test
   void
       updateShouldThrowRequestNotAllowedExceptionWhenCurrentUserIdIsDifferentFromCommentAuthorId() {
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(comment));
 
-    assertThrows(
-        RequestNotAllowedException.class, () -> commentService.update(user2, patchCommentDto));
+    Exception exception =
+        assertThrows(
+            RequestNotAllowedException.class, () -> commentService.update(user2, patchCommentDto));
+    assertEquals(UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -165,16 +182,21 @@ class CommentServiceImplTest {
   void deleteShouldThrowResourceNotFoundExceptionWhenCommentIsNotFound() {
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-    assertThrows(
-        ResourceNotFoundException.class, () -> commentService.delete(user, comment.getId()));
+    Exception exception =
+        assertThrows(
+            ResourceNotFoundException.class, () -> commentService.delete(user, comment.getId()));
+    assertEquals(COMMENT_NOT_FOUND_MESSAGE, exception.getMessage());
   }
 
   @Test
   void
       deleteShouldThrowRequestNotAllowedExceptionWhenCurrentUserIdIsDifferentFromCommentAuthorId() {
     when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(comment));
-    assertThrows(
-        RequestNotAllowedException.class, () -> commentService.delete(user2, comment.getId()));
+
+    Exception exception =
+        assertThrows(
+            RequestNotAllowedException.class, () -> commentService.delete(user2, comment.getId()));
+    assertEquals(UNABLE_TO_MODIFY_OR_DELETE_COMMENT_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -193,5 +215,33 @@ class CommentServiceImplTest {
     assertNotNull(response);
     assertEquals(page, response);
     verify(commentRepository).findByPostId(any(UUID.class), any(Pageable.class));
+  }
+
+  @Test
+  void findByPostIdShouldThrowResourceNotFoundExceptionWhenPostAuthorIsNotFound() {
+    when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+    Exception exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () ->
+                commentService.findByPostId(
+                    post.getId(), UUID.randomUUID(), PageRequest.of(0, 10)));
+    assertEquals(POST_NOT_FOUND_MESSAGE, exception.getMessage());
+  }
+
+  @Test
+  void
+      findByPostIdShouldThrowRequestNotAllowedExceptionWhenBlockRelationshipExistsBetweenCurrentUserAndPostAuthor() {
+    when(postRepository.findById(any(UUID.class))).thenReturn(Optional.of(post));
+    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class))).thenReturn(true);
+
+    Exception exception =
+        assertThrows(
+            ResourceNotFoundException.class,
+            () ->
+                commentService.findByPostId(
+                    post.getId(), UUID.randomUUID(), PageRequest.of(0, 10)));
+    assertEquals(POST_NOT_FOUND_MESSAGE, exception.getMessage());
   }
 }
