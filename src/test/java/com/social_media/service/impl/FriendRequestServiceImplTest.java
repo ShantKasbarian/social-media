@@ -9,8 +9,8 @@ import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.FriendRequestRepository;
-import com.social_media.repository.UserBlockRepository;
 import com.social_media.repository.UserRepository;
+import com.social_media.service.UserBlockService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +43,7 @@ class FriendRequestServiceImplTest {
 
   @Mock private FriendRequestRepository friendRequestRepository;
 
-  @Mock private UserBlockRepository userBlockRepository;
+  @Mock private UserBlockService userBlockService;
 
   @Mock private UserRepository userRepository;
 
@@ -72,8 +72,7 @@ class FriendRequestServiceImplTest {
     when(userRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(user2));
     when(friendRequestRepository.existsByUserIdTargetUserId(any(UUID.class), any(UUID.class)))
         .thenReturn(false);
-    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
-        .thenReturn(false);
+    doNothing().when(userBlockService).checkBlockRelationship(any(UUID.class), any(UUID.class));
     when(friendRequestRepository.save(any(FriendRequest.class))).thenReturn(friendRequest);
 
     var response = friendRequestService.create(user1, user2.getId());
@@ -85,7 +84,7 @@ class FriendRequestServiceImplTest {
     assertEquals(friendRequest.getTargetUser(), response.getTargetUser());
     verify(userRepository).findById(any(UUID.class));
     verify(friendRequestRepository).existsByUserIdTargetUserId(any(UUID.class), any(UUID.class));
-    verify(userBlockRepository).existsBlockBetween(any(UUID.class), any(UUID.class));
+    verify(userBlockService).checkBlockRelationship(any(UUID.class), any(UUID.class));
     verify(friendRequestRepository).save(any(FriendRequest.class));
   }
 
@@ -117,8 +116,7 @@ class FriendRequestServiceImplTest {
   void acceptFriendRequest() {
     when(friendRequestRepository.findById(any(UUID.class)))
         .thenReturn(Optional.ofNullable(friendRequest));
-    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
-        .thenReturn(false);
+    doNothing().when(userBlockService).checkBlockRelationship(any(UUID.class), any(UUID.class));
 
     var response =
         friendRequestService.acceptFriendRequest(

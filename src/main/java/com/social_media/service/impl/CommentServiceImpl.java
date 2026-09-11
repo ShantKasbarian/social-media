@@ -1,6 +1,5 @@
 package com.social_media.service.impl;
 
-import static com.social_media.service.impl.LikeServiceImpl.BLOCKED_USER_MESSAGE;
 import static com.social_media.service.impl.PostServiceImpl.POST_NOT_FOUND_MESSAGE;
 
 import com.social_media.entity.*;
@@ -10,9 +9,9 @@ import com.social_media.model.CommentDto;
 import com.social_media.model.PatchCommentDto;
 import com.social_media.repository.CommentRepository;
 import com.social_media.repository.PostRepository;
-import com.social_media.repository.UserBlockRepository;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.CommentService;
+import com.social_media.service.UserBlockService;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.UUID;
@@ -37,7 +36,7 @@ public class CommentServiceImpl implements CommentService {
 
   private final PostRepository postRepository;
 
-  private final UserBlockRepository userBlockRepository;
+  private final UserBlockService userBlockService;
 
   @Override
   @Transactional
@@ -52,10 +51,7 @@ public class CommentServiceImpl implements CommentService {
             .findAuthorIdById(postId)
             .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
-    if (!postAuthorId.equals(userId)
-        && userBlockRepository.existsBlockBetween(postAuthorId, userId)) {
-      throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
-    }
+    userBlockService.checkBlockRelationship(userId, postAuthorId);
 
     Comment comment =
         new Comment(
@@ -122,10 +118,7 @@ public class CommentServiceImpl implements CommentService {
             .findAuthorIdById(postId)
             .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
-    if (!postAuthorId.equals(userId)
-        && userBlockRepository.existsBlockBetween(postAuthorId, userId)) {
-      throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
-    }
+    userBlockService.checkBlockRelationship(userId, postAuthorId);
 
     Page<Comment> comments = commentRepository.findByPostId(postId, pageable);
 

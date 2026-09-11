@@ -6,9 +6,9 @@ import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.FriendRequestRepository;
-import com.social_media.repository.UserBlockRepository;
 import com.social_media.repository.UserRepository;
 import com.social_media.service.FriendRequestService;
+import com.social_media.service.UserBlockService;
 import jakarta.transaction.Transactional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
   private final FriendRequestRepository friendRequestRepository;
 
-  private final UserBlockRepository userBlockRepository;
+  private final UserBlockService userBlockService;
 
   private final UserRepository userRepository;
 
@@ -52,10 +52,11 @@ public class FriendRequestServiceImpl implements FriendRequestService {
             .findById(data)
             .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
 
-    if (friendRequestRepository.existsByUserIdTargetUserId(currentUserId, data)
-        || userBlockRepository.existsBlockBetween(currentUserId, data)) {
+    if (friendRequestRepository.existsByUserIdTargetUserId(currentUserId, data)) {
       throw new ResourceAlreadyExistsException(FRIEND_REQUEST_ALREADY_EXISTS_MESSAGE);
     }
+
+    userBlockService.checkBlockRelationship(currentUserId, data);
 
     FriendRequest friendRequest = new FriendRequest(user, targetUser, FriendRequest.Status.PENDING);
 

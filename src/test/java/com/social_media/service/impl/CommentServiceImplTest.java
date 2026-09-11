@@ -11,8 +11,8 @@ import com.social_media.model.CommentDto;
 import com.social_media.model.PatchCommentDto;
 import com.social_media.repository.CommentRepository;
 import com.social_media.repository.PostRepository;
-import com.social_media.repository.UserBlockRepository;
 import com.social_media.repository.UserRepository;
+import com.social_media.service.UserBlockService;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +46,7 @@ class CommentServiceImplTest {
 
   @Mock private UserRepository userRepository;
 
-  @Mock private UserBlockRepository userBlockRepository;
+  @Mock private UserBlockService userBlockService;
 
   private User user;
 
@@ -95,8 +95,7 @@ class CommentServiceImplTest {
   void create() {
     when(postRepository.findAuthorIdById(any(UUID.class)))
         .thenReturn(Optional.of(post.getUser().getId()));
-    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
-        .thenReturn(false);
+    doNothing().when(userBlockService).checkBlockRelationship(any(UUID.class), any(UUID.class));
     when(commentRepository.save(any(Comment.class))).thenReturn(comment);
     when(userRepository.getReferenceById(any(UUID.class))).thenReturn(user);
 
@@ -104,7 +103,7 @@ class CommentServiceImplTest {
 
     assertEquals(comment.getText(), response.getText());
     verify(postRepository).findAuthorIdById(any(UUID.class));
-    verify(userBlockRepository).existsBlockBetween(any(UUID.class), any(UUID.class));
+    verify(userBlockService).checkBlockRelationship(any(UUID.class), any(UUID.class));
     verify(commentRepository).save(any(Comment.class));
   }
 
@@ -116,19 +115,6 @@ class CommentServiceImplTest {
         assertThrows(
             ResourceNotFoundException.class, () -> commentService.create(user, commentDto));
     assertEquals(POST_NOT_FOUND_MESSAGE, exception.getMessage());
-  }
-
-  @Test
-  void
-      createShouldThrowRequestNotAllowedExceptionWhenABlockRelationshipExistsBetweenCurrentUserAndPostAuthor() {
-    when(postRepository.findAuthorIdById(any(UUID.class)))
-        .thenReturn(Optional.of(post.getUser().getId()));
-    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class))).thenReturn(true);
-
-    Exception exception =
-        assertThrows(
-            RequestNotAllowedException.class, () -> commentService.create(user2, commentDto));
-    assertEquals(BLOCKED_USER_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -205,8 +191,7 @@ class CommentServiceImplTest {
 
     when(postRepository.findAuthorIdById(any(UUID.class)))
         .thenReturn(Optional.of(post.getUser().getId()));
-    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
-        .thenReturn(false);
+    doNothing().when(userBlockService).checkBlockRelationship(any(UUID.class), any(UUID.class));
     when(commentRepository.findByPostId(any(UUID.class), any(Pageable.class))).thenReturn(page);
 
     var response =
@@ -234,7 +219,9 @@ class CommentServiceImplTest {
   void
       findByPostIdShouldThrowRequestNotAllowedExceptionWhenBlockRelationshipExistsBetweenCurrentUserAndPostAuthor() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.of(post));
-    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class))).thenReturn(true);
+    doThrow(RequestNotAllowedException.class)
+        .when(userBlockService)
+        .checkBlockRelationship(any(UUID.class), any(UUID.class));
 
     Exception exception =
         assertThrows(
