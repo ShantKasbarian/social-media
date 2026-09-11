@@ -8,12 +8,11 @@ import static org.mockito.Mockito.*;
 import com.social_media.entity.Like;
 import com.social_media.entity.Post;
 import com.social_media.entity.User;
-import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceAlreadyExistsException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.repository.LikeRepository;
 import com.social_media.repository.PostRepository;
-import com.social_media.repository.UserBlockRepository;
+import com.social_media.service.UserBlockService;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,13 +27,11 @@ class LikeServiceImplTest {
 
   private static final String LIKE_NOT_FOUND_MESSAGE = "liked not found";
 
-  static final String BLOCKED_USER_MESSAGE = "cannot interact with or view blocked user posts";
-
   @InjectMocks private LikeServiceImpl likeService;
 
   @Mock private LikeRepository likeRepository;
 
-  @Mock private UserBlockRepository userBlockRepository;
+  @Mock private UserBlockService userBlockService;
 
   @Mock private PostRepository postRepository;
 
@@ -61,8 +58,7 @@ class LikeServiceImplTest {
   @Test
   void create() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
-    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
-        .thenReturn(false);
+    doNothing().when(userBlockService).checkBlockRelationship(any(UUID.class), any(UUID.class));
     when(likeRepository.existsByPostAndUser(any(Post.class), any(User.class))).thenReturn(false);
     when(likeRepository.save(any(Like.class))).thenReturn(like);
 
@@ -84,21 +80,9 @@ class LikeServiceImplTest {
   }
 
   @Test
-  void createShouldThrowRequestNotAllowedExceptionWhenUserBlockExistsBetweenAuthorAndUser() {
-    when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
-    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class))).thenReturn(true);
-
-    Exception exception =
-        assertThrows(
-            RequestNotAllowedException.class, () -> likeService.create(user, post.getId()));
-    assertEquals(BLOCKED_USER_MESSAGE, exception.getMessage());
-  }
-
-  @Test
   void createShouldThrowResourceAlreadyExistsExceptionWhenLikeByCurrentUserAlreadyExists() {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
-    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
-        .thenReturn(false);
+    doNothing().when(userBlockService).checkBlockRelationship(any(UUID.class), any(UUID.class));
     when(likeRepository.existsByPostAndUser(any(Post.class), any(User.class))).thenReturn(true);
 
     Exception exception =

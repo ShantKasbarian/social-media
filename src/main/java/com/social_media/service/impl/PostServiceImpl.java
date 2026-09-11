@@ -1,13 +1,12 @@
 package com.social_media.service.impl;
 
-import static com.social_media.service.impl.LikeServiceImpl.BLOCKED_USER_MESSAGE;
-
 import com.social_media.entity.*;
 import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.model.PostDto;
 import com.social_media.repository.*;
 import com.social_media.service.PostService;
+import com.social_media.service.UserBlockService;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.UUID;
@@ -28,7 +27,7 @@ public class PostServiceImpl implements PostService {
 
   private final PostRepository postRepository;
 
-  private final UserBlockRepository userBlockRepository;
+  private final UserBlockService userBlockService;
 
   @Override
   @Transactional
@@ -55,12 +54,7 @@ public class PostServiceImpl implements PostService {
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException(POST_NOT_FOUND_MESSAGE));
 
-    UUID userId = user.getId();
-    UUID authorId = post.getUser().getId();
-
-    if (!userId.equals(authorId) && userBlockRepository.existsBlockBetween(userId, authorId)) {
-      throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
-    }
+    userBlockService.checkBlockRelationship(user.getId(), post.getUser().getId());
 
     log.info("fetched post with id {}", id);
 
@@ -124,12 +118,7 @@ public class PostServiceImpl implements PostService {
   public Page<Post> findByUserId(User user, UUID userId, Pageable pageable) {
     log.info("fetching posts of user with id {}", userId);
 
-    UUID currentUserId = user.getId();
-
-    if (!currentUserId.equals(userId)
-        && userBlockRepository.existsBlockBetween(currentUserId, userId)) {
-      throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
-    }
+    userBlockService.checkBlockRelationship(user.getId(), userId);
 
     Page<Post> posts = postRepository.findByUserId(userId, pageable);
 

@@ -31,6 +31,9 @@ public class UserBlockServiceImpl implements UserBlockService {
   private static final String CANNOT_DELETE_USER_BLOCK_MESSAGE =
       "cannot unblock user because you are not the blocker";
 
+  private static final String BLOCKED_USER_MESSAGE =
+      "cannot interact with or view blocked user posts";
+
   private final UserBlockRepository userBlockRepository;
 
   private final UserRepository userRepository;
@@ -89,5 +92,12 @@ public class UserBlockServiceImpl implements UserBlockService {
     log.info("fetched user blocks for user with id {}", userId);
 
     return page;
+  }
+
+  @Override
+  public void checkBlockRelationship(UUID user1Id, UUID user2Id) {
+    if (!user1Id.equals(user2Id) && userBlockRepository.existsBlockBetween(user1Id, user2Id)) {
+      throw new RequestNotAllowedException(BLOCKED_USER_MESSAGE);
+    }
   }
 }

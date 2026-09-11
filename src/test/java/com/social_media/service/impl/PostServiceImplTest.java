@@ -1,6 +1,5 @@
 package com.social_media.service.impl;
 
-import static com.social_media.service.impl.LikeServiceImpl.BLOCKED_USER_MESSAGE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -9,6 +8,7 @@ import com.social_media.exception.RequestNotAllowedException;
 import com.social_media.exception.ResourceNotFoundException;
 import com.social_media.model.PostDto;
 import com.social_media.repository.*;
+import com.social_media.service.UserBlockService;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ class PostServiceImplTest {
 
   @Mock private PostRepository postRepository;
 
-  @Mock private UserBlockRepository userBlockRepository;
+  @Mock private UserBlockService userBlockService;
 
   private User user;
 
@@ -89,18 +89,6 @@ class PostServiceImplTest {
     when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
     assertThrows(ResourceNotFoundException.class, () -> postService.findById(post.getId(), user));
-  }
-
-  @Test
-  void
-      findByIdShouldThrowRequestNotAllowedExceptionWhenBlockRelationshipExistsBetweenCurrentUserAndAuthor() {
-    when(postRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(post));
-    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class))).thenReturn(true);
-
-    Exception exception =
-        assertThrows(
-            RequestNotAllowedException.class, () -> postService.findById(post.getId(), user2));
-    assertEquals(BLOCKED_USER_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -203,18 +191,6 @@ class PostServiceImplTest {
     assertFalse(response.isEmpty());
     assertEquals(page, response);
     verify(postRepository).findByUserId(any(UUID.class), any(Pageable.class));
-  }
-
-  @Test
-  void
-      findByUserIdShouldThrowRequestNotAllowedExceptionWhenBlockRelationshipExistsBetweenCurrentUserAndTargetUser() {
-    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class))).thenReturn(true);
-
-    Exception exception =
-        assertThrows(
-            RequestNotAllowedException.class,
-            () -> postService.findByUserId(user, user2.getId(), PageRequest.of(0, 10)));
-    assertEquals(BLOCKED_USER_MESSAGE, exception.getMessage());
   }
 
   @Test

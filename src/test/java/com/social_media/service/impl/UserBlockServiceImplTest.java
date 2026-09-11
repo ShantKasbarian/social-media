@@ -36,6 +36,9 @@ class UserBlockServiceImplTest {
   private static final String CANNOT_DELETE_USER_BLOCK_MESSAGE =
       "cannot unblock user because you are not the blocker";
 
+  private static final String BLOCKED_USER_MESSAGE =
+      "cannot interact with or view blocked user posts";
+
   @InjectMocks private UserBlockServiceImpl userBlockServiceImpl;
 
   @Mock private UserBlockRepository userBlockRepository;
@@ -149,5 +152,25 @@ class UserBlockServiceImplTest {
     assertNotNull(response);
     assertEquals(userBlocks, response);
     verify(userBlockRepository).findByUserId(any(UUID.class), any(Pageable.class));
+  }
+
+  @Test
+  void checkBlockRelationship() {
+    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class)))
+        .thenReturn(false);
+
+    assertDoesNotThrow(
+        () -> userBlockServiceImpl.checkBlockRelationship(user.getId(), user2.getId()));
+  }
+
+  @Test
+  void checkBlockRelationshipShouldThrowRequestNotAllowedExceptionWhenUserBlockAlreadyExists() {
+    when(userBlockRepository.existsBlockBetween(any(UUID.class), any(UUID.class))).thenReturn(true);
+
+    Exception exception =
+        assertThrows(
+            RequestNotAllowedException.class,
+            () -> userBlockServiceImpl.checkBlockRelationship(user.getId(), user2.getId()));
+    assertEquals(BLOCKED_USER_MESSAGE, exception.getMessage());
   }
 }
